@@ -131,7 +131,7 @@ module tb_audio_bypass;
         for (i = 0; i < MEM_DEPTH; i = i + 1)
             audio_memory[i] = 16'h0000;
 
-        $readmemh("audio_test.txt", audio_memory);
+        $readmemh("audio_test_nz.txt", audio_memory);
 
         // Hitung jumlah sample: anggap semua MEM_DEPTH terisi penuh.
         // Ganti dengan nilai tetap jika ukuran file diketahui, mis. 2048.

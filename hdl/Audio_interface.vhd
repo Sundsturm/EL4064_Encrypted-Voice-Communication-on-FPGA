@@ -124,7 +124,7 @@ begin
 						Lin(15-k) <= AUD_ADCDAT;
 					end if;
 				when left3 =>
-					k := k+1;
+					k := (k + 1) mod 16;
 					RCV <= left4;
 				when left4 =>
 					if(k = 0) then
@@ -146,7 +146,7 @@ begin
 						Rin(15-k) <= AUD_ADCDAT;
 					end if;
 				when right3 =>
-					k := k+1;	
+					k := (k + 1) mod 16;
 					RCV <= right4;
 				when right4 =>
 					if(k = 0) then 

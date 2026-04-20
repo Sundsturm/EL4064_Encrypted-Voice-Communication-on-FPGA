@@ -7,5 +7,5 @@
 2 11 generic_pll 4 fast 66 D:/Program Files/altera/25.1std/questa_fse/intel/vhdl/altera_lnsim 0 0 131072 524288 2856 0
 2 10 altera_pll 4 fast 66 D:/Program Files/altera/25.1std/questa_fse/intel/vhdl/altera_lnsim 0 0 786432 393216 7999 0
 2 8 audiopll 3 rtl 109 d:/Users/Rafi Ananta Alden/Documents/Kuliah/Semester 8/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl/audiopll 1 65 0 0 932 0
-2 15 audio_interface 6 wm8731 105 d:/Users/Rafi Ananta Alden/Documents/Kuliah/Semester 8/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl/work 1 65 1024 0 1598 0
+2 15 audio_interface 6 wm8731 105 d:/Users/Rafi Ananta Alden/Documents/Kuliah/Semester 8/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl/work 1 65 1024 0 1602 0
 1 15 tb_audio_bypass 4 fast 105 d:/Users/Rafi Ananta Alden/Documents/Kuliah/Semester 8/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl/work 0 0 180224 0 411 0
