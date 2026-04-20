@@ -1,0 +1,61 @@
+[N
+8
+4
+8 clk_freq
+5
+8 i2c_freq
+3
+3 rtl
+8
+11 SAMPLE_RATE
+6
+15 audio_interface
+2
+3 i2c
+1
+105 d:/Users/Rafi Ananta Alden/Documents/Kuliah/Semester 8/EL4046/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl/work
+7
+6 wm8731
+]
+[G
+1
+2
+3
+1
+4
+0
+0
+50000000
+0
+0 0
+0
+0
+]
+[G
+1
+6
+7
+1
+8
+0
+0
+32
+0
+0 0
+0
+0
+]
+[G
+1
+2
+3
+1
+5
+0
+0
+20000
+0
+0 0
+0
+0
+]

@@ -1,0 +1,202 @@
+
+State Machine - |AcakCakap_Top|dtmf_system:DTMF_Display|top_dtmfencode:encoder_inst|shift_add:encoder|state
+Name state.STORE state.COMPUTE state.IDLE 
+state.IDLE 0 0 0 
+state.COMPUTE 0 1 1 
+state.STORE 1 0 1 
+
+State Machine - |AcakCakap_Top|dtmf_system:DTMF_Display|top_dtmfencode:encoder_inst|decision:dec_DTMF|state
+Name state.STORE state.COMPUTE state.IDLE 
+state.IDLE 0 0 0 
+state.COMPUTE 0 1 1 
+state.STORE 1 0 1 
+
+State Machine - |AcakCakap_Top|dtmf_system:DTMF_Display|top_dtmfencode:encoder_inst|highcomparator:comp_high|state
+Name state.STORE state.COMPUTE state.IDLE 
+state.IDLE 0 0 0 
+state.COMPUTE 0 1 1 
+state.STORE 1 0 1 
+
+State Machine - |AcakCakap_Top|dtmf_system:DTMF_Display|top_dtmfencode:encoder_inst|lowcomparator:comp_low|state
+Name state.STORE state.COMPUTE state.IDLE 
+state.IDLE 0 0 0 
+state.COMPUTE 0 1 1 
+state.STORE 1 0 1 
+
+State Machine - |AcakCakap_Top|toplevel_iq:DTMF_corr|slidingv5:batch_unit|state
+Name state.STORE state.COMPUTE state.IDLE 
+state.IDLE 0 0 0 
+state.COMPUTE 0 1 1 
+state.STORE 1 0 1 
+
+State Machine - |AcakCakap_Top|toplevel_iq:DTMF_corr|markingv1:mark_unit|state
+Name state.STORE state.COMPUTE state.IDLE 
+state.IDLE 0 0 0 
+state.COMPUTE 0 1 1 
+state.STORE 1 0 1 
+
+State Machine - |AcakCakap_Top|toplevel_iq:DTMF_corr|flaggingv2:flag_unit|state
+Name state.STORE state.COMPUTE state.IDLE 
+state.IDLE 0 0 0 
+state.COMPUTE 0 1 1 
+state.STORE 1 0 1 
+
+State Machine - |AcakCakap_Top|dtmf_state
+Name dtmf_state.SCRAMBLE dtmf_state.SEND_SYNCH_HASH_FINAL dtmf_state.SEND_SYNCH_3 dtmf_state.SEND_SYNCH_HASH_FIRST dtmf_state.IDLE 
+dtmf_state.IDLE 0 0 0 0 0 
+dtmf_state.SEND_SYNCH_HASH_FIRST 0 0 0 1 1 
+dtmf_state.SEND_SYNCH_3 0 0 1 0 1 
+dtmf_state.SEND_SYNCH_HASH_FINAL 0 1 0 0 1 
+dtmf_state.SCRAMBLE 1 0 0 0 1 
+
+State Machine - |AcakCakap_Top|button_state
+Name button_state.RELEASE_STATE button_state.WAIT_FOR_RELEASE button_state.WAIT_FOR_PRESS 
+button_state.WAIT_FOR_PRESS 0 0 0 
+button_state.WAIT_FOR_RELEASE 0 1 1 
+button_state.RELEASE_STATE 1 0 1 
+
+State Machine - |AcakCakap_Top|Audio_interface:Audio_interface|RCV
+Name RCV.right5 RCV.right4 RCV.right3 RCV.right2 RCV.right1 RCV.left5 RCV.left4 RCV.left3 RCV.left2 RCV.left1 RCV.wait2 RCV.wait1 
+RCV.wait1 0 0 0 0 0 0 0 0 0 0 0 0 
+RCV.wait2 0 0 0 0 0 0 0 0 0 0 1 1 
+RCV.left1 0 0 0 0 0 0 0 0 0 1 0 1 
+RCV.left2 0 0 0 0 0 0 0 0 1 0 0 1 
+RCV.left3 0 0 0 0 0 0 0 1 0 0 0 1 
+RCV.left4 0 0 0 0 0 0 1 0 0 0 0 1 
+RCV.left5 0 0 0 0 0 1 0 0 0 0 0 1 
+RCV.right1 0 0 0 0 1 0 0 0 0 0 0 1 
+RCV.right2 0 0 0 1 0 0 0 0 0 0 0 1 
+RCV.right3 0 0 1 0 0 0 0 0 0 0 0 1 
+RCV.right4 0 1 0 0 0 0 0 0 0 0 0 1 
+RCV.right5 1 0 0 0 0 0 0 0 0 0 0 1 
+
+State Machine - |AcakCakap_Top|Audio_interface:Audio_interface|i2c:I2C_controller|AUDIO
+Name AUDIO.s5 AUDIO.s4 AUDIO.s3 AUDIO.s2 AUDIO.s1 
+AUDIO.s1 0 0 0 0 0 
+AUDIO.s2 0 0 0 1 1 
+AUDIO.s3 0 0 1 0 1 
+AUDIO.s4 0 1 0 0 1 
+AUDIO.s5 1 0 0 0 1 
+
+State Machine - |AcakCakap_Top|toplevel_iq:DTMF_corr|multv6:mult_unit|state
+Name state.STORE state.COMPUTE state.IDLE 
+state.IDLE 0 0 0 
+state.COMPUTE 0 1 1 
+state.STORE 1 0 1 
+
+State Machine - |AcakCakap_Top|toplevel_iq:DTMF_corr|Framingv2:framing|state
+Name state.STORE state.COMPUTE state.IDLE 
+state.IDLE 0 0 0 
+state.COMPUTE 0 1 1 
+state.STORE 1 0 1 
+
+State Machine - |AcakCakap_Top|toplevel_iq:DTMF_corr|powercalcv1:powercalc|state
+Name state.STORE state.COMPUTE state.IDLE 
+state.IDLE 0 0 0 
+state.COMPUTE 0 1 1 
+state.STORE 1 0 1 
+
+State Machine - |AcakCakap_Top|dtmf_system:DTMF_Display|Goertzel_top:goertzel_inst|Goertzel:GOERTZEL_1477|state
+Name state.OUTPUT state.COMPUTE_POWER_5 state.COMPUTE_POWER_4 state.COMPUTE_POWER_3 state.COMPUTE_POWER_2 state.COMPUTE_POWER_1 state.UPDATE state.STORE_TO_Q0 state.COMPUTE_FILTER_3 state.COMPUTE_FILTER_2 state.COMPUTE_FILTER_1 state.IDLE 
+state.IDLE 0 0 0 0 0 0 0 0 0 0 0 0 
+state.COMPUTE_FILTER_1 0 0 0 0 0 0 0 0 0 0 1 1 
+state.COMPUTE_FILTER_2 0 0 0 0 0 0 0 0 0 1 0 1 
+state.COMPUTE_FILTER_3 0 0 0 0 0 0 0 0 1 0 0 1 
+state.STORE_TO_Q0 0 0 0 0 0 0 0 1 0 0 0 1 
+state.UPDATE 0 0 0 0 0 0 1 0 0 0 0 1 
+state.COMPUTE_POWER_1 0 0 0 0 0 1 0 0 0 0 0 1 
+state.COMPUTE_POWER_2 0 0 0 0 1 0 0 0 0 0 0 1 
+state.COMPUTE_POWER_3 0 0 0 1 0 0 0 0 0 0 0 1 
+state.COMPUTE_POWER_4 0 0 1 0 0 0 0 0 0 0 0 1 
+state.COMPUTE_POWER_5 0 1 0 0 0 0 0 0 0 0 0 1 
+state.OUTPUT 1 0 0 0 0 0 0 0 0 0 0 1 
+
+State Machine - |AcakCakap_Top|dtmf_system:DTMF_Display|Goertzel_top:goertzel_inst|Goertzel:GOERTZEL_697|state
+Name state.OUTPUT state.COMPUTE_POWER_5 state.COMPUTE_POWER_4 state.COMPUTE_POWER_3 state.COMPUTE_POWER_2 state.COMPUTE_POWER_1 state.UPDATE state.STORE_TO_Q0 state.COMPUTE_FILTER_3 state.COMPUTE_FILTER_2 state.COMPUTE_FILTER_1 state.IDLE 
+state.IDLE 0 0 0 0 0 0 0 0 0 0 0 0 
+state.COMPUTE_FILTER_1 0 0 0 0 0 0 0 0 0 0 1 1 
+state.COMPUTE_FILTER_2 0 0 0 0 0 0 0 0 0 1 0 1 
+state.COMPUTE_FILTER_3 0 0 0 0 0 0 0 0 1 0 0 1 
+state.STORE_TO_Q0 0 0 0 0 0 0 0 1 0 0 0 1 
+state.UPDATE 0 0 0 0 0 0 1 0 0 0 0 1 
+state.COMPUTE_POWER_1 0 0 0 0 0 1 0 0 0 0 0 1 
+state.COMPUTE_POWER_2 0 0 0 0 1 0 0 0 0 0 0 1 
+state.COMPUTE_POWER_3 0 0 0 1 0 0 0 0 0 0 0 1 
+state.COMPUTE_POWER_4 0 0 1 0 0 0 0 0 0 0 0 1 
+state.COMPUTE_POWER_5 0 1 0 0 0 0 0 0 0 0 0 1 
+state.OUTPUT 1 0 0 0 0 0 0 0 0 0 0 1 
+
+State Machine - |AcakCakap_Top|dtmf_system:DTMF_Display|Goertzel_top:goertzel_inst|Goertzel:GOERTZEL_770|state
+Name state.OUTPUT state.COMPUTE_POWER_5 state.COMPUTE_POWER_4 state.COMPUTE_POWER_3 state.COMPUTE_POWER_2 state.COMPUTE_POWER_1 state.UPDATE state.STORE_TO_Q0 state.COMPUTE_FILTER_3 state.COMPUTE_FILTER_2 state.COMPUTE_FILTER_1 state.IDLE 
+state.IDLE 0 0 0 0 0 0 0 0 0 0 0 0 
+state.COMPUTE_FILTER_1 0 0 0 0 0 0 0 0 0 0 1 1 
+state.COMPUTE_FILTER_2 0 0 0 0 0 0 0 0 0 1 0 1 
+state.COMPUTE_FILTER_3 0 0 0 0 0 0 0 0 1 0 0 1 
+state.STORE_TO_Q0 0 0 0 0 0 0 0 1 0 0 0 1 
+state.UPDATE 0 0 0 0 0 0 1 0 0 0 0 1 
+state.COMPUTE_POWER_1 0 0 0 0 0 1 0 0 0 0 0 1 
+state.COMPUTE_POWER_2 0 0 0 0 1 0 0 0 0 0 0 1 
+state.COMPUTE_POWER_3 0 0 0 1 0 0 0 0 0 0 0 1 
+state.COMPUTE_POWER_4 0 0 1 0 0 0 0 0 0 0 0 1 
+state.COMPUTE_POWER_5 0 1 0 0 0 0 0 0 0 0 0 1 
+state.OUTPUT 1 0 0 0 0 0 0 0 0 0 0 1 
+
+State Machine - |AcakCakap_Top|dtmf_system:DTMF_Display|Goertzel_top:goertzel_inst|Goertzel:GOERTZEL_852|state
+Name state.OUTPUT state.COMPUTE_POWER_5 state.COMPUTE_POWER_4 state.COMPUTE_POWER_3 state.COMPUTE_POWER_2 state.COMPUTE_POWER_1 state.UPDATE state.STORE_TO_Q0 state.COMPUTE_FILTER_3 state.COMPUTE_FILTER_2 state.COMPUTE_FILTER_1 state.IDLE 
+state.IDLE 0 0 0 0 0 0 0 0 0 0 0 0 
+state.COMPUTE_FILTER_1 0 0 0 0 0 0 0 0 0 0 1 1 
+state.COMPUTE_FILTER_2 0 0 0 0 0 0 0 0 0 1 0 1 
+state.COMPUTE_FILTER_3 0 0 0 0 0 0 0 0 1 0 0 1 
+state.STORE_TO_Q0 0 0 0 0 0 0 0 1 0 0 0 1 
+state.UPDATE 0 0 0 0 0 0 1 0 0 0 0 1 
+state.COMPUTE_POWER_1 0 0 0 0 0 1 0 0 0 0 0 1 
+state.COMPUTE_POWER_2 0 0 0 0 1 0 0 0 0 0 0 1 
+state.COMPUTE_POWER_3 0 0 0 1 0 0 0 0 0 0 0 1 
+state.COMPUTE_POWER_4 0 0 1 0 0 0 0 0 0 0 0 1 
+state.COMPUTE_POWER_5 0 1 0 0 0 0 0 0 0 0 0 1 
+state.OUTPUT 1 0 0 0 0 0 0 0 0 0 0 1 
+
+State Machine - |AcakCakap_Top|dtmf_system:DTMF_Display|Goertzel_top:goertzel_inst|Goertzel:GOERTZEL_941|state
+Name state.OUTPUT state.COMPUTE_POWER_5 state.COMPUTE_POWER_4 state.COMPUTE_POWER_3 state.COMPUTE_POWER_2 state.COMPUTE_POWER_1 state.UPDATE state.STORE_TO_Q0 state.COMPUTE_FILTER_3 state.COMPUTE_FILTER_2 state.COMPUTE_FILTER_1 state.IDLE 
+state.IDLE 0 0 0 0 0 0 0 0 0 0 0 0 
+state.COMPUTE_FILTER_1 0 0 0 0 0 0 0 0 0 0 1 1 
+state.COMPUTE_FILTER_2 0 0 0 0 0 0 0 0 0 1 0 1 
+state.COMPUTE_FILTER_3 0 0 0 0 0 0 0 0 1 0 0 1 
+state.STORE_TO_Q0 0 0 0 0 0 0 0 1 0 0 0 1 
+state.UPDATE 0 0 0 0 0 0 1 0 0 0 0 1 
+state.COMPUTE_POWER_1 0 0 0 0 0 1 0 0 0 0 0 1 
+state.COMPUTE_POWER_2 0 0 0 0 1 0 0 0 0 0 0 1 
+state.COMPUTE_POWER_3 0 0 0 1 0 0 0 0 0 0 0 1 
+state.COMPUTE_POWER_4 0 0 1 0 0 0 0 0 0 0 0 1 
+state.COMPUTE_POWER_5 0 1 0 0 0 0 0 0 0 0 0 1 
+state.OUTPUT 1 0 0 0 0 0 0 0 0 0 0 1 
+
+State Machine - |AcakCakap_Top|dtmf_system:DTMF_Display|Goertzel_top:goertzel_inst|Goertzel:GOERTZEL_1209|state
+Name state.OUTPUT state.COMPUTE_POWER_5 state.COMPUTE_POWER_4 state.COMPUTE_POWER_3 state.COMPUTE_POWER_2 state.COMPUTE_POWER_1 state.UPDATE state.STORE_TO_Q0 state.COMPUTE_FILTER_3 state.COMPUTE_FILTER_2 state.COMPUTE_FILTER_1 state.IDLE 
+state.IDLE 0 0 0 0 0 0 0 0 0 0 0 0 
+state.COMPUTE_FILTER_1 0 0 0 0 0 0 0 0 0 0 1 1 
+state.COMPUTE_FILTER_2 0 0 0 0 0 0 0 0 0 1 0 1 
+state.COMPUTE_FILTER_3 0 0 0 0 0 0 0 0 1 0 0 1 
+state.STORE_TO_Q0 0 0 0 0 0 0 0 1 0 0 0 1 
+state.UPDATE 0 0 0 0 0 0 1 0 0 0 0 1 
+state.COMPUTE_POWER_1 0 0 0 0 0 1 0 0 0 0 0 1 
+state.COMPUTE_POWER_2 0 0 0 0 1 0 0 0 0 0 0 1 
+state.COMPUTE_POWER_3 0 0 0 1 0 0 0 0 0 0 0 1 
+state.COMPUTE_POWER_4 0 0 1 0 0 0 0 0 0 0 0 1 
+state.COMPUTE_POWER_5 0 1 0 0 0 0 0 0 0 0 0 1 
+state.OUTPUT 1 0 0 0 0 0 0 0 0 0 0 1 
+
+State Machine - |AcakCakap_Top|dtmf_system:DTMF_Display|Goertzel_top:goertzel_inst|Goertzel:GOERTZEL_1336|state
+Name state.OUTPUT state.COMPUTE_POWER_5 state.COMPUTE_POWER_4 state.COMPUTE_POWER_3 state.COMPUTE_POWER_2 state.COMPUTE_POWER_1 state.UPDATE state.STORE_TO_Q0 state.COMPUTE_FILTER_3 state.COMPUTE_FILTER_2 state.COMPUTE_FILTER_1 state.IDLE 
+state.IDLE 0 0 0 0 0 0 0 0 0 0 0 0 
+state.COMPUTE_FILTER_1 0 0 0 0 0 0 0 0 0 0 1 1 
+state.COMPUTE_FILTER_2 0 0 0 0 0 0 0 0 0 1 0 1 
+state.COMPUTE_FILTER_3 0 0 0 0 0 0 0 0 1 0 0 1 
+state.STORE_TO_Q0 0 0 0 0 0 0 0 1 0 0 0 1 
+state.UPDATE 0 0 0 0 0 0 1 0 0 0 0 1 
+state.COMPUTE_POWER_1 0 0 0 0 0 1 0 0 0 0 0 1 
+state.COMPUTE_POWER_2 0 0 0 0 1 0 0 0 0 0 0 1 
+state.COMPUTE_POWER_3 0 0 0 1 0 0 0 0 0 0 0 1 
+state.COMPUTE_POWER_4 0 0 1 0 0 0 0 0 0 0 0 1 
+state.COMPUTE_POWER_5 0 1 0 0 0 0 0 0 0 0 0 1 
+state.OUTPUT 1 0 0 0 0 0 0 0 0 0 0 1 

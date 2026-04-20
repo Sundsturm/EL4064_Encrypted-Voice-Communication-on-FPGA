@@ -1,0 +1,126 @@
+Restore Archived Project report for AcakCakap_Top
+Mon Apr 06 14:19:27 2026
+Quartus Prime Version 18.1.0 Build 625 09/12/2018 SJ Lite Edition
+
+
+---------------------
+; Table of Contents ;
+---------------------
+  1. Legal Notice
+  2. Restore Archived Project Summary
+  3. Restore Archived Project Messages
+  4. Files Restored
+  5. Files Not Restored
+
+
+
+----------------
+; Legal Notice ;
+----------------
+Copyright (C) 2018  Intel Corporation. All rights reserved.
+Your use of Intel Corporation's design tools, logic functions 
+and other software and tools, and its AMPP partner logic 
+functions, and any output files from any of the foregoing 
+(including device programming or simulation files), and any 
+associated documentation or information are expressly subject 
+to the terms and conditions of the Intel Program License 
+Subscription Agreement, the Intel Quartus Prime License Agreement,
+the Intel FPGA IP License Agreement, or other applicable license
+agreement, including, without limitation, that your use is for
+the sole purpose of programming logic devices manufactured by
+Intel and sold by Intel or its authorized distributors.  Please
+refer to the applicable agreement for further details.
+
+
+
++-------------------------------------------------------------------------+
+; Restore Archived Project Summary                                        ;
++---------------------------------+---------------------------------------+
+; Restore Archived Project Status ; Successful - Mon Apr 06 14:19:27 2026 ;
+; Revision Name                   ; AcakCakap_Top                         ;
+; Top-level Entity Name           ; AcakCakap_Top                         ;
+; Family                          ; Cyclone V                             ;
++---------------------------------+---------------------------------------+
+
+
++-----------------------------------+
+; Restore Archived Project Messages ;
++-----------------------------------+
+Info: Successfully restored 'D:/Users/Rafi Ananta Alden/Documents/Kuliah/Semester 8/EL4046/Enkripsi-Suara-FPGA/RTL/Progress Terakhir/Gabungan semua desain/AcakCakap_Top.qar' into the 'D:\\Users\\Rafi Ananta Alden\\Documents\\Kuliah\\Semester 8\\EL4046\\Enkripsi-Suara-FPGA\\Demo\\Top-Level/' directory
+Info: Generated report 'AcakCakap_Top.restore.rpt'
+Info (23030): Evaluation of Tcl script d:/intelfpga_lite/18.1/quartus/common/tcl/apps/qpm/qar.tcl was successful
+Info: Quartus Prime Shell was successful. 0 errors, 2 warnings
+    Info: Peak virtual memory: 4834 megabytes
+    Info: Processing ended: Mon Apr 06 14:19:27 2026
+    Info: Elapsed time: 00:00:06
+    Info: Total CPU time (on all processors): 00:00:02
+
+
++-------------------------------------------------------------------------------+
+; Files Restored                                                                ;
++-------------------------------------------------------------------------------+
+; File Name                                                                     ;
++-------------------------------------------------------------------------------+
+; qar_info.json                                                                 ;
+; Source Code TA/HDL/AcakCakap/hdl/AcakCakap_Top.vhd                            ;
+; Source Code TA/HDL/AcakCakap/hdl/Audio_interface.vhd                          ;
+; Source Code TA/HDL/AcakCakap/hdl/Butterfly.v                                  ;
+; Source Code TA/HDL/AcakCakap/hdl/DelayBuffer.v                                ;
+; Source Code TA/HDL/AcakCakap/hdl/FFT.v                                        ;
+; Source Code TA/HDL/AcakCakap/hdl/GenPermutationKey.v                          ;
+; Source Code TA/HDL/AcakCakap/hdl/Mult128.v                                    ;
+; Source Code TA/HDL/AcakCakap/hdl/Multiply.v                                   ;
+; Source Code TA/HDL/AcakCakap/hdl/ReorderXk.v                                  ;
+; Source Code TA/HDL/AcakCakap/hdl/ReverseBitOrder.v                            ;
+; Source Code TA/HDL/AcakCakap/hdl/Scrambler_TOP.v                              ;
+; Source Code TA/HDL/AcakCakap/hdl/SdfUnit.v                                    ;
+; Source Code TA/HDL/AcakCakap/hdl/SdfUnit2.v                                   ;
+; Source Code TA/HDL/AcakCakap/hdl/Twiddle.v                                    ;
+; Source Code TA/HDL/AcakCakap/hdl/dtmf_detect_hdl/DecodeDTMF.vhd               ;
+; Source Code TA/HDL/AcakCakap/hdl/dtmf_detect_hdl/Goertzel.vhd                 ;
+; Source Code TA/HDL/AcakCakap/hdl/dtmf_detect_hdl/Goertzel_top.vhd             ;
+; Source Code TA/HDL/AcakCakap/hdl/dtmf_detect_hdl/decision.vhd                 ;
+; Source Code TA/HDL/AcakCakap/hdl/dtmf_detect_hdl/dtmf_system.vhd              ;
+; Source Code TA/HDL/AcakCakap/hdl/dtmf_detect_hdl/highcomparator.vhd           ;
+; Source Code TA/HDL/AcakCakap/hdl/dtmf_detect_hdl/lowcomparator.vhd            ;
+; Source Code TA/HDL/AcakCakap/hdl/dtmf_detect_hdl/shift_add.vhd                ;
+; Source Code TA/HDL/AcakCakap/hdl/dtmf_detect_hdl/top_dtmfencode.vhd           ;
+; Source Code TA/HDL/AcakCakap/hdl/i2c.vhd                                      ;
+; Source Code TA/HDL/AcakCakap/hdl/receiver_hdl/Framingv2.vhd                   ;
+; Source Code TA/HDL/AcakCakap/hdl/receiver_hdl/dec_control.vhd                 ;
+; Source Code TA/HDL/AcakCakap/hdl/receiver_hdl/flaggingv2.vhd                  ;
+; Source Code TA/HDL/AcakCakap/hdl/receiver_hdl/lutcos_block.vhd                ;
+; Source Code TA/HDL/AcakCakap/hdl/receiver_hdl/lutsin_block.vhd                ;
+; Source Code TA/HDL/AcakCakap/hdl/receiver_hdl/markingv1.vhd                   ;
+; Source Code TA/HDL/AcakCakap/hdl/receiver_hdl/multv6.vhd                      ;
+; Source Code TA/HDL/AcakCakap/hdl/receiver_hdl/powercalcv1.vhd                 ;
+; Source Code TA/HDL/AcakCakap/hdl/receiver_hdl/slidingv5.vhd                   ;
+; Source Code TA/HDL/AcakCakap/hdl/receiver_hdl/toplevel_iq.vhd                 ;
+; Source Code TA/HDL/AcakCakap/hdl/sender_hdl/generate_dtmf_signed.vhd          ;
+; Source Code TA/HDL/AcakCakap/hdl/sender_hdl/sine_gen_signed.vhd               ;
+; Source Code TA/HDL/AcakCakap/quartus/AcakCakap_Top.SDC                        ;
+; Source Code TA/HDL/AcakCakap/quartus/AcakCakap_Top.qpf                        ;
+; Source Code TA/HDL/AcakCakap/quartus/AcakCakap_Top.qsf                        ;
+; Source Code TA/HDL/AcakCakap/quartus/AcakCakap_Top_assignment_defaults.qdf    ;
+; Source Code TA/HDL/AcakCakap/quartus/AudioPLL.cmp                             ;
+; Source Code TA/HDL/AcakCakap/quartus/AudioPLL.qip                             ;
+; Source Code TA/HDL/AcakCakap/quartus/AudioPLL.sip                             ;
+; Source Code TA/HDL/AcakCakap/quartus/AudioPLL.spd                             ;
+; Source Code TA/HDL/AcakCakap/quartus/AudioPLL.vhd                             ;
+; Source Code TA/HDL/AcakCakap/quartus/AudioPLL/AudioPLL_0002.qip               ;
+; Source Code TA/HDL/AcakCakap/quartus/AudioPLL/AudioPLL_0002.v                 ;
+; Source Code TA/HDL/AcakCakap/quartus/AudioPLL_sim/AudioPLL.vho                ;
+; intelFPGA_lite/18.1/modelsim_ase/vhdl_src/floatfixlib/fixed_float_types_c.vhd ;
+; intelFPGA_lite/18.1/modelsim_ase/vhdl_src/floatfixlib/fixed_pkg_c.vhd         ;
++-------------------------------------------------------------------------------+
+
+
++--------------------------------------------------------+
+; Files Not Restored                                     ;
++--------------------------------------------------------+
+; File Name                                              ;
++--------------------------------------------------------+
+; Source Code TA/HDL/AcakCakap/quartus/AcakCakap_Top.sdc ;
++--------------------------------------------------------+
+
+
