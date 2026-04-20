@@ -35,7 +35,7 @@ module tb_audio_bypass;
     // Parameter
     // -------------------------------------------------------------------------
     parameter CLK_PERIOD  = 20;      // 50 MHz (ns)
-    parameter MEM_DEPTH   = 191500;    // Kapasitas audio_memory (sample)
+    parameter MEM_DEPTH   = 400;     // Kapasitas audio_memory (sample) — kecilkan untuk simulasi
     parameter SAMPLE_RATE = 32;      // Harus sama dengan generic Audio_interface
 
     // -------------------------------------------------------------------------
@@ -58,12 +58,14 @@ module tb_audio_bypass;
 
     // I2C
     wire       I2C_SCLK;
-    // I2C_SDAT: DUT mem-drive '0'/Z via open-drain.
-    // Weak pull-down (pull0) mensimulasikan slave WM8731 yang selalu ACK:
-    //   - Saat DUT drive '0'  → strong0 menang  (transmit bit = 0)  ✓
-    //   - Saat DUT drive 'Z'  → pull0 menang     (slave ACK = 0)    ✓
-    wire       I2C_SDAT;
-    assign (weak0, highz1) I2C_SDAT = 1'b0;
+    // I2C_SDAT: open-drain bus modelled with wand + explicit '0' driver.
+    // wand (wired-AND) resolves using logic (not strength), so it works reliably
+    // across the VHDL/Verilog language boundary in Questa:
+    //   - Testbench drives '0' always  → wand resolved = 0
+    //   - DUT VHDL drives '0' (transmit bit) → wand 0 AND 0 = 0  ✓
+    //   - DUT VHDL drives 'Z' (Hi-Z, await ACK) → only testbench '0' active → 0 ✓
+    wand       I2C_SDAT;
+    assign     I2C_SDAT = 1'b0;   // Slave WM8731 stub: always ACK
 
     // Audio serial I/O
     reg        AUD_ADCDAT;   // Testbench → DUT  (serial ADC data)
@@ -160,8 +162,10 @@ module tb_audio_bypass;
         AUD_ADCDAT = 1'b0;
 
         // -- Tunggu BCLK mulai (I2C init + PLL lock) --
+        // AUD_BCLK dimulai dari '0' (bukan X/Z), jadi tunggu posedge pertama
+        // sebagai tanda PLL sudah aktif dan BCLK sudah benar-benar toggle.
         timeout_cnt = 0;
-        while (AUD_BCLK === 1'bx || AUD_BCLK === 1'bz) begin
+        while (AUD_BCLK !== 1'b1) begin
             @(posedge clk);
             timeout_cnt = timeout_cnt + 1;
             if (timeout_cnt > 3_000_000) begin
@@ -169,10 +173,6 @@ module tb_audio_bypass;
                 $finish;
             end
         end
-
-        // Tunggu transisi pertama BCLK untuk memastikan stabil
-        @(negedge AUD_BCLK);
-        @(posedge AUD_BCLK);
 
         // Sinkronisasi ke awal kanal Kiri: tunggu rising edge ADCLRCK (LRCK='1')
         @(posedge AUD_ADCLRCK);
@@ -287,10 +287,10 @@ module tb_audio_bypass;
     end
 
     // -------------------------------------------------------------------------
-    // Watchdog (60 ms sim time)  — naikkan jika perlu
+    // Watchdog (40 ms sim time)  — cukup untuk I2C init ~16ms + 200 sample pair ~6ms
     // -------------------------------------------------------------------------
     initial begin : watchdog
-        #(60_000_000);
+        #(40_000_000);
         $display("[%0t ns] WATCHDOG: Simulasi melebihi batas waktu 60 ms.", $time);
         if (out_fp != 0) $fclose(out_fp);
         $finish;

@@ -1,9 +1,17 @@
 m255
 K4
 z2
-Z0 !s12c _opt
+Z0 !s12c _opt1
 Z1 !s99 mlopt
 R0
+R1
+R0
+R1
+R0
+R1
+Z2 !s12c _opt
+R1
+R2
 R1
 !s11f MIXED_VERSIONS
 !s11e vcom 2025.2 2025.05, May 31 2025
@@ -13,105 +21,79 @@ R1
 !i10e 25
 !i10f 100
 cModel Technology
-Z2 dd:/Users/Rafi Ananta Alden/Documents/Kuliah/Semester 8/EL4046/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl
+Z3 dd:/Users/Rafi Ananta Alden/Documents/Kuliah/Semester 8/EL4046/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl
 T_opt
 !i145 1
 !i144 0
 !s110 1776312035
 VkX>F1@D1hKmmTeVO9I`8O0
-04 15 4 work tb_audio_bypass fast 0
+Z4 04 15 4 work tb_audio_bypass fast 0
 =1-e00af698b079-69e05ee2-154-2c24
 R1
-!s12f OEM100
-!s12b OEM100
-!s124 OEM10U4 
-!s135 nogc
-o-quiet -auto_acc_if_foreign -work work
-tCvgOpt 0 defaultOptions 1107585188
+Z5 !s12f OEM100
+Z6 !s12b OEM100
+Z7 !s124 OEM10U4 
+Z8 !s135 nogc
+Z9 o-quiet -auto_acc_if_foreign -work work
+Z10 tCvgOpt 0 defaultOptions 1107585188
 n@_opt
-OL;O;2025.2;82
+Z11 OL;O;2025.2;82
+R3
+T_opt1
+!i145 1
+!i144 0
+!s110 1776653312
+VcDocEZ1T>IZdH>z:WGAIj0
+R4
+=1-e00af698b079-69e593ff-4e-3d50
+R1
+R5
+R6
+R7
+R8
+R9
+R10
+n@_opt1
+R11
 Eaudio_interface
-Z3 w1735364105
-Z4 DPx12 altera_lnsim 23 altera_lnsim_components 0 22 IkVUgNVX366BneI70`VBS2
-Z5 DEx8 audiopll 8 audiopll 0 22 dBj?6P?5O4>XdR0gLmF030
-Z6 DPx4 ieee 11 numeric_std 0 22 aU^R8eGcicLcUFIaBQSL>3
-Z7 DPx3 std 6 textio 0 22 zE1`LPoLg^DX3Oz^4Fj1K3
-Z8 DPx4 ieee 14 std_logic_1164 0 22 cVAk:aDinOX8^VGI1ekP<3
-!i122 2
-R2
-Z9 8Audio_interface.vhd
-Z10 FAudio_interface.vhd
+Z12 w1776651053
+Z13 DPx12 altera_lnsim 23 altera_lnsim_components 0 22 IkVUgNVX366BneI70`VBS2
+Z14 DEx8 audiopll 8 audiopll 0 22 dBj?6P?5O4>XdR0gLmF030
+Z15 DPx4 ieee 11 numeric_std 0 22 aU^R8eGcicLcUFIaBQSL>3
+Z16 DPx3 std 6 textio 0 22 zE1`LPoLg^DX3Oz^4Fj1K3
+Z17 DPx4 ieee 14 std_logic_1164 0 22 cVAk:aDinOX8^VGI1ekP<3
+!i122 7
+Z18 dd:/Users/Rafi Ananta Alden/Documents/Kuliah/Semester 8/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl
+Z19 8Audio_interface.vhd
+Z20 FAudio_interface.vhd
 l0
 L9 1
 V3OSl1P3d1h3<L?>?=zLA;0
 !s100 =E8gjbo5leZCGXETY`:Wn3
-Z11 OL;C;2025.2;82
+Z21 OL;C;2025.2;82
 31
-Z12 !s110 1776311162
+Z22 !s110 1776651377
 !i10b 1
-Z13 !s108 1776311162.000000
-Z14 !s90 -reportprogress|300|-93|-work|work|Audio_interface.vhd|
-Z15 !s107 Audio_interface.vhd|
+Z23 !s108 1776651377.000000
+Z24 !s90 -reportprogress|300|-93|-work|work|Audio_interface.vhd|
+Z25 !s107 Audio_interface.vhd|
 !i113 0
-Z16 o-93 -work work
-Z17 tExplicit 1 CvgOpt 0 defaultOptions 1083072464
+Z26 o-93 -work work
+Z27 tExplicit 1 CvgOpt 0 defaultOptions 1083072464
 Awm8731
-R5
-Z18 DEx4 work 3 i2c 0 22 zROH]CZ7f>kM?XE6:ABR`1
-R4
-R6
-R7
-R8
+R14
+Z28 DEx4 work 3 i2c 0 22 zROH]CZ7f>kM?XE6:ABR`1
+R13
+R15
+R16
+R17
 DEx4 work 15 audio_interface 0 22 3OSl1P3d1h3<L?>?=zLA;0
-!i122 2
+!i122 7
 l44
 L30 142
 V@W=Sn6hoo8UXC?dez^5Yd0
 !s100 =JHH2d[]Ml7[]ejFT[CzK2
-R11
-31
-R12
-!i10b 1
-R13
-R14
-R15
-!i113 0
-R16
-R17
-Eaudiopll
-Z19 w1738721141
-R7
-R8
-R4
-!i122 0
-R2
-Z20 8../quartus/AudioPLL_sim/AudioPLL.vho
-Z21 F../quartus/AudioPLL_sim/AudioPLL.vho
-l0
-L33 1
-VUi@OHzPQBRMWdA2ddO7>J3
-!s100 Mc>1c@ZM=c2SCS8MJC`5]3
-R11
-31
-Z22 !s110 1776310644
-!i10b 1
-Z23 !s108 1776310644.000000
-Z24 !s90 -reportprogress|300|-93|-work|work|../quartus/AudioPLL_sim/AudioPLL.vho|
-Z25 !s107 ../quartus/AudioPLL_sim/AudioPLL.vho|
-!i113 0
-R16
-R17
-Artl
-R7
-R8
-R4
-DEx4 work 8 audiopll 0 22 Ui@OHzPQBRMWdA2ddO7>J3
-!i122 0
-l50
-L43 262
-V@9ThHH]9YhQOQL<fe^;8e0
-!s100 VP:>HLRgkQIQNU::3LWMS0
-R11
+R21
 31
 R22
 !i10b 1
@@ -119,69 +101,112 @@ R23
 R24
 R25
 !i113 0
+R26
+R27
+Eaudiopll
+Z29 w1738721141
 R16
 R17
+R13
+!i122 0
+R3
+Z30 8../quartus/AudioPLL_sim/AudioPLL.vho
+Z31 F../quartus/AudioPLL_sim/AudioPLL.vho
+l0
+L33 1
+VUi@OHzPQBRMWdA2ddO7>J3
+!s100 Mc>1c@ZM=c2SCS8MJC`5]3
+R21
+31
+Z32 !s110 1776310644
+!i10b 1
+Z33 !s108 1776310644.000000
+Z34 !s90 -reportprogress|300|-93|-work|work|../quartus/AudioPLL_sim/AudioPLL.vho|
+Z35 !s107 ../quartus/AudioPLL_sim/AudioPLL.vho|
+!i113 0
+R26
+R27
+Artl
+R16
+R17
+R13
+DEx4 work 8 audiopll 0 22 Ui@OHzPQBRMWdA2ddO7>J3
+!i122 0
+l50
+L43 262
+V@9ThHH]9YhQOQL<fe^;8e0
+!s100 VP:>HLRgkQIQNU::3LWMS0
+R21
+31
+R32
+!i10b 1
+R33
+R34
+R35
+!i113 0
+R26
+R27
 Ei2c
-Z26 w1776311702
-R6
-R7
-R8
-!i122 4
-R2
-Z27 8i2c.vhd
-Z28 Fi2c.vhd
+R12
+R15
+R16
+R17
+!i122 6
+R18
+Z36 8i2c.vhd
+Z37 Fi2c.vhd
 l0
 L5 1
 VzROH]CZ7f>kM?XE6:ABR`1
 !s100 <1f5LKEOAmL;m?ER[akkn3
-R11
+R21
 31
-Z29 !s110 1776311995
+Z38 !s110 1776651362
 !i10b 1
-Z30 !s108 1776311995.000000
-Z31 !s90 -reportprogress|300|-93|-work|work|i2c.vhd|
-Z32 !s107 i2c.vhd|
+Z39 !s108 1776651362.000000
+Z40 !s90 -reportprogress|300|-93|-work|work|i2c.vhd|
+Z41 !s107 i2c.vhd|
 !i113 0
+R26
+R27
+Artl
+R15
 R16
 R17
-Artl
-R6
-R7
-R8
-R18
-!i122 4
+R28
+!i122 6
 l44
 L20 141
 V_@JXcJn=5WSz`;P?[nfVd0
 !s100 iIzZaY05S`]QTmJZ6EMfz3
-R11
+R21
 31
-R29
+R38
 !i10b 1
-R30
-R31
-R32
+R39
+R40
+R41
 !i113 0
-R16
-R17
+R26
+R27
 vtb_audio_bypass
 2tb_audio_bypass.v
-!s110 1776312015
+!s110 1776653297
 !i10b 1
-!s100 FlIm[eBiYaCkMo^f4A9B`3
-I9MoOY:=4NPS7_4^CQS7_P0
-R2
-w1776311929
+!s100 FXfUgiA[A;X^K^`R?@l1M2
+IKYl31a`9MoD_iQ=oinl0>2
+R18
+w1776652922
 8tb_audio_bypass.v
 Ftb_audio_bypass.v
-!i122 5
+!i122 11
 L0 32 268
 VDg1SIo80bB@j0V0VzS_@n1
 OL;L;2025.2;82
 r1
 !s85 0
 31
-!s108 1776312015.000000
+!s108 1776653297.000000
 !s107 tb_audio_bypass.v|
 !s90 -reportprogress|300|-work|work|tb_audio_bypass.v|
 !i113 0

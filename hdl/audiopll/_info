@@ -10,45 +10,45 @@ z2
 cModel Technology
 Z0 dd:/Users/Rafi Ananta Alden/Documents/Kuliah/Semester 8/EL4046/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl
 Eaudiopll
-Z1 w1738721141
+Z1 w1776651053
 Z2 DPx3 std 6 textio 0 22 zE1`LPoLg^DX3Oz^4Fj1K3
 Z3 DPx4 ieee 14 std_logic_1164 0 22 cVAk:aDinOX8^VGI1ekP<3
 Z4 DPx12 altera_lnsim 23 altera_lnsim_components 0 22 IkVUgNVX366BneI70`VBS2
-!i122 0
-R0
-Z5 8../quartus/AudioPLL_sim/AudioPLL.vho
-Z6 F../quartus/AudioPLL_sim/AudioPLL.vho
+!i122 1
+Z5 dd:/Users/Rafi Ananta Alden/Documents/Kuliah/Semester 8/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl
+Z6 8../quartus/AudioPLL_sim/AudioPLL.vho
+Z7 F../quartus/AudioPLL_sim/AudioPLL.vho
 l0
 L33 1
 VdBj?6P?5O4>XdR0gLmF030
 !s100 Mc>1c@ZM=c2SCS8MJC`5]3
-Z7 OL;C;2025.2;82
+Z8 OL;C;2025.2;82
 31
-Z8 !s110 1776311157
+Z9 !s110 1776651343
 !i10b 1
-Z9 !s108 1776311157.000000
-Z10 !s90 -reportprogress|300|-93|-work|audiopll|../quartus/AudioPLL_sim/AudioPLL.vho|
-!s107 ../quartus/AudioPLL_sim/AudioPLL.vho|
+Z10 !s108 1776651342.000000
+Z11 !s90 -reportprogress|300|-93|-work|audiopll|../quartus/AudioPLL_sim/AudioPLL.vho|
+Z12 !s107 ../quartus/AudioPLL_sim/AudioPLL.vho|
 !i113 0
-Z11 o-93 -work audiopll
-Z12 tExplicit 1 CvgOpt 0 defaultOptions 1083072464
+Z13 o-93 -work audiopll
+Z14 tExplicit 1 CvgOpt 0 defaultOptions 1083072464
 Artl
 R2
 R3
 R4
-DEx4 work 8 audiopll 0 22 dBj?6P?5O4>XdR0gLmF030
-!i122 0
+Z15 DEx4 work 8 audiopll 0 22 dBj?6P?5O4>XdR0gLmF030
+!i122 1
 l50
-L43 262
-VaDWhfNWhJAnAVMZBzO2Y=2
-!s100 VP:>HLRgkQIQNU::3LWMS0
-R7
-31
+Z16 L43 262
+Z17 VaDWhfNWhJAnAVMZBzO2Y=2
+Z18 !s100 VP:>HLRgkQIQNU::3LWMS0
 R8
-!i10b 1
+31
 R9
+!i10b 1
 R10
-Z13 !s107 ../quartus/AudioPLL_sim/AudioPLL.vho|
-!i113 0
 R11
 R12
+!i113 0
+R13
+R14
