@@ -174,26 +174,39 @@ module tb_audio_bypass;
             end
         end
 
-        // Sinkronisasi ke awal kanal Kiri: tunggu rising edge ADCLRCK (LRCK='1')
+        // Sinkronisasi ke awal kanal Kiri: tunggu rising edge ADCLRCK (LRCK='1').
+        // Lalu lewatkan satu frame dummy agar FSM DUT benar-benar settle.
+        @(posedge AUD_ADCLRCK);
+        @(negedge AUD_BCLK);   // tunggu negedge pertama setelah LRCK naik
+        @(posedge AUD_BCLK);   // tunggu posedge — DUT masuk left2, sample garbage
+        // Sekarang kita di tengah frame garbage; tunggu LRCK naik lagi
+        // untuk frame pertama yang benar-benar kita kirim.
         @(posedge AUD_ADCLRCK);
 
         $display("[%0t ns] BCLK aktif, stimulus I2S dimulai.", $time);
 
         // -- Loop utama: kirim pasangan L/R per siklus LRCK --
+        // Setiap word di-lock ke edge LRCK agar tidak ada slip antar kanal.
         while (stim_idx < num_samples - 1) begin
 
-            // === Kanal Kiri: 16 bit ===
-            for (b = 15; b >= 0; b = b - 1) begin
+            // === Kanal Kiri: LRCK harus '1' ===
+            @(posedge AUD_ADCLRCK);
+            AUD_ADCDAT = audio_memory[stim_idx][15];
+            for (b = 14; b >= 0; b = b - 1) begin
                 @(negedge AUD_BCLK);
                 AUD_ADCDAT = audio_memory[stim_idx][b];
             end
+            @(posedge AUD_BCLK);
             stim_idx = stim_idx + 1;
 
-            // === Kanal Kanan: 16 bit ===
-            for (b = 15; b >= 0; b = b - 1) begin
+            // === Kanal Kanan: LRCK harus '0' ===
+            @(negedge AUD_ADCLRCK);
+            AUD_ADCDAT = audio_memory[stim_idx][15];
+            for (b = 14; b >= 0; b = b - 1) begin
                 @(negedge AUD_BCLK);
                 AUD_ADCDAT = audio_memory[stim_idx][b];
             end
+            @(posedge AUD_BCLK);
             stim_idx = stim_idx + 1;
         end
 
@@ -214,17 +227,20 @@ module tb_audio_bypass;
     // yang dikirim dan sample yang muncul di Lin/Rin. Offset CAP_LATENCY
     // dikompensasikan di bawah; sesuaikan jika hasil tidak pas.
     // -------------------------------------------------------------------------
-    parameter CAP_LATENCY = 1;  // Kompensasi latensi dalam satuan pasangan L/R
+    parameter CAP_LATENCY      = 0;  // Kompensasi latensi dalam satuan pasangan L/R
+    parameter CAP_WARMUP_PAIRS = 1;  // Abaikan pair awal sebelum mulai compare
 
     integer out_fp;
     integer mismatch_l, mismatch_r;
     integer cap_pair;
     integer cmp_idx;
+    integer compared_pairs;
 
     initial begin : capture
         mismatch_l = 0;
         mismatch_r = 0;
         cap_pair   = 0;
+        compared_pairs = 0;
 
         // Buka file output
         out_fp = $fopen("audio_output.txt", "w");
@@ -244,12 +260,14 @@ module tb_audio_bypass;
             @(posedge Ldone);
             $fdisplay(out_fp, "%04h", Lin);
 
-            cmp_idx = (cap_pair + CAP_LATENCY) * 2;
-            if (cmp_idx < num_samples) begin
-                if (Lin !== $signed(audio_memory[cmp_idx])) begin
-                    $display("[%0t ns] MISMATCH L[%0d]: kirim=%04h terima=%04h",
-                             $time, cap_pair, audio_memory[cmp_idx], Lin);
-                    mismatch_l = mismatch_l + 1;
+            if (cap_pair >= CAP_WARMUP_PAIRS) begin
+                cmp_idx = ((cap_pair - CAP_WARMUP_PAIRS) + CAP_LATENCY) * 2;
+                if (cmp_idx < num_samples) begin
+                    if (Lin !== $signed(audio_memory[cmp_idx])) begin
+                        $display("[%0t ns] MISMATCH L[%0d]: kirim=%04h terima=%04h",
+                                 $time, (cap_pair - CAP_WARMUP_PAIRS), audio_memory[cmp_idx], Lin);
+                        mismatch_l = mismatch_l + 1;
+                    end
                 end
             end
 
@@ -257,19 +275,22 @@ module tb_audio_bypass;
             @(posedge Rdone);
             $fdisplay(out_fp, "%04h", Rin);
 
-            cmp_idx = (cap_pair + CAP_LATENCY) * 2 + 1;
-            if (cmp_idx < num_samples) begin
-                if (Rin !== $signed(audio_memory[cmp_idx])) begin
-                    $display("[%0t ns] MISMATCH R[%0d]: kirim=%04h terima=%04h",
-                             $time, cap_pair, audio_memory[cmp_idx], Rin);
-                    mismatch_r = mismatch_r + 1;
+            if (cap_pair >= CAP_WARMUP_PAIRS) begin
+                cmp_idx = ((cap_pair - CAP_WARMUP_PAIRS) + CAP_LATENCY) * 2 + 1;
+                if (cmp_idx < num_samples) begin
+                    if (Rin !== $signed(audio_memory[cmp_idx])) begin
+                        $display("[%0t ns] MISMATCH R[%0d]: kirim=%04h terima=%04h",
+                                 $time, (cap_pair - CAP_WARMUP_PAIRS), audio_memory[cmp_idx], Rin);
+                        mismatch_r = mismatch_r + 1;
+                    end
                 end
+                compared_pairs = cap_pair - CAP_WARMUP_PAIRS + 1;
             end
 
             cap_pair = cap_pair + 1;
 
-            // Selesai jika sudah melampaui jumlah pasangan yang dikirim
-            if (cap_pair >= (num_samples / 2) - CAP_LATENCY) begin
+            // Selesai setelah seluruh pair valid selesai dibandingkan.
+            if (compared_pairs >= (num_samples / 2) - CAP_LATENCY) begin
                 $fclose(out_fp);
                 $display("==================================================");
                 $display("[%0t ns] Capture selesai.", $time);

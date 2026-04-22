@@ -13,6 +13,20 @@ R0
 R1
 R0
 R1
+R0
+R1
+R0
+R1
+R0
+R1
+R0
+R1
+R0
+R1
+R0
+R1
+R0
+R1
 Z2 !s12c _opt
 R1
 R2
@@ -46,10 +60,10 @@ R3
 T_opt1
 !i145 1
 !i144 0
-!s110 1776660842
-V1E^U^PkWfTFbV5A4giF@?1
+!s110 1776832139
+VgM]R2H>o[jEYSMIYYT;3`0
 R4
-=1-e00af698b079-69e5b169-10a-66cc
+=6-e00af698b079-69e84e8a-df-1edc
 R1
 R5
 R6
@@ -59,6 +73,7 @@ R9
 R10
 n@_opt1
 R11
+R3
 Eaudio_interface
 Z12 w1776659246
 Z13 DPx12 altera_lnsim 23 altera_lnsim_components 0 22 IkVUgNVX366BneI70`VBS2
@@ -66,7 +81,7 @@ Z14 DEx8 audiopll 8 audiopll 0 22 dBj?6P?5O4>XdR0gLmF030
 Z15 DPx4 ieee 11 numeric_std 0 22 aU^R8eGcicLcUFIaBQSL>3
 Z16 DPx3 std 6 textio 0 22 zE1`LPoLg^DX3Oz^4Fj1K3
 Z17 DPx4 ieee 14 std_logic_1164 0 22 cVAk:aDinOX8^VGI1ekP<3
-!i122 15
+!i122 33
 Z18 dd:/Users/Rafi Ananta Alden/Documents/Kuliah/Semester 8/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl
 Z19 8Audio_interface.vhd
 Z20 FAudio_interface.vhd
@@ -76,9 +91,9 @@ V3OSl1P3d1h3<L?>?=zLA;0
 !s100 =E8gjbo5leZCGXETY`:Wn3
 Z21 OL;C;2025.2;82
 31
-Z22 !s110 1776659314
+Z22 !s110 1776848804
 !i10b 1
-Z23 !s108 1776659314.000000
+Z23 !s108 1776848804.000000
 Z24 !s90 -reportprogress|300|-93|-work|work|Audio_interface.vhd|
 Z25 !s107 Audio_interface.vhd|
 !i113 0
@@ -92,7 +107,7 @@ R15
 R16
 R17
 DEx4 work 15 audio_interface 0 22 3OSl1P3d1h3<L?>?=zLA;0
-!i122 15
+!i122 33
 l44
 L30 142
 V5l6cfPjGMU=`NP_kDABYK0
@@ -155,7 +170,7 @@ Z36 w1776651053
 R15
 R16
 R17
-!i122 12
+!i122 32
 R18
 Z37 8i2c.vhd
 Z38 Fi2c.vhd
@@ -165,9 +180,9 @@ VzROH]CZ7f>kM?XE6:ABR`1
 !s100 <1f5LKEOAmL;m?ER[akkn3
 R21
 31
-Z39 !s110 1776659086
+Z39 !s110 1776848803
 !i10b 1
-Z40 !s108 1776659086.000000
+Z40 !s108 1776848803.000000
 Z41 !s90 -reportprogress|300|-93|-work|work|i2c.vhd|
 Z42 !s107 i2c.vhd|
 !i113 0
@@ -178,7 +193,7 @@ R15
 R16
 R17
 R28
-!i122 12
+!i122 32
 l44
 L20 141
 V_@JXcJn=5WSz`;P?[nfVd0
@@ -195,22 +210,22 @@ R26
 R27
 vtb_audio_bypass
 2tb_audio_bypass.v
-!s110 1776660836
+!s110 1776848805
 !i10b 1
-!s100 :e?6>L1Kz=B8e9LLU`^3d3
-ImDV]2:kWVzF@dKbL?e?OX3
+!s100 =h7lGhJ>iIj0kG3MbKC072
+I5C4Ed7ZhcYA<3^@bBha__2
 R18
-w1776660317
+w1776832051
 8tb_audio_bypass.v
 Ftb_audio_bypass.v
-!i122 16
-L0 32 268
+!i122 34
+L0 32 289
 VDg1SIo80bB@j0V0VzS_@n1
 OL;L;2025.2;82
 r1
 !s85 0
 31
-!s108 1776660836.000000
+R23
 !s107 tb_audio_bypass.v|
 !s90 -reportprogress|300|-work|work|tb_audio_bypass.v|
 !i113 0

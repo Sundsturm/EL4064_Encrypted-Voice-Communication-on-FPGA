@@ -1,1 +1,1 @@
-{D:/Program Files/altera/25.1std/questa_fse/win64/VisualizerRls/bin/viscom.exe} -nolock -quiet -jmem_size 22806528 work.tb_audio_bypass -quiet -auto_acc_if_foreign -work work -allow_unnamed -o _opt1 -id 1-e00af698b079-69e5b169-10a-66cc
+{D:/Program Files/altera/25.1std/questa_fse/win64/VisualizerRls/bin/viscom.exe} -nolock -quiet -jmem_size 21233664 work.tb_audio_bypass(fast) -quiet -auto_acc_if_foreign -work work -allow_unnamed -o _opt1 -id 6-e00af698b079-69e84e8a-df-1edc
