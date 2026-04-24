@@ -1,0 +1,612 @@
+# cd {d:/Users/Rafi Ananta Alden/Documents/Kuliah/Semester 8/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl}
+# reading modelsim.ini
+#  do compile_acakcakap_top.do
+# 
+# puts ""
+# puts {=== [1/6] Setup libraries ===}
+# if {![file exists work]}     { vlib work     }
+# if {![file exists audiopll]} { vlib audiopll }
+# if {![file exists floatfixlib]} { vlib floatfixlib }
+# if {![file exists ieee_proposed]} { vlib ieee_proposed }
+# vmap work work
+# Questa Altera Starter FPGA Edition-64 vmap 2025.2 Lib Mapping Utility 2025.05 May 31 2025
+# vmap work work 
+# ** Note: (vmap-220) 'modelsim.ini' is used as the ini file.
+# Modifying modelsim.ini
+# vmap audiopll audiopll
+# Questa Altera Starter FPGA Edition-64 vmap 2025.2 Lib Mapping Utility 2025.05 May 31 2025
+# vmap audiopll audiopll 
+# ** Note: (vmap-220) 'modelsim.ini' is used as the ini file.
+# Modifying modelsim.ini
+# vmap floatfixlib floatfixlib
+# Questa Altera Starter FPGA Edition-64 vmap 2025.2 Lib Mapping Utility 2025.05 May 31 2025
+# vmap floatfixlib floatfixlib 
+# ** Note: (vmap-220) 'modelsim.ini' is used as the ini file.
+# Modifying modelsim.ini
+# vmap ieee_proposed ieee_proposed
+# Questa Altera Starter FPGA Edition-64 vmap 2025.2 Lib Mapping Utility 2025.05 May 31 2025
+# vmap ieee_proposed ieee_proposed 
+# ** Note: (vmap-220) 'modelsim.ini' is used as the ini file.
+# Modifying modelsim.ini
+# 
+# puts ""
+# puts {=== [2/6] Compile PLL / audio base ===}
+# vcom -2008 -work audiopll ../quartus/AudioPLL_sim/AudioPLL.vho
+# Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:16 on Apr 24,2026
+# vcom -2008 -work audiopll ../quartus/AudioPLL_sim/AudioPLL.vho 
+# ** Note: (vcom-220) 'modelsim.ini' is used as the ini file.
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package altera_lnsim_components
+# -- Compiling entity AudioPLL
+# -- Compiling architecture RTL of AudioPLL
+# End time: 15:28:16 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -2008 -work work i2c.vhd
+# Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:16 on Apr 24,2026
+# vcom -2008 -work work i2c.vhd 
+# ** Note: (vcom-220) 'modelsim.ini' is used as the ini file.
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Compiling entity i2c
+# -- Compiling architecture rtl of I2C
+# End time: 15:28:16 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -2008 -work work Audio_interface.vhd
+# Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:16 on Apr 24,2026
+# vcom -2008 -work work Audio_interface.vhd 
+# ** Note: (vcom-220) 'modelsim.ini' is used as the ini file.
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package altera_lnsim_components
+# -- Loading entity AudioPLL
+# -- Compiling entity Audio_interface
+# -- Compiling architecture WM8731 of Audio_interface
+# -- Loading entity i2c
+# End time: 15:28:17 on Apr 24,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+# 
+# puts ""
+# puts {=== [3/6] Compile DTMF sender ===}
+# vcom -2008 -work work sender_hdl/sine_gen_signed.vhd
+# Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:17 on Apr 24,2026
+# vcom -2008 -work work sender_hdl/sine_gen_signed.vhd 
+# ** Note: (vcom-220) 'modelsim.ini' is used as the ini file.
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package MATH_REAL
+# -- Compiling entity sine_gen_signed
+# -- Compiling architecture rtl of sine_gen_signed
+# End time: 15:28:17 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -2008 -work work sender_hdl/generate_dtmf_signed.vhd
+# Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:17 on Apr 24,2026
+# vcom -2008 -work work sender_hdl/generate_dtmf_signed.vhd 
+# ** Note: (vcom-220) 'modelsim.ini' is used as the ini file.
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package MATH_REAL
+# -- Compiling entity generate_dtmf_signed
+# -- Compiling architecture rtl of generate_dtmf_signed
+# -- Loading entity sine_gen_signed
+# End time: 15:28:17 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# 
+# puts ""
+# puts {=== [3.5/6] Compile fixed-point support libraries ===}
+# vcom -93 -work floatfixlib ../intelFPGA_lite/18.1/modelsim_ase/vhdl_src/floatfixlib/fixed_float_types_c.vhd
+# Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:17 on Apr 24,2026
+# vcom -93 -work floatfixlib ../intelFPGA_lite/18.1/modelsim_ase/vhdl_src/floatfixlib/fixed_float_types_c.vhd 
+# ** Note: (vcom-220) 'modelsim.ini' is used as the ini file.
+# -- Loading package STANDARD
+# -- Compiling package fixed_float_types
+# End time: 15:28:17 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -93 -work ieee_proposed ../intelFPGA_lite/18.1/modelsim_ase/vhdl_src/floatfixlib/fixed_pkg_c.vhd
+# Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:17 on Apr 24,2026
+# vcom -93 -work ieee_proposed ../intelFPGA_lite/18.1/modelsim_ase/vhdl_src/floatfixlib/fixed_pkg_c.vhd 
+# ** Note: (vcom-220) 'modelsim.ini' is used as the ini file.
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package fixed_float_types
+# -- Compiling package fixed_pkg
+# -- Loading package MATH_REAL
+# -- Compiling package body fixed_pkg
+# -- Loading package fixed_pkg
+# ** Warning: ../intelFPGA_lite/18.1/modelsim_ase/vhdl_src/floatfixlib/fixed_pkg_c.vhd(1470): (vcom-1246) Range 0 downto 1 is null.
+# ** Warning: ../intelFPGA_lite/18.1/modelsim_ase/vhdl_src/floatfixlib/fixed_pkg_c.vhd(1471): (vcom-1246) Range 0 downto 1 is null.
+# ** Warning: ../intelFPGA_lite/18.1/modelsim_ase/vhdl_src/floatfixlib/fixed_pkg_c.vhd(1472): (vcom-1246) Range 0 downto 1 is null.
+# ** Warning: ../intelFPGA_lite/18.1/modelsim_ase/vhdl_src/floatfixlib/fixed_pkg_c.vhd(6873): (vcom-1246) Range 2 to 1 is null.
+# End time: 15:28:18 on Apr 24,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 4
+# 
+# puts ""
+# puts {=== [4/6] Compile DTMF detector and receiver ===}
+# vcom -2008 -work work receiver_hdl/lutcos_block.vhd
+# Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:18 on Apr 24,2026
+# vcom -2008 -work work receiver_hdl/lutcos_block.vhd 
+# ** Note: (vcom-220) 'modelsim.ini' is used as the ini file.
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Compiling entity lutcos_block
+# -- Compiling architecture Behavioral of lutcos_block
+# End time: 15:28:18 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -2008 -work work receiver_hdl/lutsin_block.vhd
+# Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:18 on Apr 24,2026
+# vcom -2008 -work work receiver_hdl/lutsin_block.vhd 
+# ** Note: (vcom-220) 'modelsim.ini' is used as the ini file.
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Compiling entity lutsin_block
+# -- Compiling architecture Behavioral of lutsin_block
+# End time: 15:28:18 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -2008 -work work receiver_hdl/multv6.vhd
+# Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:18 on Apr 24,2026
+# vcom -2008 -work work receiver_hdl/multv6.vhd 
+# ** Note: (vcom-220) 'modelsim.ini' is used as the ini file.
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package fixed_float_types
+# -- Loading package fixed_pkg
+# -- Compiling entity multv6
+# -- Compiling architecture Behavioral of multv6
+# End time: 15:28:18 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -2008 -work work receiver_hdl/powercalcv1.vhd
+# Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:19 on Apr 24,2026
+# vcom -2008 -work work receiver_hdl/powercalcv1.vhd 
+# ** Note: (vcom-220) 'modelsim.ini' is used as the ini file.
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package fixed_float_types
+# -- Loading package fixed_pkg
+# -- Compiling entity powercalcv1
+# -- Compiling architecture Behavioral of powercalcv1
+# End time: 15:28:19 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -2008 -work work receiver_hdl/slidingv5.vhd
+# Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:19 on Apr 24,2026
+# vcom -2008 -work work receiver_hdl/slidingv5.vhd 
+# ** Note: (vcom-220) 'modelsim.ini' is used as the ini file.
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package fixed_float_types
+# -- Loading package fixed_pkg
+# -- Compiling entity slidingv5
+# -- Compiling architecture Behavioral of slidingv5
+# End time: 15:28:19 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -2008 -work work receiver_hdl/markingv1.vhd
+# Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:19 on Apr 24,2026
+# vcom -2008 -work work receiver_hdl/markingv1.vhd 
+# ** Note: (vcom-220) 'modelsim.ini' is used as the ini file.
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package fixed_float_types
+# -- Loading package fixed_pkg
+# -- Compiling entity markingv1
+# -- Compiling architecture Behavioral of markingv1
+# End time: 15:28:19 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -2008 -work work receiver_hdl/Framingv2.vhd
+# Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:19 on Apr 24,2026
+# vcom -2008 -work work receiver_hdl/Framingv2.vhd 
+# ** Note: (vcom-220) 'modelsim.ini' is used as the ini file.
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package fixed_float_types
+# -- Loading package fixed_pkg
+# -- Compiling entity Framingv2
+# -- Compiling architecture Behavioral of Framingv2
+# End time: 15:28:20 on Apr 24,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+# vcom -2008 -work work receiver_hdl/flaggingv2.vhd
+# Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:20 on Apr 24,2026
+# vcom -2008 -work work receiver_hdl/flaggingv2.vhd 
+# ** Note: (vcom-220) 'modelsim.ini' is used as the ini file.
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package fixed_float_types
+# -- Loading package fixed_pkg
+# -- Compiling entity flaggingv2
+# -- Compiling architecture Behavioral of flaggingv2
+# End time: 15:28:20 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -2008 -work work receiver_hdl/dec_control.vhd
+# Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:20 on Apr 24,2026
+# vcom -2008 -work work receiver_hdl/dec_control.vhd 
+# ** Note: (vcom-220) 'modelsim.ini' is used as the ini file.
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Compiling entity dec_control
+# -- Compiling architecture Behavioral of dec_control
+# End time: 15:28:20 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -2008 -work work receiver_hdl/toplevel_iq.vhd
+# Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:20 on Apr 24,2026
+# vcom -2008 -work work receiver_hdl/toplevel_iq.vhd 
+# ** Note: (vcom-220) 'modelsim.ini' is used as the ini file.
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package fixed_float_types
+# -- Loading package fixed_pkg
+# -- Compiling entity toplevel_iq
+# -- Compiling architecture Behavioral of toplevel_iq
+# End time: 15:28:20 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# 
+# vcom -2008 -work work dtmf_detect_hdl/shift_add.vhd
+# Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:20 on Apr 24,2026
+# vcom -2008 -work work dtmf_detect_hdl/shift_add.vhd 
+# ** Note: (vcom-220) 'modelsim.ini' is used as the ini file.
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Compiling entity shift_add
+# -- Compiling architecture Behavioral of shift_add
+# End time: 15:28:21 on Apr 24,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+# vcom -2008 -work work dtmf_detect_hdl/Goertzel.vhd
+# Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:21 on Apr 24,2026
+# vcom -2008 -work work dtmf_detect_hdl/Goertzel.vhd 
+# ** Note: (vcom-220) 'modelsim.ini' is used as the ini file.
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package MATH_REAL
+# -- Loading package fixed_float_types
+# -- Loading package fixed_pkg
+# -- Compiling entity Goertzel
+# -- Compiling architecture rtl of Goertzel
+# End time: 15:28:21 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -2008 -work work dtmf_detect_hdl/Goertzel_top.vhd
+# Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:21 on Apr 24,2026
+# vcom -2008 -work work dtmf_detect_hdl/Goertzel_top.vhd 
+# ** Note: (vcom-220) 'modelsim.ini' is used as the ini file.
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Loading package MATH_REAL
+# -- Loading package fixed_float_types
+# -- Loading package fixed_pkg
+# -- Compiling entity Goertzel_top
+# -- Compiling architecture rtl of Goertzel_top
+# -- Loading entity Goertzel
+# End time: 15:28:21 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -2008 -work work dtmf_detect_hdl/highcomparator.vhd
+# Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:21 on Apr 24,2026
+# vcom -2008 -work work dtmf_detect_hdl/highcomparator.vhd 
+# ** Note: (vcom-220) 'modelsim.ini' is used as the ini file.
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Compiling entity highcomparator
+# -- Compiling architecture Behavioral of highcomparator
+# End time: 15:28:21 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -2008 -work work dtmf_detect_hdl/lowcomparator.vhd
+# Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:22 on Apr 24,2026
+# vcom -2008 -work work dtmf_detect_hdl/lowcomparator.vhd 
+# ** Note: (vcom-220) 'modelsim.ini' is used as the ini file.
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Compiling entity lowcomparator
+# -- Compiling architecture Behavioral of lowcomparator
+# End time: 15:28:22 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -2008 -work work dtmf_detect_hdl/decision.vhd
+# Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:22 on Apr 24,2026
+# vcom -2008 -work work dtmf_detect_hdl/decision.vhd 
+# ** Note: (vcom-220) 'modelsim.ini' is used as the ini file.
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Compiling entity decision
+# -- Compiling architecture Behavioral of decision
+# End time: 15:28:22 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -2008 -work work dtmf_detect_hdl/top_dtmfencode.vhd
+# Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:22 on Apr 24,2026
+# vcom -2008 -work work dtmf_detect_hdl/top_dtmfencode.vhd 
+# ** Note: (vcom-220) 'modelsim.ini' is used as the ini file.
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package std_logic_arith
+# -- Loading package STD_LOGIC_UNSIGNED
+# -- Compiling entity top_dtmfencode
+# -- Compiling architecture Behavioral of top_dtmfencode
+# End time: 15:28:22 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -2008 -work work dtmf_detect_hdl/dtmf_system.vhd
+# Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:22 on Apr 24,2026
+# vcom -2008 -work work dtmf_detect_hdl/dtmf_system.vhd 
+# ** Note: (vcom-220) 'modelsim.ini' is used as the ini file.
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Compiling entity dtmf_system
+# -- Compiling architecture rtl of dtmf_system
+# -- Loading package MATH_REAL
+# -- Loading package fixed_float_types
+# -- Loading package fixed_pkg
+# -- Loading entity Goertzel_top
+# -- Loading package std_logic_arith
+# -- Loading package STD_LOGIC_UNSIGNED
+# -- Loading entity top_dtmfencode
+# End time: 15:28:22 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vcom -2008 -work work dtmf_detect_hdl/DecodeDTMF.vhd
+# Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:23 on Apr 24,2026
+# vcom -2008 -work work dtmf_detect_hdl/DecodeDTMF.vhd 
+# ** Note: (vcom-220) 'modelsim.ini' is used as the ini file.
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Compiling entity DecodeDTMF
+# -- Compiling architecture rtl of DecodeDTMF
+# -- Loading package altera_lnsim_components
+# -- Loading entity AudioPLL
+# -- Loading entity Audio_interface
+# -- Loading entity dtmf_system
+# End time: 15:28:23 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# 
+# puts ""
+# puts {=== [5/6] Compile scrambler/verilog blocks ===}
+# vlog -work work Butterfly.v
+# Questa Altera Starter FPGA Edition-64 vlog 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:23 on Apr 24,2026
+# vlog -work work Butterfly.v 
+# ** Note: (vlog-220) 'modelsim.ini' is used as the ini file.
+# -- Compiling module Butterfly
+# 
+# Top level modules:
+# 	Butterfly
+# End time: 15:28:23 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vlog -work work DelayBuffer.v
+# Questa Altera Starter FPGA Edition-64 vlog 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:23 on Apr 24,2026
+# vlog -work work DelayBuffer.v 
+# ** Note: (vlog-220) 'modelsim.ini' is used as the ini file.
+# -- Compiling module DelayBuffer
+# 
+# Top level modules:
+# 	DelayBuffer
+# End time: 15:28:23 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vlog -work work FFT.v
+# Questa Altera Starter FPGA Edition-64 vlog 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:23 on Apr 24,2026
+# vlog -work work FFT.v 
+# ** Note: (vlog-220) 'modelsim.ini' is used as the ini file.
+# -- Compiling module FFT
+# 
+# Top level modules:
+# 	FFT
+# End time: 15:28:24 on Apr 24,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+# vlog -work work GenPermutationKey.v
+# Questa Altera Starter FPGA Edition-64 vlog 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:24 on Apr 24,2026
+# vlog -work work GenPermutationKey.v 
+# ** Note: (vlog-220) 'modelsim.ini' is used as the ini file.
+# -- Compiling module GenPermutationKey
+# 
+# Top level modules:
+# 	GenPermutationKey
+# End time: 15:28:24 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vlog -work work Mult128.v
+# Questa Altera Starter FPGA Edition-64 vlog 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:24 on Apr 24,2026
+# vlog -work work Mult128.v 
+# ** Note: (vlog-220) 'modelsim.ini' is used as the ini file.
+# -- Compiling module Mult128
+# 
+# Top level modules:
+# 	Mult128
+# End time: 15:28:24 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vlog -work work Multiply.v
+# Questa Altera Starter FPGA Edition-64 vlog 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:24 on Apr 24,2026
+# vlog -work work Multiply.v 
+# ** Note: (vlog-220) 'modelsim.ini' is used as the ini file.
+# -- Compiling module Multiply
+# 
+# Top level modules:
+# 	Multiply
+# End time: 15:28:24 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vlog -work work ReorderXk.v
+# Questa Altera Starter FPGA Edition-64 vlog 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:24 on Apr 24,2026
+# vlog -work work ReorderXk.v 
+# ** Note: (vlog-220) 'modelsim.ini' is used as the ini file.
+# -- Compiling module ReorderXk
+# 
+# Top level modules:
+# 	ReorderXk
+# End time: 15:28:25 on Apr 24,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+# vlog -work work ReverseBitOrder.v
+# Questa Altera Starter FPGA Edition-64 vlog 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:25 on Apr 24,2026
+# vlog -work work ReverseBitOrder.v 
+# ** Note: (vlog-220) 'modelsim.ini' is used as the ini file.
+# -- Compiling module ReverseBitOrder
+# 
+# Top level modules:
+# 	ReverseBitOrder
+# End time: 15:28:25 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vlog -work work SdfUnit.v
+# Questa Altera Starter FPGA Edition-64 vlog 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:25 on Apr 24,2026
+# vlog -work work SdfUnit.v 
+# ** Note: (vlog-220) 'modelsim.ini' is used as the ini file.
+# -- Compiling module SdfUnit
+# 
+# Top level modules:
+# 	SdfUnit
+# End time: 15:28:25 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vlog -work work SdfUnit2.v
+# Questa Altera Starter FPGA Edition-64 vlog 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:25 on Apr 24,2026
+# vlog -work work SdfUnit2.v 
+# ** Note: (vlog-220) 'modelsim.ini' is used as the ini file.
+# -- Compiling module SdfUnit2
+# 
+# Top level modules:
+# 	SdfUnit2
+# End time: 15:28:25 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# vlog -work work Twiddle.v
+# Questa Altera Starter FPGA Edition-64 vlog 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:25 on Apr 24,2026
+# vlog -work work Twiddle.v 
+# ** Note: (vlog-220) 'modelsim.ini' is used as the ini file.
+# -- Compiling module Twiddle
+# 
+# Top level modules:
+# 	Twiddle
+# End time: 15:28:26 on Apr 24,2026, Elapsed time: 0:00:01
+# Errors: 0, Warnings: 0
+# vlog -work work Scrambler_TOP.v
+# Questa Altera Starter FPGA Edition-64 vlog 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:26 on Apr 24,2026
+# vlog -work work Scrambler_TOP.v 
+# ** Note: (vlog-220) 'modelsim.ini' is used as the ini file.
+# -- Compiling module Scrambler_TOP
+# 
+# Top level modules:
+# 	Scrambler_TOP
+# End time: 15:28:26 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# 
+# puts ""
+# puts {=== [6/6] Compile and elaborate top-level ===}
+# vcom -2008 -work work AcakCakap_Top.vhd
+# Questa Altera Starter FPGA Edition-64 vcom 2025.2 Compiler 2025.05 May 31 2025
+# Start time: 15:28:26 on Apr 24,2026
+# vcom -2008 -work work AcakCakap_Top.vhd 
+# ** Note: (vcom-220) 'modelsim.ini' is used as the ini file.
+# -- Loading package STANDARD
+# -- Loading package TEXTIO
+# -- Loading package std_logic_1164
+# -- Loading package NUMERIC_STD
+# -- Compiling entity AcakCakap_Top
+# -- Compiling architecture rtl of AcakCakap_Top
+# -- Loading package altera_lnsim_components
+# -- Loading entity AudioPLL
+# -- Loading entity Audio_interface
+# -- Loading package MATH_REAL
+# -- Loading entity generate_dtmf_signed
+# -- Loading package fixed_float_types
+# -- Loading package fixed_pkg
+# -- Loading entity toplevel_iq
+# -- Loading entity dtmf_system
+# End time: 15:28:26 on Apr 24,2026, Elapsed time: 0:00:00
+# Errors: 0, Warnings: 0
+# 
+# Elaboration check (no run required)
+# if {[catch {vsim -quiet -t 1ps -lib work work.AcakCakap_Top} sim_result]} {
+# 	puts ""
+# 	puts {=== ERROR: Elaboration failed for work.AcakCakap_Top ===}
+# 	error $sim_result
+# }
+# ** Note: (vsim-220) 'modelsim.ini' is used as the ini file.
+# vsim -quiet -t 1ps -lib work work.AcakCakap_Top 
+# Start time: 15:28:26 on Apr 24,2026
+# ** Note: (vsim-8009) Loading existing optimized design _opt
+# //  Questa Altera Starter FPGA Edition-64
+# //  Version 2025.2 win64 May 31 2025
+# //
+# // Unpublished work. Copyright 2025 Siemens
+# //
+# // This material contains trade secrets or otherwise confidential information
+# // owned by Siemens Industry Software Inc. or its affiliates (collectively,
+# // "SISW"), or its licensors. Access to and use of this information is strictly
+# // limited as set forth in the Customer's applicable agreements with SISW.
+# //
+# // This material may not be copied, distributed, or otherwise disclosed outside
+# // of the Customer's facilities without the express written permission of SISW,
+# // and may not be used in any way not expressly authorized by SISW.
+# //
+# ** Error: License checkout has been disallowed because
+# only one session is allowed to run on an uncounted nodelocked
+# license and an instance of QuestaSim is already running with a
+# nodelocked license on this machine.
+# Error loading design
+# End time: 15:28:27 on Apr 24,2026, Elapsed time: 0:00:01
+# Errors: 1, Warnings: 0

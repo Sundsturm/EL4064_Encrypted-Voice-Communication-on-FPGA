@@ -79,6 +79,10 @@ architecture rtl of AcakCakap_Top is
 	signal dtmf_out : signed(15 downto 0);
 	signal counter : natural := 0;
 	signal tone_digit : std_logic_vector(9 downto 0);
+	signal shift_key_24bit : std_logic_vector(23 downto 0);
+	signal segment_counter : unsigned(2 downto 0) := (others => '0');
+	signal current_3bit_segment : std_logic_vector(2 downto 0);
+	signal dtmf_digit_to_send : std_logic_vector(9 downto 0);
 	signal LED : std_logic := '0';
 	-- State machine for button pressing 
 	type command_state is (WAIT_FOR_PRESS, WAIT_FOR_RELEASE, RELEASE_STATE);
@@ -209,18 +213,67 @@ begin
 	Lout <= Lin                when SW(9) = '0' else signed(out_real);
 	Rout <= Rin                when SW(9) = '0' else signed(out_real);
 
+	-- Phase 1: prepare 24-bit key source for segmentation.
+	shift_key_24bit <= shift_key;
+
+	-- Combinational multiplexer: select one 3-bit segment from 24-bit key.
+	SEGMENT_MUX : process(shift_key_24bit, segment_counter)
+	begin
+		case to_integer(segment_counter) is
+			when 0 =>
+				current_3bit_segment <= shift_key_24bit(23 downto 21);
+			when 1 =>
+				current_3bit_segment <= shift_key_24bit(20 downto 18);
+			when 2 =>
+				current_3bit_segment <= shift_key_24bit(17 downto 15);
+			when 3 =>
+				current_3bit_segment <= shift_key_24bit(14 downto 12);
+			when 4 =>
+				current_3bit_segment <= shift_key_24bit(11 downto 9);
+			when 5 =>
+				current_3bit_segment <= shift_key_24bit(8 downto 6);
+			when 6 =>
+				current_3bit_segment <= shift_key_24bit(5 downto 3);
+			when others =>
+				current_3bit_segment <= shift_key_24bit(2 downto 0);
+		end case;
+	end process;
+
+	-- Combinational decoder: map 3-bit segment into one-hot DTMF tone digit.
+	SEGMENT_TO_DTMF_DECODER : process(current_3bit_segment)
+	begin
+		case current_3bit_segment is
+			when "000" => -- DTMF '3'
+				dtmf_digit_to_send <= "0000000100";
+			when "001" => -- DTMF '2'
+				dtmf_digit_to_send <= "0000000010";
+			when "010" => -- DTMF '4'
+				dtmf_digit_to_send <= "0000001000";
+			when "011" => -- DTMF '5'
+				dtmf_digit_to_send <= "0000010000";
+			when "100" => -- DTMF '7'
+				dtmf_digit_to_send <= "0001000000";
+			when "101" => -- DTMF '8'
+				dtmf_digit_to_send <= "0010000000";
+			when "110" => -- DTMF '0'
+				dtmf_digit_to_send <= "0000000000";
+			when others => -- "111" -> DTMF '*'
+				dtmf_digit_to_send <= "1000000000";
+		end case;
+	end process;
+
 	-- FSM for generating ##3# DTMF sequence
 	FSM_GENERATE_DTMF : process(AUD_XCK, KEY(0))
 	begin 
 		if(KEY(0)='0') then
-			tone_digit <= (others => 'X');
+			tone_digit <= (others => '0');
 			dtmf_state <= IDLE;
 			sync_start <= '0';
 			counter <= 0;
 		elsif(AUD_XCK'event and AUD_XCK='1') then
 			case dtmf_state is
 				when IDLE => 
-					tone_digit <= (others => 'X');
+					tone_digit <= (others => '0');
 					if (command = '1') then 
 						dtmf_state <= SEND_SYNCH_HASH_FIRST;
 						tone_digit <= "1000000001"; -- set to sending #
@@ -245,7 +298,7 @@ begin
 					if (counter >= 368640) then -- Send for 20 ms
 						counter <= 0;
 						dtmf_state <= SCRAMBLE;
-						tone_digit <= (others => 'X');
+						tone_digit <= (others => '0');
 						sync_start <= '1';
 					else 
 						counter <= counter + 1;

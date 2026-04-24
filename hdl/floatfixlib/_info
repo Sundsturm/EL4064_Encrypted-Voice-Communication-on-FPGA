@@ -1,0 +1,31 @@
+m255
+K4
+z2
+!s11e vcom 2025.2 2025.05, May 31 2025
+13
+!s112 1.1
+!i10d 8192
+!i10e 25
+!i10f 100
+cModel Technology
+Z0 dd:/Users/Rafi Ananta Alden/Documents/Kuliah/Semester 8/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl
+Pfixed_float_types
+!i122 7
+w1776651053
+R0
+8../intelFPGA_lite/18.1/modelsim_ase/vhdl_src/floatfixlib/fixed_float_types_c.vhd
+F../intelFPGA_lite/18.1/modelsim_ase/vhdl_src/floatfixlib/fixed_float_types_c.vhd
+l0
+L16 19
+VJkVPlS4RL^1YdLZMj`0VY1
+!s100 cW]eNFhGGd5lB:5@0FCJB2
+OL;C;2025.2;82
+31
+!s110 1777019508
+!i10b 1
+!s108 1777019508.000000
+!s90 -reportprogress|300|-93|-work|floatfixlib|../intelFPGA_lite/18.1/modelsim_ase/vhdl_src/floatfixlib/fixed_float_types_c.vhd|
+!s107 ../intelFPGA_lite/18.1/modelsim_ase/vhdl_src/floatfixlib/fixed_float_types_c.vhd|
+!i113 0
+o-93 -work floatfixlib
+tExplicit 1 CvgOpt 0 defaultOptions 1083072464
