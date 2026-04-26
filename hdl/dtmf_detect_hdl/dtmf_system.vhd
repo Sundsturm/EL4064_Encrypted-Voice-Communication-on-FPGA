@@ -71,7 +71,8 @@ begin
         out_valid => out_valid,
         sevseg => sevseg,
         anode => anode,
-        encode_out => encode_out
+        encode_out => encode_out,
+        dtmf_code_4bit => open
     );
 
 end architecture;
