@@ -81,6 +81,7 @@ architecture rtl of AcakCakap_Top is
 	signal power_1336 : std_logic_vector(16 downto 0);
 	signal power_1477 : std_logic_vector(16 downto 0);
 	signal dtmf_code_4bit : std_logic_vector(3 downto 0);
+	signal dtmf_code_valid : std_logic;
 	signal reconstructed_key_24bit : std_logic_vector(23 downto 0);
 	signal shift_add_in_ready : std_logic;
 	signal shift_add_out_valid : std_logic;
@@ -257,14 +258,15 @@ begin
 		sevseg    => HEX0,
 		anode     => anode,
 		encode_out => encode_out,
-		dtmf_code_4bit => dtmf_code_4bit
+		dtmf_code_4bit => dtmf_code_4bit,
+		dtmf_code_valid => dtmf_code_valid
 	);
 
 	SHIFT_ADD_RX : entity work.shift_add
 	port map (
 		clk      => AUD_XCK,
 		reset    => not KEY(0),
-		in_valid => out_valid,
+		in_valid => dtmf_code_valid,
 		out_ready => '1',
 		in_ready => shift_add_in_ready,
 		out_valid => shift_add_out_valid,

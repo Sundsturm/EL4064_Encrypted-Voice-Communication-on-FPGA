@@ -1,0 +1,32 @@
+# do run_tb_dtmf_integration.do
+# 
+# puts ""
+# puts {=== [1/5] Setup libraries ===}
+# if {![file exists work]} { vlib work }
+# if {![file exists floatfixlib]} { vlib floatfixlib }
+# if {![file exists ieee_proposed]} { vlib ieee_proposed }
+# vmap work work
+# Model Technology ModelSim - Intel FPGA Edition vmap 10.5b Lib Mapping Utility 2016.10 Oct  5 2016
+# vmap work work 
+# Modifying modelsim.ini
+# vmap floatfixlib floatfixlib
+# Model Technology ModelSim - Intel FPGA Edition vmap 10.5b Lib Mapping Utility 2016.10 Oct  5 2016
+# vmap floatfixlib floatfixlib 
+# Modifying modelsim.ini
+# vmap ieee_proposed ieee_proposed
+# Model Technology ModelSim - Intel FPGA Edition vmap 10.5b Lib Mapping Utility 2016.10 Oct  5 2016
+# vmap ieee_proposed ieee_proposed 
+# Modifying modelsim.ini
+# 
+# puts ""
+# puts {=== [2/5] Compile fixed-point support libraries ===}
+# vcom -93 -work floatfixlib ../intelFPGA_lite/18.1/modelsim_ase/vhdl_src/floatfixlib/fixed_float_types_c.vhd
+# Model Technology ModelSim - Intel FPGA Edition vcom 10.5b Compiler 2016.10 Oct  5 2016
+# Start time: 15:13:28 on Apr 30,2026
+# vcom -93 -work floatfixlib ../intelFPGA_lite/18.1/modelsim_ase/vhdl_src/floatfixlib/fixed_float_types_c.vhd 
+# ** Error: (vcom-1598) Library "std" not found.
+# ** Error: VHDL Compiler exiting
+# End time: 15:13:28 on Apr 30,2026, Elapsed time: 0:00:00
+# Errors: 2, Warnings: 0
+# ** Error: D:/intelFPGA_lite/18.1/modelsim_ase/win32aloem/vcom failed.
+# Executing ONERROR command at macro ./run_tb_dtmf_integration.do line 27

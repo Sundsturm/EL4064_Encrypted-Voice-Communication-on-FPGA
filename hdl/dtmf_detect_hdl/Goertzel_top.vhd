@@ -34,13 +34,14 @@ entity Goertzel_top is
 end Goertzel_top;
 
 architecture rtl of Goertzel_top is
-    constant COEFF_697      : real    := 1.98113868088715; -- For frequency 697 Hz
-    constant COEFF_770      : real    := 1.97537668119028; -- For frequency 770 Hz
-    constant COEFF_852      : real    := 1.96885313617978;
-    constant COEFF_941      : real    := 1.96530655866142;
-    constant COEFF_1209     : real    := 1.94006250638909;
-    constant COEFF_1336     : real    := 1.93014734462309;
-    constant COEFF_1477     : real    := 1.91388067146442;
+    -- Correct Goertzel coefficients: 2*cos(2*pi*f/32000) for each DTMF frequency
+    constant COEFF_697      : real    := 1.981299751034064;  -- For frequency  697 Hz
+    constant COEFF_770      : real    := 1.977185350114547;  -- For frequency  770 Hz
+    constant COEFF_852      : real    := 1.972079326472499;  -- For frequency  852 Hz
+    constant COEFF_941      : real    := 1.965958931999434;  -- For frequency  941 Hz
+    constant COEFF_1209     : real    := 1.943911740684265;  -- For frequency 1209 Hz
+    constant COEFF_1336     : real    := 1.931580353106243;  -- For frequency 1336 Hz
+    constant COEFF_1477     : real    := 1.916483020260862;  -- For frequency 1477 Hz
 
     -- Individual ready/valid signals
     signal ready_697, ready_770, ready_852, ready_941 : std_logic;

@@ -22,7 +22,8 @@ entity top_dtmfencode is
         sevseg          : out STD_LOGIC_VECTOR(6 downto 0);
         anode           : out STD_LOGIC;
         encode_out      : out STD_LOGIC_VECTOR(23 downto 0);
-        dtmf_code_4bit  : out STD_LOGIC_VECTOR(3 downto 0)
+        dtmf_code_4bit  : out STD_LOGIC_VECTOR(3 downto 0);
+        dtmf_code_valid : out STD_LOGIC
     );
 end top_dtmfencode;
 
@@ -93,6 +94,7 @@ begin
     in_ready <= lowready and highready;
     v2v2     <= v2vl and v2vh;
     dtmf_code_4bit <= code_dtmf;
+    dtmf_code_valid <= v2v3;
     -- Instance of comparator for frequency 697 and 770 Hz
     comp_low : component lowcomparator
         port map(
