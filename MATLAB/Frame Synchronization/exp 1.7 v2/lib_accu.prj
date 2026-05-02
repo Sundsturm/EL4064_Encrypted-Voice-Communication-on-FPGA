@@ -1,0 +1,1310 @@
+<deployment-project plugin="plugin.coder" plugin-version="R2021a">
+  <configuration file="D:\Hilman\ITB\EL\Semester 9\TA 2\Bagian Hilman\Frame Sychronization\iqintegrated\exp 1.7\lib_accu.prj" location="D:\Hilman\ITB\EL\Semester 9\TA 2\Bagian Hilman\Frame Sychronization\iqintegrated\exp 1.7" name="lib_accu" target="target.unifiedcoder" target-name="MATLAB Coder">
+    <profile key="profile.mex">
+      <param.BuiltInstrumentedMex />
+      <param.RanInstrumentedMex />
+      <param.WorkingFolder>option.WorkingFolder.Project</param.WorkingFolder>
+      <param.SpecifiedWorkingFolder />
+      <param.BuildFolder>option.BuildFolder.Project</param.BuildFolder>
+      <param.SpecifiedBuildFolder />
+      <param.SearchPaths />
+      <var.SimdQueryHardwareVendor>Generic</var.SimdQueryHardwareVendor>
+      <var.SimdQueryHardwareType>MATLAB Host Computer</var.SimdQueryHardwareType>
+      <param.InstructionSetExtensionsAvailableInUI />
+      <param.InstructionSetExtensions>None</param.InstructionSetExtensions>
+      <param.ResponsivenessChecks />
+      <param.ExtrinsicCalls />
+      <param.IntegrityChecks />
+      <param.SaturateOnIntegerOverflow />
+      <param.EnableAutoParallelization />
+      <param.NumberOfCpuThreads />
+      <param.OptimizeReductions />
+      <param.GlobalDataSyncMethod />
+      <param.EnableVariableSizing />
+      <param.DynamicMemoryAllocation />
+      <param.DynamicMemoryAllocationThreshold />
+      <param.DynamicMemoryAllocationInterface />
+      <param.RowMajor />
+      <param.HighlightPotentialRowMajorIssues />
+      <param.PreserveArrayDimensions />
+      <param.EliminateSingleDimensions />
+      <param.StackUsageMax />
+      <param.FilePartitionMethod />
+      <param.GenerateComments />
+      <param.MATLABSourceComments />
+      <param.MATLABSourceCommentLineNumbers />
+      <param.CodeFormattingTool />
+      <param.ReservedNameArray />
+      <param.CppStyleConst />
+      <param.EnableDebugging />
+      <param.Verbosity />
+      <param.ReportPotentialDifferences />
+      <param.GenerateReport />
+      <param.HighlightImplicitExpansionIssues />
+      <param.HighlightLoopControlIssues />
+      <param.LaunchReport />
+      <param.ReportInfoVarName />
+      <param.DefaultTestFile />
+      <param.MergeInstrumentationResults />
+      <param.VerificationMode />
+      <param.VerificationStatus>option.VerificationStatus.Inactive</param.VerificationStatus>
+      <param.EnableMexProfiling>false</param.EnableMexProfiling>
+      <var.BuiltWithMexProfiling />
+      <param.CustomSourceCode />
+      <param.CustomHeaderCode />
+      <param.CustomInitializer />
+      <param.CustomTerminator />
+      <param.CustomInclude />
+      <param.CustomSource />
+      <param.CustomLibrary />
+      <param.PostCodeGenCommand />
+      <param.mex.GenCodeOnly />
+      <param.ConstantFoldingTimeout />
+      <param.CompileTimeRecursionLimit />
+      <param.EnableRuntimeRecursion />
+      <param.PreserveVariableNames />
+      <param.EchoExpressions />
+      <param.InlineThreshold />
+      <param.InlineThresholdMax />
+      <param.InlineStackLimit />
+      <param.InlineBetweenUserFunctions />
+      <param.InlineBetweenUserAndMathWorksFunctions />
+      <param.InlineBetweenMathWorksFunctions />
+      <param.EnableMemcpy />
+      <param.MemcpyThreshold />
+      <param.EnableOpenMP />
+      <param.InitFltsAndDblsToZero />
+      <param.ConstantInputs />
+      <param.EnableCRICodeCoverage />
+      <param.EnableAutoParallelizationReporting />
+      <param.CacheDynamicArrayDataPointer />
+      <param.EnableJIT />
+      <param.EnableJITSilentBailOut />
+      <param.CheckForIssuesJIT />
+      <param.EnableGitSupport />
+      <param.EnableAutoCommit />
+      <param.RepositoryStyle />
+      <unset>
+        <param.BuiltInstrumentedMex />
+        <param.RanInstrumentedMex />
+        <param.WorkingFolder />
+        <param.SpecifiedWorkingFolder />
+        <param.BuildFolder />
+        <param.SpecifiedBuildFolder />
+        <param.SearchPaths />
+        <var.SimdQueryHardwareVendor />
+        <var.SimdQueryHardwareType />
+        <param.InstructionSetExtensionsAvailableInUI />
+        <param.InstructionSetExtensions />
+        <param.ResponsivenessChecks />
+        <param.ExtrinsicCalls />
+        <param.IntegrityChecks />
+        <param.SaturateOnIntegerOverflow />
+        <param.EnableAutoParallelization />
+        <param.NumberOfCpuThreads />
+        <param.OptimizeReductions />
+        <param.GlobalDataSyncMethod />
+        <param.EnableVariableSizing />
+        <param.DynamicMemoryAllocation />
+        <param.DynamicMemoryAllocationThreshold />
+        <param.DynamicMemoryAllocationInterface />
+        <param.RowMajor />
+        <param.HighlightPotentialRowMajorIssues />
+        <param.PreserveArrayDimensions />
+        <param.EliminateSingleDimensions />
+        <param.StackUsageMax />
+        <param.FilePartitionMethod />
+        <param.GenerateComments />
+        <param.MATLABSourceComments />
+        <param.MATLABSourceCommentLineNumbers />
+        <param.CodeFormattingTool />
+        <param.ReservedNameArray />
+        <param.CppStyleConst />
+        <param.EnableDebugging />
+        <param.Verbosity />
+        <param.ReportPotentialDifferences />
+        <param.GenerateReport />
+        <param.HighlightImplicitExpansionIssues />
+        <param.HighlightLoopControlIssues />
+        <param.LaunchReport />
+        <param.ReportInfoVarName />
+        <param.DefaultTestFile />
+        <param.MergeInstrumentationResults />
+        <param.VerificationMode />
+        <param.VerificationStatus />
+        <param.EnableMexProfiling />
+        <var.BuiltWithMexProfiling />
+        <param.CustomSourceCode />
+        <param.CustomHeaderCode />
+        <param.CustomInitializer />
+        <param.CustomTerminator />
+        <param.CustomInclude />
+        <param.CustomSource />
+        <param.CustomLibrary />
+        <param.PostCodeGenCommand />
+        <param.mex.GenCodeOnly />
+        <param.ConstantFoldingTimeout />
+        <param.CompileTimeRecursionLimit />
+        <param.EnableRuntimeRecursion />
+        <param.PreserveVariableNames />
+        <param.EchoExpressions />
+        <param.InlineThreshold />
+        <param.InlineThresholdMax />
+        <param.InlineStackLimit />
+        <param.InlineBetweenUserFunctions />
+        <param.InlineBetweenUserAndMathWorksFunctions />
+        <param.InlineBetweenMathWorksFunctions />
+        <param.EnableMemcpy />
+        <param.MemcpyThreshold />
+        <param.EnableOpenMP />
+        <param.InitFltsAndDblsToZero />
+        <param.ConstantInputs />
+        <param.EnableCRICodeCoverage />
+        <param.EnableAutoParallelizationReporting />
+        <param.CacheDynamicArrayDataPointer />
+        <param.EnableJIT />
+        <param.EnableJITSilentBailOut />
+        <param.CheckForIssuesJIT />
+        <param.EnableGitSupport />
+        <param.EnableAutoCommit />
+        <param.RepositoryStyle />
+      </unset>
+    </profile>
+    <profile key="profile.c">
+      <param.WorkingFolder>option.WorkingFolder.Project</param.WorkingFolder>
+      <param.SpecifiedWorkingFolder />
+      <param.BuildFolder>option.BuildFolder.Project</param.BuildFolder>
+      <param.SpecifiedBuildFolder />
+      <param.SearchPaths />
+      <var.SimdQueryHardwareVendor>Generic</var.SimdQueryHardwareVendor>
+      <var.SimdQueryHardwareType>MATLAB Host Computer</var.SimdQueryHardwareType>
+      <param.InstructionSetExtensionsAvailableInUI />
+      <param.InstructionSetExtensions>None</param.InstructionSetExtensions>
+      <param.SaturateOnIntegerOverflow />
+      <param.PurelyIntegerCode />
+      <param.SupportNonFinite />
+      <param.LoopUnrollThreshold />
+      <param.EnableAutoParallelization />
+      <param.NumberOfCpuThreads />
+      <param.OptimizeReductions />
+      <param.EnableVariableSizing />
+      <param.DynamicMemoryAllocation />
+      <param.DynamicMemoryAllocationThreshold />
+      <param.DynamicMemoryAllocationInterface />
+      <param.RowMajor />
+      <param.HighlightPotentialRowMajorIssues />
+      <param.PreserveArrayDimensions />
+      <param.EliminateSingleDimensions />
+      <param.StackUsageMax />
+      <param.MultiInstanceCode />
+      <param.PreserveUnusedStructFields />
+      <param.FilePartitionMethod />
+      <param.GenerateComments />
+      <param.CommentStyle />
+      <param.MATLABSourceComments />
+      <param.MATLABSourceCommentLineNumbers />
+      <param.MATLABFcnDesc />
+      <param.ReqsInCode />
+      <param.ConvertIfToSwitch />
+      <param.PreserveExternInFcnDecls />
+      <param.EnableSignedLeftShifts />
+      <param.EnableSignedRightShifts />
+      <param.ParenthesesLevel />
+      <param.MaxIdLength />
+      <param.HeaderGuardStyle />
+      <param.CodeFormattingTool />
+      <param.ClangFormatFile />
+      <param.DataTypeReplacement />
+      <param.EnableCustomReplacementTypes />
+      <param.ReplacementTypes.double />
+      <param.ReplacementTypes.single />
+      <param.ReplacementTypes.uint8 />
+      <param.ReplacementTypes.uint16 />
+      <param.ReplacementTypes.uint32 />
+      <param.ReplacementTypes.uint64 />
+      <param.ReplacementTypes.int8 />
+      <param.ReplacementTypes.int16 />
+      <param.ReplacementTypes.int32 />
+      <param.ReplacementTypes.int64 />
+      <param.ReplacementTypes.char />
+      <param.ReplacementTypes.logical />
+      <param.ReplacementTypes.ImportCustomTypes />
+      <param.ReplacementTypes.HeaderFiles />
+      <param.CppInterfaceStyle />
+      <param.CppInterfaceClassName />
+      <param.CustomFileNameStr />
+      <param.CustomSymbolStrGlobalVar />
+      <param.CustomSymbolStrType />
+      <param.CustomSymbolStrField />
+      <param.CustomSymbolStrFcn />
+      <param.CustomSymbolStrTmpVar />
+      <param.CustomSymbolStrMacro />
+      <param.CustomSymbolStrEMXArray />
+      <param.CustomSymbolStrEMXArrayFcn />
+      <param.ReservedNameArray />
+      <param.CppStyleConst />
+      <param.RuntimeChecks />
+      <param.Verbose />
+      <param.Verbosity />
+      <param.ReportPotentialDifferences />
+      <param.GenerateReport />
+      <param.GenerateCodeMetricsReport />
+      <param.GenerateCodeReplacementReport />
+      <param.HighlightPotentialDataTypeIssues />
+      <param.HighlightImplicitExpansionIssues />
+      <param.HighlightLoopControlIssues />
+      <param.LaunchReport />
+      <param.ReportInfoVarName />
+      <param.SILDebugging />
+      <param.SILPILCheckConstantInputs />
+      <param.SILPILSyncGlobalData />
+      <param.CodeExecutionProfiling />
+      <param.CodeProfilingInstrumentation />
+      <param.CodeStackProfiling />
+      <param.DefaultTestFile />
+      <param.MergeInstrumentationResults />
+      <param.RanPilSilVerification />
+      <param.VerificationMode />
+      <param.VerificationStatus>option.VerificationStatus.Inactive</param.VerificationStatus>
+      <param.CustomSourceCode />
+      <param.CustomHeaderCode />
+      <param.CustomInitializer />
+      <param.CustomTerminator />
+      <param.CustomInclude />
+      <param.CustomSource />
+      <param.CustomLibrary />
+      <param.PostCodeGenCommand />
+      <param.TargetLangStandard />
+      <param.CodeReplacementLibrary />
+      <param.DeprecatedCRLFlag />
+      <param.SameHardware>true</param.SameHardware>
+      <param.Toolchain>Automatically locate an installed toolchain</param.Toolchain>
+      <param.BuildConfiguration />
+      <param.CustomToolchainOptions />
+      <var.ToolchainSettingsVisible />
+      <param.target.Data>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;&lt;ctdata&gt;&lt;configuredHardware/&gt;&lt;/ctdata&gt;</param.target.Data>
+      <param.target.ActiveType>option.target.TargetType.MatlabHost</param.target.ActiveType>
+      <param.target.ActiveTarget />
+      <param.HardwareVendor.Production>Generic</param.HardwareVendor.Production>
+      <param.HardwareType.Production>MATLAB Host Computer</param.HardwareType.Production>
+      <param.HWDeviceType.Production />
+      <var.instance.enabled.Production>true</var.instance.enabled.Production>
+      <param.HardwareSizeChar.Production>8</param.HardwareSizeChar.Production>
+      <param.HardwareSizeShort.Production>16</param.HardwareSizeShort.Production>
+      <param.HardwareSizeInt.Production>32</param.HardwareSizeInt.Production>
+      <param.HardwareSizeLong.Production>32</param.HardwareSizeLong.Production>
+      <param.HardwareSizeLongLong.Production>64</param.HardwareSizeLongLong.Production>
+      <param.HardwareSizeFloat.Production>32</param.HardwareSizeFloat.Production>
+      <param.HardwareSizeDouble.Production>64</param.HardwareSizeDouble.Production>
+      <param.HardwareSizeWord.Production>64</param.HardwareSizeWord.Production>
+      <param.HardwareSizePointer.Production>64</param.HardwareSizePointer.Production>
+      <param.HardwareSizeSizeT.Production>64</param.HardwareSizeSizeT.Production>
+      <param.HardwareSizePtrDiffT.Production>64</param.HardwareSizePtrDiffT.Production>
+      <param.HardwareEndianness.Production>option.HardwareEndianness.Little</param.HardwareEndianness.Production>
+      <param.HardwareArithmeticRightShift.Production>true</param.HardwareArithmeticRightShift.Production>
+      <param.HardwareLongLongMode.Production>true</param.HardwareLongLongMode.Production>
+      <param.HardwareAtomicIntegerSize.Production>option.HardwareAtomicIntegerSize.Char</param.HardwareAtomicIntegerSize.Production>
+      <param.HardwareAtomicFloatSize.Production>option.HardwareAtomicFloatSize.None</param.HardwareAtomicFloatSize.Production>
+      <param.HardwareDivisionRounding.Production>option.HardwareDivisionRounding.Zero</param.HardwareDivisionRounding.Production>
+      <param.HardwareVendor.Target>Generic</param.HardwareVendor.Target>
+      <param.HardwareType.Target>MATLAB Host Computer</param.HardwareType.Target>
+      <param.HWDeviceType.Target />
+      <var.instance.enabled.Target>false</var.instance.enabled.Target>
+      <param.HardwareSizeChar.Target>8</param.HardwareSizeChar.Target>
+      <param.HardwareSizeShort.Target>16</param.HardwareSizeShort.Target>
+      <param.HardwareSizeInt.Target>32</param.HardwareSizeInt.Target>
+      <param.HardwareSizeLong.Target>32</param.HardwareSizeLong.Target>
+      <param.HardwareSizeLongLong.Target>64</param.HardwareSizeLongLong.Target>
+      <param.HardwareSizeFloat.Target>32</param.HardwareSizeFloat.Target>
+      <param.HardwareSizeDouble.Target>64</param.HardwareSizeDouble.Target>
+      <param.HardwareSizeWord.Target>64</param.HardwareSizeWord.Target>
+      <param.HardwareSizePointer.Target>64</param.HardwareSizePointer.Target>
+      <param.HardwareSizeSizeT.Target>64</param.HardwareSizeSizeT.Target>
+      <param.HardwareSizePtrDiffT.Target>64</param.HardwareSizePtrDiffT.Target>
+      <param.HardwareEndianness.Target>option.HardwareEndianness.Little</param.HardwareEndianness.Target>
+      <param.HardwareArithmeticRightShift.Target>true</param.HardwareArithmeticRightShift.Target>
+      <param.HardwareLongLongMode.Target>true</param.HardwareLongLongMode.Target>
+      <param.HardwareAtomicIntegerSize.Target>option.HardwareAtomicIntegerSize.Char</param.HardwareAtomicIntegerSize.Target>
+      <param.HardwareAtomicFloatSize.Target>option.HardwareAtomicFloatSize.None</param.HardwareAtomicFloatSize.Target>
+      <param.HardwareDivisionRounding.Target>option.HardwareDivisionRounding.Zero</param.HardwareDivisionRounding.Target>
+      <var.SuppressHardwareChange>false</var.SuppressHardwareChange>
+      <param.CastingMode />
+      <param.IndentStyle />
+      <param.IndentSize />
+      <param.ColumnLimit />
+      <param.grt.GenCodeOnly />
+      <param.ConstantFoldingTimeout />
+      <param.CompileTimeRecursionLimit />
+      <param.EnableRuntimeRecursion />
+      <param.RunInitializeFcn />
+      <param.IncludeInitializeFcn />
+      <param.IncludeTerminateFcn />
+      <param.GenerateExampleMain />
+      <param.PreserveVariableNames />
+      <param.GenerateMakefile />
+      <param.BuildToolEnable />
+      <param.BuildToolConfiguration />
+      <param.InlineThreshold />
+      <param.InlineThresholdMax />
+      <param.InlineStackLimit />
+      <param.InlineBetweenUserFunctions />
+      <param.InlineBetweenUserAndMathWorksFunctions />
+      <param.InlineBetweenMathWorksFunctions />
+      <param.EnableStrengthReduction />
+      <param.EnableMemcpy />
+      <param.MemcpyThreshold />
+      <param.EnableOpenMP />
+      <param.InitFltsAndDblsToZero />
+      <param.GenerateNonFiniteFilesIfUsed />
+      <param.PassStructByReference />
+      <param.CustomLAPACKCallback />
+      <param.CustomFFTCallback />
+      <param.CustomBLASCallback />
+      <param.EnableAutoParallelizationReporting />
+      <param.CacheDynamicArrayDataPointer />
+      <param.GenerateDefaultInSwitch />
+      <param.EnableTraceability />
+      <param.SILPILVerbosity />
+      <param.UseECoderFeatures>false</param.UseECoderFeatures>
+      <param.EnableGitSupport />
+      <param.EnableAutoCommit />
+      <param.RepositoryStyle />
+      <param.psCustomPrjState />
+      <param.psCustomProjectFile />
+      <param.psCheckConfValue />
+      <param.psUniqueOutPutState />
+      <param.psOpenResultsState />
+      <param.psProductModeValue />
+      <param.psQuickConfValue />
+      <param.psOutputFolder />
+      <unset>
+        <param.WorkingFolder />
+        <param.SpecifiedWorkingFolder />
+        <param.BuildFolder />
+        <param.SpecifiedBuildFolder />
+        <param.SearchPaths />
+        <var.SimdQueryHardwareVendor />
+        <var.SimdQueryHardwareType />
+        <param.InstructionSetExtensionsAvailableInUI />
+        <param.InstructionSetExtensions />
+        <param.SaturateOnIntegerOverflow />
+        <param.PurelyIntegerCode />
+        <param.SupportNonFinite />
+        <param.LoopUnrollThreshold />
+        <param.EnableAutoParallelization />
+        <param.NumberOfCpuThreads />
+        <param.OptimizeReductions />
+        <param.EnableVariableSizing />
+        <param.DynamicMemoryAllocation />
+        <param.DynamicMemoryAllocationThreshold />
+        <param.DynamicMemoryAllocationInterface />
+        <param.RowMajor />
+        <param.HighlightPotentialRowMajorIssues />
+        <param.PreserveArrayDimensions />
+        <param.EliminateSingleDimensions />
+        <param.StackUsageMax />
+        <param.MultiInstanceCode />
+        <param.PreserveUnusedStructFields />
+        <param.FilePartitionMethod />
+        <param.GenerateComments />
+        <param.CommentStyle />
+        <param.MATLABSourceComments />
+        <param.MATLABSourceCommentLineNumbers />
+        <param.MATLABFcnDesc />
+        <param.ReqsInCode />
+        <param.ConvertIfToSwitch />
+        <param.PreserveExternInFcnDecls />
+        <param.EnableSignedLeftShifts />
+        <param.EnableSignedRightShifts />
+        <param.ParenthesesLevel />
+        <param.MaxIdLength />
+        <param.HeaderGuardStyle />
+        <param.CodeFormattingTool />
+        <param.ClangFormatFile />
+        <param.DataTypeReplacement />
+        <param.EnableCustomReplacementTypes />
+        <param.ReplacementTypes.double />
+        <param.ReplacementTypes.single />
+        <param.ReplacementTypes.uint8 />
+        <param.ReplacementTypes.uint16 />
+        <param.ReplacementTypes.uint32 />
+        <param.ReplacementTypes.uint64 />
+        <param.ReplacementTypes.int8 />
+        <param.ReplacementTypes.int16 />
+        <param.ReplacementTypes.int32 />
+        <param.ReplacementTypes.int64 />
+        <param.ReplacementTypes.char />
+        <param.ReplacementTypes.logical />
+        <param.ReplacementTypes.ImportCustomTypes />
+        <param.ReplacementTypes.HeaderFiles />
+        <param.CppInterfaceStyle />
+        <param.CppInterfaceClassName />
+        <param.CustomFileNameStr />
+        <param.CustomSymbolStrGlobalVar />
+        <param.CustomSymbolStrType />
+        <param.CustomSymbolStrField />
+        <param.CustomSymbolStrFcn />
+        <param.CustomSymbolStrTmpVar />
+        <param.CustomSymbolStrMacro />
+        <param.CustomSymbolStrEMXArray />
+        <param.CustomSymbolStrEMXArrayFcn />
+        <param.ReservedNameArray />
+        <param.CppStyleConst />
+        <param.RuntimeChecks />
+        <param.Verbose />
+        <param.Verbosity />
+        <param.ReportPotentialDifferences />
+        <param.GenerateReport />
+        <param.GenerateCodeMetricsReport />
+        <param.GenerateCodeReplacementReport />
+        <param.HighlightPotentialDataTypeIssues />
+        <param.HighlightImplicitExpansionIssues />
+        <param.HighlightLoopControlIssues />
+        <param.LaunchReport />
+        <param.ReportInfoVarName />
+        <param.SILDebugging />
+        <param.SILPILCheckConstantInputs />
+        <param.SILPILSyncGlobalData />
+        <param.CodeExecutionProfiling />
+        <param.CodeProfilingInstrumentation />
+        <param.CodeStackProfiling />
+        <param.DefaultTestFile />
+        <param.MergeInstrumentationResults />
+        <param.RanPilSilVerification />
+        <param.VerificationMode />
+        <param.VerificationStatus />
+        <param.CustomSourceCode />
+        <param.CustomHeaderCode />
+        <param.CustomInitializer />
+        <param.CustomTerminator />
+        <param.CustomInclude />
+        <param.CustomSource />
+        <param.CustomLibrary />
+        <param.PostCodeGenCommand />
+        <param.TargetLangStandard />
+        <param.CodeReplacementLibrary />
+        <param.DeprecatedCRLFlag />
+        <param.SameHardware />
+        <param.Toolchain />
+        <param.BuildConfiguration />
+        <param.CustomToolchainOptions />
+        <var.ToolchainSettingsVisible />
+        <param.target.ActiveType />
+        <param.target.ActiveTarget />
+        <param.HardwareVendor.Production />
+        <param.HardwareType.Production />
+        <param.HWDeviceType.Production />
+        <var.instance.enabled.Production />
+        <param.HardwareSizeChar.Production />
+        <param.HardwareSizeShort.Production />
+        <param.HardwareSizeInt.Production />
+        <param.HardwareSizeLong.Production />
+        <param.HardwareSizeLongLong.Production />
+        <param.HardwareSizeFloat.Production />
+        <param.HardwareSizeDouble.Production />
+        <param.HardwareEndianness.Production />
+        <param.HardwareAtomicIntegerSize.Production />
+        <param.HardwareAtomicFloatSize.Production />
+        <param.HardwareVendor.Target />
+        <param.HardwareType.Target />
+        <param.HWDeviceType.Target />
+        <var.instance.enabled.Target />
+        <param.HardwareSizeChar.Target />
+        <param.HardwareSizeShort.Target />
+        <param.HardwareSizeInt.Target />
+        <param.HardwareSizeLong.Target />
+        <param.HardwareSizeLongLong.Target />
+        <param.HardwareSizeFloat.Target />
+        <param.HardwareSizeDouble.Target />
+        <param.HardwareEndianness.Target />
+        <param.HardwareAtomicIntegerSize.Target />
+        <param.HardwareAtomicFloatSize.Target />
+        <var.SuppressHardwareChange />
+        <param.CastingMode />
+        <param.IndentStyle />
+        <param.IndentSize />
+        <param.ColumnLimit />
+        <param.grt.GenCodeOnly />
+        <param.ConstantFoldingTimeout />
+        <param.CompileTimeRecursionLimit />
+        <param.EnableRuntimeRecursion />
+        <param.RunInitializeFcn />
+        <param.IncludeInitializeFcn />
+        <param.IncludeTerminateFcn />
+        <param.GenerateExampleMain />
+        <param.PreserveVariableNames />
+        <param.GenerateMakefile />
+        <param.BuildToolEnable />
+        <param.BuildToolConfiguration />
+        <param.InlineThreshold />
+        <param.InlineThresholdMax />
+        <param.InlineStackLimit />
+        <param.InlineBetweenUserFunctions />
+        <param.InlineBetweenUserAndMathWorksFunctions />
+        <param.InlineBetweenMathWorksFunctions />
+        <param.EnableStrengthReduction />
+        <param.EnableMemcpy />
+        <param.MemcpyThreshold />
+        <param.EnableOpenMP />
+        <param.InitFltsAndDblsToZero />
+        <param.GenerateNonFiniteFilesIfUsed />
+        <param.PassStructByReference />
+        <param.CustomLAPACKCallback />
+        <param.CustomFFTCallback />
+        <param.CustomBLASCallback />
+        <param.EnableAutoParallelizationReporting />
+        <param.CacheDynamicArrayDataPointer />
+        <param.GenerateDefaultInSwitch />
+        <param.EnableTraceability />
+        <param.SILPILVerbosity />
+        <param.UseECoderFeatures />
+        <param.EnableGitSupport />
+        <param.EnableAutoCommit />
+        <param.RepositoryStyle />
+        <param.psCustomPrjState />
+        <param.psCustomProjectFile />
+        <param.psCheckConfValue />
+        <param.psUniqueOutPutState />
+        <param.psOpenResultsState />
+        <param.psProductModeValue />
+        <param.psQuickConfValue />
+        <param.psOutputFolder />
+      </unset>
+    </profile>
+    <param.objective>option.objective.fixedpoint</param.objective>
+    <param.WorkflowStep>fixedPoint</param.WorkflowStep>
+    <param.TestSnippets>
+      <item>main</item>
+    </param.TestSnippets>
+    <param.ExternalFcnMajority />
+    <param.UseGlobals>option.UseGlobals.No</param.UseGlobals>
+    <param.outputfile>${PROJECT_ROOT}\accu_mex.mexw64</param.outputfile>
+    <param.version />
+    <param.HasECoderFeatures>false</param.HasECoderFeatures>
+    <param.HasGpuCoder>false</param.HasGpuCoder>
+    <var.HasNeuralNetworkToolbox>true</var.HasNeuralNetworkToolbox>
+    <param.mex.mainhtml />
+    <param.grt.mainhtml />
+    <param.CallGeneratedCodeFromTest />
+    <param.AutoInferDefaultFile />
+    <param.AutoInferUseVariableSize />
+    <param.AutoInferUseUnboundedSize />
+    <param.AutoInferVariableSizeThreshold />
+    <param.AutoInferUnboundedSizeThreshold />
+    <param.EnableFixedPointStep />
+    <param.EnableScreener>true</param.EnableScreener>
+    <param.AnnotationChecksum />
+    <var.LegacyTarget />
+    <var.MirrorOnOpen>false</var.MirrorOnOpen>
+    <param.FixedPointEnabled>true</param.FixedPointEnabled>
+    <var.redirectedInputTypeData />
+    <var.DismissScreener>true</var.DismissScreener>
+    <param.unifiedParamStorage />
+    <param.hdlParamStorage />
+    <var.gc.lastOutputRoot />
+    <var.gc.lastOutputType />
+    <var.gc.preBuildChecksum />
+    <var.cfi.lastOutputRoot />
+    <var.cfi.preBuildChecksum />
+    <var.outdatedOnRestore />
+    <var.lastUserSourceChecksum />
+    <var.sourceSetState>&lt;?xml version="1.0" encoding="UTF-8" standalone="yes"?&gt;&lt;sourceModel&gt;&lt;primarySourceFiles&gt;&lt;file&gt;D:\Hilman\ITB\EL\Semester 9\TA 2\Bagian Hilman\Frame Sychronization\iqintegrated\exp 1.7\accu.m&lt;/file&gt;&lt;file&gt;D:\Hilman\ITB\EL\Semester 9\TA 2\Bagian Hilman\Frame Sychronization\iqintegrated\exp 1.7\cosines_mult.m&lt;/file&gt;&lt;file&gt;D:\Hilman\ITB\EL\Semester 9\TA 2\Bagian Hilman\Frame Sychronization\iqintegrated\exp 1.7\flagging.m&lt;/file&gt;&lt;file&gt;D:\Hilman\ITB\EL\Semester 9\TA 2\Bagian Hilman\Frame Sychronization\iqintegrated\exp 1.7\lut_1477.m&lt;/file&gt;&lt;file&gt;D:\Hilman\ITB\EL\Semester 9\TA 2\Bagian Hilman\Frame Sychronization\iqintegrated\exp 1.7\lut_697.m&lt;/file&gt;&lt;file&gt;D:\Hilman\ITB\EL\Semester 9\TA 2\Bagian Hilman\Frame Sychronization\iqintegrated\exp 1.7\lut_941.m&lt;/file&gt;&lt;file&gt;D:\Hilman\ITB\EL\Semester 9\TA 2\Bagian Hilman\Frame Sychronization\iqintegrated\exp 1.7\precision.m&lt;/file&gt;&lt;file&gt;D:\Hilman\ITB\EL\Semester 9\TA 2\Bagian Hilman\Frame Sychronization\iqintegrated\exp 1.7\sin_mult.m&lt;/file&gt;&lt;file&gt;D:\Hilman\ITB\EL\Semester 9\TA 2\Bagian Hilman\Frame Sychronization\iqintegrated\exp 1.7\sliding.m&lt;/file&gt;&lt;file&gt;D:\Hilman\ITB\EL\Semester 9\TA 2\Bagian Hilman\Frame Sychronization\iqintegrated\exp 1.7\total_calc.m&lt;/file&gt;&lt;/primarySourceFiles&gt;&lt;fixedPointSourceFiles/&gt;&lt;fixedPointSourceRegistered&gt;false&lt;/fixedPointSourceRegistered&gt;&lt;fixedPointSourceSelected&gt;false&lt;/fixedPointSourceSelected&gt;&lt;/sourceModel&gt;</var.sourceSetState>
+    <param.forceMexBuild>true</param.forceMexBuild>
+    <param.NoDefaultJIT />
+    <param.configImportActive>false</param.configImportActive>
+    <var.isGpuCoder>false</var.isGpuCoder>
+    <var.notGpuCoder />
+    <var.boundToGui>true</var.boundToGui>
+    <var.isConfigDialog />
+    <var.ecoderEnabled>false</var.ecoderEnabled>
+    <param.AlwaysGenerateTypedefGuards />
+    <param.RemoveDuplicateFunctionsAndTypes />
+    <param.EnableStructExplosion />
+    <param.ForceANSIC />
+    <param.NumCompileJobs />
+    <param.mex.outputfile>accu_mex</param.mex.outputfile>
+    <param.grt.outputfile>accu</param.grt.outputfile>
+    <param.artifact>option.target.artifact.mex</param.artifact>
+    <param.outputfile>${PROJECT_ROOT}\accu_mex.mexw64</param.outputfile>
+    <param.CppNamespace />
+    <param.CppPackagesToNamespaces />
+    <param.CppNamespaceForMathworksCode />
+    <param.CppPreserveClasses />
+    <param.CppGenerateEnumClass />
+    <param.gpu.Enabled>false</param.gpu.Enabled>
+    <param.gpu.SelectCudaDevice />
+    <param.gpu.ComputeCapability />
+    <param.gpu.CustomComputeCapability />
+    <param.gpu.MallocMode />
+    <param.gpu.MallocThreshold />
+    <param.gpu.StackLimitPerThread />
+    <param.gpu.MaximumBlocksPerKernel />
+    <param.gpu.Benchmarking>false</param.gpu.Benchmarking>
+    <param.gpu.SafeBuild />
+    <param.gpu.KernelNamePrefix />
+    <param.gpu.CompilerFlags />
+    <param.gpu.EnableCUBLAS>false</param.gpu.EnableCUBLAS>
+    <param.gpu.EnableCUSOLVER>false</param.gpu.EnableCUSOLVER>
+    <param.gpu.EnableCUFFT>false</param.gpu.EnableCUFFT>
+    <param.gpu.EnableMemoryManager>false</param.gpu.EnableMemoryManager>
+    <param.gpu.BlockAlignment />
+    <param.gpu.FreeMode />
+    <param.gpu.MinPoolSize />
+    <param.gpu.MaxPoolSize />
+    <var.checkIssuesGpu>false</var.checkIssuesGpu>
+    <var.hasGpu>false</var.hasGpu>
+    <var.isDeepLearningForMatlabCoderEnabled>true</var.isDeepLearningForMatlabCoderEnabled>
+    <param.deeplearning.EnableDeepLearning>false</param.deeplearning.EnableDeepLearning>
+    <param.deeplearning.DeepLearningCustomCallback />
+    <param.deeplearning.TargetLib>option.deeplearning.targetlibrary.none</param.deeplearning.TargetLib>
+    <var.cfiTargetLibSuppression>false</var.cfiTargetLibSuppression>
+    <var.hasMatlabDeepLearningSupportPackage>true</var.hasMatlabDeepLearningSupportPackage>
+    <var.hasGpuDeepLearningSupportPackage>true</var.hasGpuDeepLearningSupportPackage>
+    <param.tensorrt.DataType />
+    <param.tensorrt.DataPath />
+    <param.tensorrt.NumCalibrationBatches />
+    <param.cudnn.AutoTuning />
+    <param.cudnn.DataType />
+    <param.cudnn.CalibrationResultFile />
+    <param.arm-compute.ArmComputeVersion />
+    <param.arm-compute.ArmArchitecture />
+    <param.arm-compute.DataType />
+    <param.arm-compute.CalibrationResultFile />
+    <param.cmsis-nn.DataType />
+    <param.cmsis-nn.CalibrationResultFile />
+    <param.TargetLang />
+    <param.EnableAutoExtrinsicCalls />
+    <param.EnableImplicitExpansion />
+    <param.UsePreconditions>false</param.UsePreconditions>
+    <param.FeatureFlags />
+    <param.FixedPointMode>option.FixedPointMode.Automatic</param.FixedPointMode>
+    <param.AutoScaleLoopIndexVariables />
+    <param.ComputedFixedPointData>
+      <ComputedEntities>
+        <Function file="$(PROJECTDIR)\accu.m" name="accu" specialization="accu" specializationId="-1" uniqueId="accu">
+          <Variable name="acc_sinsignal" specid="-1">
+            <Column property="Kind" type="String" value="output" />
+            <MATLABType class="double" complex="false">
+              <size>3</size>
+              <size>-1</size>
+              <dynamic>false</dynamic>
+              <dynamic>true</dynamic>
+            </MATLABType>
+          </Variable>
+          <Variable name="acc_cossignal" specid="-1">
+            <Column property="Kind" type="String" value="output" />
+            <MATLABType class="double" complex="false">
+              <size>3</size>
+              <size>-1</size>
+              <dynamic>false</dynamic>
+              <dynamic>true</dynamic>
+            </MATLABType>
+          </Variable>
+          <Variable name="mult_sinsignal" specid="-1">
+            <Column property="Kind" type="String" value="input" />
+            <MATLABType class="double" complex="false">
+              <size>3</size>
+              <size>2560</size>
+            </MATLABType>
+          </Variable>
+          <Variable name="mult_cossignal" specid="-1">
+            <Column property="Kind" type="String" value="input" />
+            <MATLABType class="double" complex="false">
+              <size>3</size>
+              <size>2560</size>
+            </MATLABType>
+          </Variable>
+          <Variable name="frame_size" specid="-1">
+            <Column property="Kind" type="String" value="input" />
+            <MATLABType class="double" complex="false">
+              <size>1</size>
+              <size>1</size>
+            </MATLABType>
+          </Variable>
+          <Variable name="num_frames" specid="-1">
+            <Column property="Kind" type="String" value="local" />
+            <MATLABType class="double" complex="false">
+              <size>1</size>
+              <size>1</size>
+            </MATLABType>
+          </Variable>
+          <Variable name="frame" specid="-1">
+            <Column property="Kind" type="String" value="local" />
+            <MATLABType class="double" complex="false">
+              <size>1</size>
+              <size>1</size>
+            </MATLABType>
+          </Variable>
+          <Variable name="start_idx" specid="-1">
+            <Column property="Kind" type="String" value="local" />
+            <MATLABType class="double" complex="false">
+              <size>1</size>
+              <size>1</size>
+            </MATLABType>
+          </Variable>
+          <Variable name="end_idx" specid="-1">
+            <Column property="Kind" type="String" value="local" />
+            <MATLABType class="double" complex="false">
+              <size>1</size>
+              <size>1</size>
+            </MATLABType>
+          </Variable>
+          <Variable name="freq_idx" specid="-1">
+            <Column property="Kind" type="String" value="local" />
+            <MATLABType class="double" complex="false">
+              <size>1</size>
+              <size>1</size>
+            </MATLABType>
+          </Variable>
+        </Function>
+        <Function file="$(PROJECTDIR)\flagging.m" name="flagging" specialization="flagging" specializationId="-1" uniqueId="flagging">
+          <Variable name="detect_enable_941" specid="-1">
+            <Column property="Kind" type="String" value="output" />
+            <MATLABType class="double" complex="false">
+              <size>1</size>
+              <size>1</size>
+            </MATLABType>
+          </Variable>
+          <Variable name="detect_enable_1477" specid="-1">
+            <Column property="Kind" type="String" value="output" />
+            <MATLABType class="double" complex="false">
+              <size>1</size>
+              <size>1</size>
+            </MATLABType>
+          </Variable>
+          <Variable name="precision_enable" specid="-1">
+            <Column property="Kind" type="String" value="output" />
+            <MATLABType class="double" complex="false">
+              <size>1</size>
+              <size>1</size>
+            </MATLABType>
+          </Variable>
+          <Variable name="batch_sums" specid="-1">
+            <Column property="Kind" type="String" value="input" />
+            <MATLABType class="double" complex="false">
+              <size>113</size>
+              <size>3</size>
+            </MATLABType>
+          </Variable>
+          <Variable name="count_941" specid="-1">
+            <Column property="Kind" type="String" value="local" />
+            <MATLABType class="double" complex="false">
+              <size>1</size>
+              <size>1</size>
+            </MATLABType>
+          </Variable>
+          <Variable name="count_1477" specid="-1">
+            <Column property="Kind" type="String" value="local" />
+            <MATLABType class="double" complex="false">
+              <size>1</size>
+              <size>1</size>
+            </MATLABType>
+          </Variable>
+          <Variable name="slide_i" specid="-1">
+            <Column property="Kind" type="String" value="local" />
+            <MATLABType class="double" complex="false">
+              <size>1</size>
+              <size>1</size>
+            </MATLABType>
+          </Variable>
+        </Function>
+        <Function file="$(PROJECTDIR)\cosines_mult.m" name="cosines_mult" specialization="cosines_mult" specializationId="-1" uniqueId="cosines_mult">
+          <Variable name="mult_cossignal" specid="-1">
+            <Column property="Kind" type="String" value="output" />
+            <MATLABType class="double" complex="false">
+              <size>3</size>
+              <size>2560</size>
+            </MATLABType>
+          </Variable>
+          <Variable name="inputsignal" specid="-1">
+            <Column property="Kind" type="String" value="input" />
+            <MATLABType class="double" complex="false">
+              <size>1</size>
+              <size>2560</size>
+            </MATLABType>
+          </Variable>
+          <Variable name="refcosines" specid="-1">
+            <Column property="Kind" type="String" value="input" />
+            <MATLABType class="double" complex="false">
+              <size>3</size>
+              <size>320</size>
+            </MATLABType>
+          </Variable>
+          <Variable name="refcosines_length" specid="-1">
+            <Column property="Kind" type="String" value="local" />
+            <MATLABType class="double" complex="false">
+              <size>1</size>
+              <size>1</size>
+            </MATLABType>
+          </Variable>
+          <Variable name="i" specid="-1">
+            <Column property="Kind" type="String" value="local" />
+            <MATLABType class="double" complex="false">
+              <size>1</size>
+              <size>1</size>
+            </MATLABType>
+          </Variable>
+          <Variable name="idx" specid="-1">
+            <Column property="Kind" type="String" value="local" />
+            <MATLABType class="double" complex="false">
+              <size>1</size>
+              <size>1</size>
+            </MATLABType>
+          </Variable>
+          <Variable name="freq_idx" specid="-1">
+            <Column property="Kind" type="String" value="local" />
+            <MATLABType class="double" complex="false">
+              <size>1</size>
+              <size>1</size>
+            </MATLABType>
+          </Variable>
+        </Function>
+      </ComputedEntities>
+    </param.ComputedFixedPointData>
+    <param.UserFixedPointData>
+      <UserEntities>
+        <Function file="$(PROJECTDIR)\accu.m" name="accu" specialization="accu" specializationId="-1" uniqueId="accu">
+          <Variable name="acc_sinsignal" specid="-1" />
+          <Variable name="acc_cossignal" specid="-1" />
+          <Variable name="mult_sinsignal" specid="-1" />
+          <Variable name="mult_cossignal" specid="-1" />
+          <Variable name="frame_size" specid="-1" />
+          <Variable name="num_frames" specid="-1" />
+          <Variable name="frame" specid="-1" />
+          <Variable name="start_idx" specid="-1" />
+          <Variable name="end_idx" specid="-1" />
+          <Variable name="freq_idx" specid="-1" />
+        </Function>
+        <Function file="$(PROJECTDIR)\flagging.m" name="flagging" specialization="flagging" specializationId="-1" uniqueId="flagging">
+          <Variable name="detect_enable_941" specid="-1" />
+          <Variable name="detect_enable_1477" specid="-1" />
+          <Variable name="precision_enable" specid="-1" />
+          <Variable name="batch_sums" specid="-1" />
+          <Variable name="count_941" specid="-1" />
+          <Variable name="count_1477" specid="-1" />
+          <Variable name="slide_i" specid="-1" />
+        </Function>
+        <Function file="$(PROJECTDIR)\cosines_mult.m" name="cosines_mult" specialization="cosines_mult" specializationId="-1" uniqueId="cosines_mult">
+          <Variable name="mult_cossignal" specid="-1" />
+          <Variable name="inputsignal" specid="-1" />
+          <Variable name="refcosines" specid="-1" />
+          <Variable name="refcosines_length" specid="-1" />
+          <Variable name="i" specid="-1" />
+          <Variable name="idx" specid="-1" />
+          <Variable name="freq_idx" specid="-1" />
+        </Function>
+      </UserEntities>
+    </param.UserFixedPointData>
+    <param.DefaultWordLength>16</param.DefaultWordLength>
+    <param.DefaultFractionLength>4</param.DefaultFractionLength>
+    <param.FixedPointSafetyMargin>0</param.FixedPointSafetyMargin>
+    <param.FixedPointFimath>fimath('RoundingMethod', 'Floor', 'OverflowAction', 'Wrap', 'ProductMode', 'FullPrecision', 'MaxProductWordLength', 128, 'SumMode', 'FullPrecision', 'MaxSumWordLength', 128)</param.FixedPointFimath>
+    <param.FixedPointTypeSource>option.FixedPointTypeSource.SimAndDerived</param.FixedPointTypeSource>
+    <param.StaticAnalysisTimeout />
+    <param.StaticAnalysisGlobalRangesOnly>false</param.StaticAnalysisGlobalRangesOnly>
+    <param.LogAllIOValues>false</param.LogAllIOValues>
+    <param.DetectOverflows>false</param.DetectOverflows>
+    <param.LogHistogram>false</param.LogHistogram>
+    <param.ShowCoverage>true</param.ShowCoverage>
+    <param.ExcludedFixedPointVerificationFiles />
+    <param.ExcludedFixedPointSimulationFiles />
+    <param.InstrumentedBuildChecksum />
+    <param.FixedPointStaticAnalysisChecksum />
+    <param.InstrumentedMexFile>${PROJECT_ROOT}\codegen\accu\fixpt\accu_float_mex.mexw64</param.InstrumentedMexFile>
+    <param.FixedPointValidationChecksum />
+    <param.FixedPointSourceCodeChecksum />
+    <param.FixedPointFunctionReplacements>
+      <FunctionReplacements />
+    </param.FixedPointFunctionReplacements>
+    <param.OptimizeWholeNumbers>true</param.OptimizeWholeNumbers>
+    <param.ContainerTypes>false</param.ContainerTypes>
+    <param.GeneratedFixedPointFileSuffix>_fixpt</param.GeneratedFixedPointFileSuffix>
+    <param.PlotFunction />
+    <param.SDIPlot>false</param.SDIPlot>
+    <param.EnableCodeEfficiencyChecks>false</param.EnableCodeEfficiencyChecks>
+    <param.DefaultFixedPointSignedness>option.DefaultFixedPointSignedness.Automatic</param.DefaultFixedPointSignedness>
+    <param.FixedPointTypeProposalMode>option.FixedPointTypeProposalMode.ProposeFractionLengths</param.FixedPointTypeProposalMode>
+    <param.EnableFixedPointStep />
+    <var.lastFixedPointAction />
+    <var.lastSimContext />
+    <var.lastVerifyContext />
+    <param.fpDataRoot />
+    <param.fpUserFileChecksum />
+    <var.snapshotChecksum />
+    <param.fpLastConvertChecksum />
+    <var.functionBlockSid />
+    <param.fptSignedness />
+    <var.FixedPointAnalysisMode>option.FixedPointAnalysisMode.Sim</var.FixedPointAnalysisMode>
+    <param.FixedPointUseDesignRanges>false</param.FixedPointUseDesignRanges>
+    <unset>
+      <param.ExternalFcnMajority />
+      <param.UseGlobals />
+      <param.outputfile />
+      <param.version />
+      <param.HasECoderFeatures />
+      <param.HasGpuCoder />
+      <var.HasNeuralNetworkToolbox />
+      <param.mex.mainhtml />
+      <param.grt.mainhtml />
+      <param.CallGeneratedCodeFromTest />
+      <param.AutoInferDefaultFile />
+      <param.AutoInferUseVariableSize />
+      <param.AutoInferUseUnboundedSize />
+      <param.AutoInferVariableSizeThreshold />
+      <param.AutoInferUnboundedSizeThreshold />
+      <param.EnableFixedPointStep />
+      <param.EnableScreener />
+      <param.AnnotationChecksum />
+      <var.LegacyTarget />
+      <var.MirrorOnOpen />
+      <var.redirectedInputTypeData />
+      <param.unifiedParamStorage />
+      <param.hdlParamStorage />
+      <var.gc.lastOutputRoot />
+      <var.gc.lastOutputType />
+      <var.gc.preBuildChecksum />
+      <var.cfi.lastOutputRoot />
+      <var.cfi.preBuildChecksum />
+      <var.outdatedOnRestore />
+      <var.lastUserSourceChecksum />
+      <param.NoDefaultJIT />
+      <param.configImportActive />
+      <var.isGpuCoder />
+      <var.notGpuCoder />
+      <var.isConfigDialog />
+      <var.ecoderEnabled />
+      <param.AlwaysGenerateTypedefGuards />
+      <param.RemoveDuplicateFunctionsAndTypes />
+      <param.EnableStructExplosion />
+      <param.ForceANSIC />
+      <param.NumCompileJobs />
+      <param.mex.outputfile />
+      <param.grt.outputfile />
+      <param.artifact />
+      <param.CppNamespace />
+      <param.CppPackagesToNamespaces />
+      <param.CppNamespaceForMathworksCode />
+      <param.CppPreserveClasses />
+      <param.CppGenerateEnumClass />
+      <param.gpu.Enabled />
+      <param.gpu.SelectCudaDevice />
+      <param.gpu.ComputeCapability />
+      <param.gpu.CustomComputeCapability />
+      <param.gpu.MallocMode />
+      <param.gpu.MallocThreshold />
+      <param.gpu.StackLimitPerThread />
+      <param.gpu.MaximumBlocksPerKernel />
+      <param.gpu.Benchmarking />
+      <param.gpu.SafeBuild />
+      <param.gpu.KernelNamePrefix />
+      <param.gpu.CompilerFlags />
+      <param.gpu.EnableCUBLAS />
+      <param.gpu.EnableCUSOLVER />
+      <param.gpu.EnableCUFFT />
+      <param.gpu.EnableMemoryManager />
+      <param.gpu.BlockAlignment />
+      <param.gpu.FreeMode />
+      <param.gpu.MinPoolSize />
+      <param.gpu.MaxPoolSize />
+      <var.checkIssuesGpu />
+      <var.hasGpu />
+      <var.isDeepLearningForMatlabCoderEnabled />
+      <param.deeplearning.EnableDeepLearning />
+      <param.deeplearning.DeepLearningCustomCallback />
+      <param.deeplearning.TargetLib />
+      <var.cfiTargetLibSuppression />
+      <var.hasMatlabDeepLearningSupportPackage />
+      <var.hasGpuDeepLearningSupportPackage />
+      <param.tensorrt.DataType />
+      <param.tensorrt.DataPath />
+      <param.tensorrt.NumCalibrationBatches />
+      <param.cudnn.AutoTuning />
+      <param.cudnn.DataType />
+      <param.cudnn.CalibrationResultFile />
+      <param.arm-compute.ArmComputeVersion />
+      <param.arm-compute.ArmArchitecture />
+      <param.arm-compute.DataType />
+      <param.arm-compute.CalibrationResultFile />
+      <param.cmsis-nn.DataType />
+      <param.cmsis-nn.CalibrationResultFile />
+      <param.TargetLang />
+      <param.EnableAutoExtrinsicCalls />
+      <param.EnableImplicitExpansion />
+      <param.UsePreconditions />
+      <param.FeatureFlags />
+      <param.AutoScaleLoopIndexVariables />
+      <param.DefaultWordLength />
+      <param.DefaultFractionLength />
+      <param.FixedPointSafetyMargin />
+      <param.FixedPointFimath />
+      <param.FixedPointTypeSource />
+      <param.StaticAnalysisTimeout />
+      <param.StaticAnalysisGlobalRangesOnly />
+      <param.LogAllIOValues />
+      <param.DetectOverflows />
+      <param.LogHistogram />
+      <param.ShowCoverage />
+      <param.ExcludedFixedPointVerificationFiles />
+      <param.ExcludedFixedPointSimulationFiles />
+      <param.InstrumentedBuildChecksum />
+      <param.FixedPointStaticAnalysisChecksum />
+      <param.FixedPointValidationChecksum />
+      <param.FixedPointSourceCodeChecksum />
+      <param.OptimizeWholeNumbers />
+      <param.ContainerTypes />
+      <param.GeneratedFixedPointFileSuffix />
+      <param.PlotFunction />
+      <param.SDIPlot />
+      <param.EnableCodeEfficiencyChecks />
+      <param.DefaultFixedPointSignedness />
+      <param.FixedPointTypeProposalMode />
+      <var.lastFixedPointAction />
+      <var.lastSimContext />
+      <var.lastVerifyContext />
+      <param.fpDataRoot />
+      <param.fpUserFileChecksum />
+      <var.snapshotChecksum />
+      <param.fpLastConvertChecksum />
+      <var.functionBlockSid />
+      <param.fptSignedness />
+      <var.FixedPointAnalysisMode />
+      <param.FixedPointUseDesignRanges />
+    </unset>
+    <fileset.entrypoints>
+      <file custom-data-expanded="false" value="${PROJECT_ROOT}\accu.m">
+        <Marker>1734195045197</Marker>
+      </file>
+      <file custom-data-expanded="false" value="${PROJECT_ROOT}\cosines_mult.m">
+        <Marker>1734195044342</Marker>
+      </file>
+      <file custom-data-expanded="false" value="${PROJECT_ROOT}\flagging.m">
+        <Marker>1734195045684</Marker>
+      </file>
+      <file custom-data-expanded="false" value="${PROJECT_ROOT}\lut_1477.m" />
+      <file custom-data-expanded="false" value="${PROJECT_ROOT}\lut_697.m" />
+      <file custom-data-expanded="false" value="${PROJECT_ROOT}\lut_941.m" />
+      <file custom-data-expanded="false" value="${PROJECT_ROOT}\precision.m">
+        <Marker>1734195045892</Marker>
+      </file>
+      <file custom-data-expanded="false" value="${PROJECT_ROOT}\sin_mult.m">
+        <Marker>1734195046105</Marker>
+      </file>
+      <file custom-data-expanded="false" value="${PROJECT_ROOT}\sliding.m">
+        <Marker>1734195045422</Marker>
+      </file>
+      <file custom-data-expanded="false" value="${PROJECT_ROOT}\total_calc.m">
+        <Marker>1734195044938</Marker>
+      </file>
+    </fileset.entrypoints>
+    <fileset.testbench>
+      <file>${PROJECT_ROOT}\main.m</file>
+    </fileset.testbench>
+    <fileset.inputtypes>
+      <file custom-data-expanded="false" value="${PROJECT_ROOT}\accu.m">
+        <Inputs fileName="accu.m" functionName="accu">
+          <Input Name="mult_sinsignal" typeId="0" />
+          <Input Name="mult_cossignal" typeId="0" />
+          <Input Name="frame_size" typeId="1" />
+          <idpTable>
+            <type typeId="0">
+              <Class>double</Class>
+              <Size>3 x 2560</Size>
+              <Value />
+              <InitialValue />
+              <UserDefined>false</UserDefined>
+              <Complex>false</Complex>
+              <Sparse>false</Sparse>
+            </type>
+            <type typeId="1">
+              <Class>double</Class>
+              <Size>1 x 1</Size>
+              <Value />
+              <InitialValue />
+              <UserDefined>false</UserDefined>
+              <Complex>false</Complex>
+              <Sparse>false</Sparse>
+            </type>
+          </idpTable>
+        </Inputs>
+      </file>
+      <file custom-data-expanded="false" value="${PROJECT_ROOT}\cosines_mult.m">
+        <Inputs fileName="cosines_mult.m" functionName="cosines_mult">
+          <Input Name="inputsignal" typeId="0" />
+          <Input Name="refcosines" typeId="1" />
+          <idpTable>
+            <type typeId="0">
+              <Class>double</Class>
+              <Size>1 x 2560</Size>
+              <Value />
+              <InitialValue />
+              <UserDefined>false</UserDefined>
+              <Complex>false</Complex>
+              <Sparse>false</Sparse>
+            </type>
+            <type typeId="1">
+              <Class>double</Class>
+              <Size>3 x 320</Size>
+              <Value />
+              <InitialValue />
+              <UserDefined>false</UserDefined>
+              <Complex>false</Complex>
+              <Sparse>false</Sparse>
+            </type>
+          </idpTable>
+        </Inputs>
+      </file>
+      <file custom-data-expanded="false" value="${PROJECT_ROOT}\flagging.m">
+        <Inputs fileName="flagging.m" functionName="flagging">
+          <Input Name="batch_sums" typeId="0" />
+          <idpTable>
+            <type typeId="0">
+              <Class>double</Class>
+              <Size>113 x 3</Size>
+              <Value />
+              <InitialValue />
+              <UserDefined>false</UserDefined>
+              <Complex>false</Complex>
+              <Sparse>false</Sparse>
+            </type>
+          </idpTable>
+        </Inputs>
+      </file>
+      <file custom-data-expanded="false" value="${PROJECT_ROOT}\lut_1477.m" />
+      <file custom-data-expanded="false" value="${PROJECT_ROOT}\lut_697.m" />
+      <file custom-data-expanded="false" value="${PROJECT_ROOT}\lut_941.m" />
+      <file custom-data-expanded="false" value="${PROJECT_ROOT}\precision.m">
+        <Inputs fileName="precision.m" functionName="precision">
+          <Input Name="batch_sums" typeId="0" />
+          <idpTable>
+            <type typeId="0">
+              <Class>double</Class>
+              <Size>113 x 3</Size>
+              <Value />
+              <InitialValue />
+              <UserDefined>false</UserDefined>
+              <Complex>false</Complex>
+              <Sparse>false</Sparse>
+            </type>
+          </idpTable>
+        </Inputs>
+      </file>
+      <file custom-data-expanded="false" value="${PROJECT_ROOT}\sin_mult.m">
+        <Inputs fileName="sin_mult.m" functionName="sin_mult">
+          <Input Name="inputsignal" typeId="0" />
+          <Input Name="refsins" typeId="1" />
+          <idpTable>
+            <type typeId="0">
+              <Class>double</Class>
+              <Size>1 x 2560</Size>
+              <Value />
+              <InitialValue />
+              <UserDefined>false</UserDefined>
+              <Complex>false</Complex>
+              <Sparse>false</Sparse>
+            </type>
+            <type typeId="1">
+              <Class>double</Class>
+              <Size>3 x 320</Size>
+              <Value />
+              <InitialValue />
+              <UserDefined>false</UserDefined>
+              <Complex>false</Complex>
+              <Sparse>false</Sparse>
+            </type>
+          </idpTable>
+        </Inputs>
+      </file>
+      <file custom-data-expanded="false" value="${PROJECT_ROOT}\sliding.m">
+        <Inputs fileName="sliding.m" functionName="sliding">
+          <Input Name="total_power" typeId="0" />
+          <Input Name="batch_size" typeId="1" />
+          <idpTable>
+            <type typeId="0">
+              <Class>double</Class>
+              <Size>3 x 128</Size>
+              <Value />
+              <InitialValue />
+              <UserDefined>false</UserDefined>
+              <Complex>false</Complex>
+              <Sparse>false</Sparse>
+            </type>
+            <type typeId="1">
+              <Class>double</Class>
+              <Size>1 x 1</Size>
+              <Value />
+              <InitialValue />
+              <UserDefined>false</UserDefined>
+              <Complex>false</Complex>
+              <Sparse>false</Sparse>
+            </type>
+          </idpTable>
+        </Inputs>
+      </file>
+      <file custom-data-expanded="false" value="${PROJECT_ROOT}\total_calc.m">
+        <Inputs fileName="total_calc.m" functionName="total_calc">
+          <Input Name="acc_sinsignal" typeId="0" />
+          <Input Name="acc_cossignal" typeId="0" />
+          <idpTable>
+            <type typeId="0">
+              <Class>double</Class>
+              <Size>3 x 128</Size>
+              <Value />
+              <InitialValue />
+              <UserDefined>false</UserDefined>
+              <Complex>false</Complex>
+              <Sparse>false</Sparse>
+            </type>
+          </idpTable>
+        </Inputs>
+      </file>
+    </fileset.inputtypes>
+    <build-deliverables>
+      <file location="${PROJECT_ROOT}" name="accu_mex.mexw64" optional="false">D:\Hilman\ITB\EL\Semester 9\TA 2\Bagian Hilman\Frame Sychronization\iqintegrated\exp 1.7\accu_mex.mexw64</file>
+    </build-deliverables>
+    <workflow />
+    <matlab>
+      <root>D:\MATLAB</root>
+      <toolboxes>
+        <toolbox name="matlabcoder" />
+        <toolbox name="fixedpoint" />
+        <toolbox name="matlabhdlcoder" />
+        <toolbox name="neuralnetwork" />
+      </toolboxes>
+      <toolbox>
+        <matlabcoder>
+          <enabled>true</enabled>
+        </matlabcoder>
+      </toolbox>
+      <toolbox>
+        <fixedpoint>
+          <enabled>true</enabled>
+        </fixedpoint>
+      </toolbox>
+      <toolbox>
+        <matlabhdlcoder>
+          <enabled>true</enabled>
+        </matlabhdlcoder>
+      </toolbox>
+      <toolbox>
+        <neuralnetwork>
+          <enabled>true</enabled>
+        </neuralnetwork>
+      </toolbox>
+    </matlab>
+    <platform>
+      <unix>false</unix>
+      <mac>false</mac>
+      <windows>true</windows>
+      <win2k>false</win2k>
+      <winxp>false</winxp>
+      <vista>false</vista>
+      <linux>false</linux>
+      <solaris>false</solaris>
+      <osver>10.0</osver>
+      <os32>false</os32>
+      <os64>true</os64>
+      <arch>win64</arch>
+      <matlab>true</matlab>
+    </platform>
+  </configuration>
+</deployment-project>
