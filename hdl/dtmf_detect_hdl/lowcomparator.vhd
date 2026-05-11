@@ -22,6 +22,11 @@ architecture Behavioral of lowcomparator is
     --signal temp1, temp2, out_temp : STD_LOGIC_VECTOR(16 downto 0);
     signal state    : state_type;
     signal code_temp: STD_LOGIC_VECTOR(2 downto 0);
+    
+    -- Ambang batas daya (Power Threshold)
+    -- Jika nilai daya tertinggi masih di bawah nilai ini, ia akan dianggap sebagai NOISE / SILENCE.
+    -- Nilai x"01000" ini mungkin perlu Anda 'tuning' (besarkan/kecilkan) tergantung gain dari Goertzel.
+    constant THRESHOLD : STD_LOGIC_VECTOR(16 downto 0) := "00000100100000000"; -- x"003E8"
 
 begin
     process(state)
@@ -54,13 +59,13 @@ begin
                     end if;
                 
                 when COMPUTE =>
-                    if input697 > input770 and input697 > input852 and input697 > input941 then
+                    if (input697 > input770 and input697 > input852 and input697 > input941) and (input697 > THRESHOLD) then
                         code_temp <= "001"; 
-                    elsif input770 > input697 and input770 > input852 and input770 > input941 then
+                    elsif (input770 > input697 and input770 > input852 and input770 > input941) and (input770 > THRESHOLD) then
                         code_temp <= "010"; 
-                    elsif input852 > input697 and input852 > input770 and input852 > input941 then
+                    elsif (input852 > input697 and input852 > input770 and input852 > input941) and (input852 > THRESHOLD) then
                         code_temp <= "011"; 
-                    elsif input941 > input697 and input941 > input770 and input941 > input852 then
+                    elsif (input941 > input697 and input941 > input770 and input941 > input852) and (input941 > THRESHOLD) then
                         code_temp <= "100";  
                     else
                         --out_temp <= (others => '0'); -- Equal case, could also set to either input1 or input2

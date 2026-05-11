@@ -1,7 +1,8 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-
+use std.textio.all;
+use ieee.std_logic_textio.all;
 entity tb_dtmf_integration is
 end entity;
 
@@ -86,6 +87,24 @@ architecture sim of tb_dtmf_integration is
         end if;
     end function;
 
+    -- Fungsi untuk menerjemahkan nilai biner 3-bit menjadi karakter nada DTMF yang mudah dibaca
+    function code_to_char(
+        code3 : std_logic_vector(2 downto 0)
+    ) return string is
+    begin
+        case code3 is
+            when "000" => return "1";
+            when "001" => return "2";
+            when "010" => return "4";
+            when "011" => return "5";
+            when "100" => return "7";
+            when "101" => return "8";
+            when "110" => return "*";
+            when "111" => return "0";
+            when others => return "?";
+        end case;
+    end function;
+
 begin
     -- 1) Clock generator
     clk <= not clk after CLK_PERIOD / 2;
@@ -108,27 +127,27 @@ begin
     end process;
 
     -- 2) Audio loopback: sender output -> receiver input
-    audio_loopback <= std_logic_vector(sender_dtmf_out);
+    -- audio_loopback <= std_logic_vector(sender_dtmf_out); -- Diganti dengan input file eksternal
 
     -- 3) Sender UUT: DTMF tone generator
-    UUT_SENDER : entity work.generate_dtmf_signed(rtl)
-    generic map (
-        addr_bits => 9,
-        data_bits => 16
-    )
-    port map (
-        clk => clk,
-        rst => sender_rst,
-        command => sender_command,
-        tone_digit => sender_tone_digit,
-        dtmf_out => sender_dtmf_out
-    );
+    -- UUT_SENDER : entity work.generate_dtmf_signed(rtl)
+    -- generic map (
+    --     addr_bits => 9,
+    --     data_bits => 16
+    -- )
+    -- port map (
+    --     clk => clk,
+    --     rst => sender_rst,
+    --     command => sender_command,
+    --     tone_digit => sender_tone_digit,
+    --     dtmf_out => sender_dtmf_out
+    -- );
 
     -- Drive sender/receiver enables from transmission state.
-    sender_command <= '1' when tx_state = TX_TRANSMIT else '0';
-    sender_rst <= '0' when (rst = '0' and tx_state = TX_TRANSMIT) else '1';
-    sender_tone_digit <= segment_to_tone(tx_segment_counter, test_key_in) when tx_state = TX_TRANSMIT else (others => '0');
-    goertzel_enable <= '1' when tx_state = TX_TRANSMIT else '0';
+    -- sender_command <= '1' when tx_state = TX_TRANSMIT else '0';
+    -- sender_rst <= '0' when (rst = '0' and tx_state = TX_TRANSMIT) else '1';
+    -- sender_tone_digit <= segment_to_tone(tx_segment_counter, test_key_in) when tx_state = TX_TRANSMIT else (others => '0');
+    -- goertzel_enable <= '1' when tx_state = TX_TRANSMIT else '0';
 
     -- Accept only first 8 payload symbols (bit3='1') for key reconstruction.
     SHIFT_ADD_INPUT_CTRL : process(clk)
@@ -140,8 +159,9 @@ begin
             else
                 shift_add_valid_in <= '0';
                 if (dtmf_code_valid = '1') and (dtmf_code_4bit(3) = '1') and (payload_symbol_count < 8) then
-                    report "RX payload symbol[" & integer'image(payload_symbol_count) & "]=" &
-                           integer'image(to_integer(unsigned(dtmf_code_4bit(2 downto 0)))) severity note;
+                    report "RX payload symbol[" & integer'image(payload_symbol_count) & "] = Nada '" &
+                           code_to_char(dtmf_code_4bit(2 downto 0)) & "' (Indeks " &
+                           integer'image(to_integer(unsigned(dtmf_code_4bit(2 downto 0)))) & ")" severity note;
                     payload_symbol_count <= payload_symbol_count + 1;
                     shift_add_valid_in <= '1';
                 end if;
@@ -150,44 +170,30 @@ begin
     end process;
 
     -- Sender control FSM in TB (10 segments, each 20 ms tone + 20 ms silence)
-    TX_FSM_PROC : process(clk)
+    -- Proses ini digantikan dengan proses membaca file MATLAB.
+    FILE_READ_PROC: process(clk)
+        -- Sesuaikan path ini dengan direktori simulasi tools Anda (misal: ModelSim/Questa).
+        -- Jika gagal membaca, gunakan "Absolute Path" (contoh: "D:/Users/.../audio_test.txt")
+        file audio_file : text open read_mode is "../MATLAB/DTMF-Generation/audio_test.txt";
+        variable text_line : line;
+        variable audio_data_var : std_logic_vector(15 downto 0);
     begin
         if rising_edge(clk) then
             if rst = '1' then
-                tx_state <= TX_IDLE;
-                tx_sample_counter <= 0;
-                tx_segment_counter <= 0;
+                audio_loopback <= (others => '0');
+                goertzel_enable <= '0';
             elsif sample_tick = '1' then
-                case tx_state is
-                    when TX_IDLE =>
-                        tx_sample_counter <= 0;
-                        tx_segment_counter <= 0;
-
-                        if start_tx = '1' then
-                            tx_state <= TX_TRANSMIT;
-                        end if;
-
-                    when TX_TRANSMIT =>
-                        if tx_sample_counter = SAMPLES_20MS - 1 then
-                            tx_sample_counter <= 0;
-                            tx_state <= TX_SILENCE;
-                        else
-                            tx_sample_counter <= tx_sample_counter + 1;
-                        end if;
-
-                    when TX_SILENCE =>
-                        if tx_sample_counter = SAMPLES_20MS - 1 then
-                            tx_sample_counter <= 0;
-                            if tx_segment_counter < 9 then
-                                tx_segment_counter <= tx_segment_counter + 1;
-                                tx_state <= TX_TRANSMIT;
-                            else
-                                tx_state <= TX_IDLE;
-                            end if;
-                        else
-                            tx_sample_counter <= tx_sample_counter + 1;
-                        end if;
-                end case;
+                -- Membaca data baru setiap siklus frekuensi sampling (32 kHz)
+                if not endfile(audio_file) then
+                    readline(audio_file, text_line);
+                    hread(text_line, audio_data_var); -- Konversi HEX ke std_logic_vector
+                    audio_loopback <= audio_data_var;
+                    goertzel_enable <= '1'; -- Aktifkan penerima saat data tersedia
+                else
+                    -- Jika file habis (EOF), beri silence & matikan receiver
+                    audio_loopback <= (others => '0');
+                    goertzel_enable <= '0';
+                end if;
             end if;
         end if;
     end process;
@@ -262,8 +268,8 @@ begin
         rst <= '0';
         wait for 10 * CLK_PERIOD;
 
-        -- Load test key
-        test_key_in <= x"A5C3B1";
+        -- Load test key (Sesuaikan dengan hasil decode dari MATLAB Golden Model)
+        test_key_in <= x"29CBB8";
         wait for 5 * CLK_PERIOD;
 
         -- Pulse start trigger
