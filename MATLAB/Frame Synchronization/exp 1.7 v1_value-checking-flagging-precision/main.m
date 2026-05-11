@@ -21,7 +21,7 @@ tones = [
 % Generate base noise and tones signal
 base_signal = [(4*rand(1, 1280))-2, ...   % Initial noise
                tones(2, :), ...          % Tone '#'
-               tones(1, :), ...          % Tone '3'
+               tones(2, :), ...          % Tone '#'
                tones(1, :), ...          % Tone '3'
                tones(2, :),...          % Tone '#'
                4*(rand(1, 1280))-2];      % Final noise
@@ -36,8 +36,8 @@ grid on;
 
 
 % Frame parameters
-frame_size = 32;                         % Frame size
-batch_size = 20;                         % Batch size
+frame_size = 40;                         % Frame size
+batch_size = 16;                         % Batch size
 
 % DTMF frequencies
 dtmf_freqs = [697, 941, 1477];
@@ -55,15 +55,21 @@ fprintf('Currently processing condition without AWGN.\n');
 % Step 1: Multiply input signal with reference sine and cosine
 mult_sinbase = sin_mult(base_signal, refsins);
 mult_cosbase = cosines_mult(base_signal, refcosines);
+check_range(mult_sinbase, 'MULT SIN');
+check_range(mult_cosbase, 'MULT COS');
 
 % Step 2: Accumulate data for framing
 [acc_sinbase, acc_cosbase] = accu(mult_sinbase, mult_cosbase, frame_size);
+check_range(acc_sinbase, 'ACC SIN');
+check_range(acc_cosbase, 'ACC COS');
 
 % Step 3: Calculate total power from sin and cos accumulations
 total_power = total_calc(acc_sinbase, acc_cosbase);
+check_range(total_power, 'TOTAL POWER');
 
 % Step 4: Perform sliding window batch summation
 batch_sums = sliding(total_power, batch_size);
+check_range(batch_sums, 'BATCH SUM');
 
 % Step 5: Flagging for specific DTMF frequencies [941 Hz and 1477 Hz]
 [detect_enable_941, detect_enable_1477, precision_enable] = flagging(batch_sums);
@@ -83,6 +89,8 @@ hold on;
 for freq_idx = 1:3
     plot(1:size(batch_sums, 1), batch_sums(:, freq_idx), 'DisplayName', ['Frequency ', num2str(dtmf_freqs(freq_idx)), ' Hz'], 'LineWidth', 3);
 end
+plot(nan, nan, 'w', 'DisplayName', ['Frame Size = ', num2str(frame_size)]);
+plot(nan, nan, 'w', 'DisplayName', ['Batch Size = ', num2str(batch_size)]);
 xlabel('Sliding Window Index');
 ylabel('Accumulated Power (Batch)');
 title('Sliding Window Batch Accumulation for DTMF Frequencies');

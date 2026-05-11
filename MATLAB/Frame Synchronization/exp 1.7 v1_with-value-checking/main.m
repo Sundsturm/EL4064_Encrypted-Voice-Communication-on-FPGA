@@ -21,7 +21,7 @@ tones = [
 % Generate base noise and tones signal
 base_signal = [(4*rand(1, 1280))-2, ...   % Initial noise
                tones(2, :), ...          % Tone '#'
-               tones(2, :), ...          % Tone '#'
+               tones(1, :), ...          % Tone '3'
                tones(1, :), ...          % Tone '3'
                tones(2, :),...          % Tone '#'
                4*(rand(1, 1280))-2];      % Final noise
