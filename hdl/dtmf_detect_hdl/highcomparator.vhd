@@ -21,6 +21,10 @@ architecture Behavioral of highcomparator is
     --signal temp1, temp2, out_temp : STD_LOGIC_VECTOR(16 downto 0);
     signal state    : state_type;
     signal code_temp: STD_LOGIC_VECTOR(2 downto 0);
+    
+    -- Ambang batas daya (Power Threshold)
+    -- Jika nilai daya tertinggi masih di bawah nilai ini, ia akan dianggap sebagai NOISE / SILENCE.
+    constant THRESHOLD : STD_LOGIC_VECTOR(16 downto 0) := "00000100100000000"; -- x"003E8"
 
 begin
     process(state)
@@ -53,11 +57,11 @@ begin
                     end if;
                 
                 when COMPUTE =>
-                    if input1209 > input1336 and input1209 > input1477 then
+                    if (input1209 > input1336 and input1209 > input1477) and (input1209 > THRESHOLD) then
                         code_temp <= "001"; 
-                    elsif input1336 > input1209 and input1336 > input1477 then
+                    elsif (input1336 > input1209 and input1336 > input1477) and (input1336 > THRESHOLD) then
                         code_temp <= "010"; 
-                    elsif input1477 > input1209 and input1477 > input1336 then
+                    elsif (input1477 > input1209 and input1477 > input1336) and (input1477 > THRESHOLD) then
                         code_temp <= "011"; 
                     else
                         --out_temp <= (others => '0'); -- Equal case, could also set to either input1 or input2
