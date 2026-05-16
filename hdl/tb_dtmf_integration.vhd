@@ -29,7 +29,7 @@ architecture sim of tb_dtmf_integration is
     type tx_state_type is (TX_IDLE, TX_TRANSMIT, TX_SILENCE);
     signal tx_state : tx_state_type := TX_IDLE;
     signal tx_sample_counter : integer range 0 to SAMPLES_20MS := 0;
-    signal tx_segment_counter : integer range 0 to 9 := 0;
+    signal tx_segment_counter : integer range 0 to 11 := 0;
     signal goertzel_enable : std_logic := '0';
     signal sample_div_counter : integer range 0 to CLK_PER_SAMPLE-1 := 0;
     signal sample_tick : std_logic := '0';
@@ -69,9 +69,13 @@ architecture sim of tb_dtmf_integration is
         if segment_idx = 0 then
             return "1000000001"; -- '#'
         elsif segment_idx = 1 then
+            return "1000000001"; -- '#'
+        elsif segment_idx = 2 then
             return "0000000100"; -- '3'
+        elsif segment_idx = 3 then
+            return "1000000001"; -- '#'
         else
-            bit_hi := 23 - ((segment_idx - 2) * 3);
+            bit_hi := 23 - ((segment_idx - 4) * 3);
             key_bits := key24(bit_hi downto bit_hi - 2);
 
             case key_bits is
@@ -169,7 +173,7 @@ begin
         end if;
     end process;
 
-    -- Sender control FSM in TB (10 segments, each 20 ms tone + 20 ms silence)
+    -- Sender control FSM in TB (12 segments, each 20 ms tone + 20 ms silence)
     -- Proses ini digantikan dengan proses membaca file MATLAB.
     FILE_READ_PROC: process(clk)
         -- Sesuaikan path ini dengan direktori simulasi tools Anda (misal: ModelSim/Questa).
@@ -277,8 +281,8 @@ begin
         wait for 1 ms;
         start_tx <= '0';
 
-        -- Wait long enough for 10 segments + receiver pipeline latency margin.
-        wait for 520 ms;
+        -- Wait long enough for 12 segments + receiver pipeline latency margin.
+        wait for 600 ms;
 
         -- Result check
         if reconstructed_key_out = test_key_in then

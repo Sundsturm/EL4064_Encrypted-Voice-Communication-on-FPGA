@@ -57,8 +57,7 @@ begin
                 in_valid_mark   <= '0';
                 out_ready_mark  <= '0';
             end if;
-            
-            mark_out <= mark_in;            
+            mark_out <= mark_enable;            
         end if;
     end process;
 end Behavioral;

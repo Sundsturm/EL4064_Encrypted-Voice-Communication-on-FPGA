@@ -62,6 +62,10 @@ architecture rtl of AcakCakap_Top is
 	signal shift_key  : std_logic_vector(23 downto 0);
 	signal sync_start : std_logic := '0';
 	
+	-- Receiver Sync Shift Register Array
+	type sync_shift_reg_type is array (0 to 6) of std_logic_vector(3 downto 0);
+	signal sync_shift_reg : sync_shift_reg_type := (others => (others => '0'));
+	
 	-- For interfacing with correlator
 	signal corr_out_valid : std_logic;
 	signal out_valid : std_logic;
@@ -288,39 +292,43 @@ begin
 	-- Phase 1: prepare 24-bit key source for segmentation.
 	shift_key_24bit <= shift_key;
 
-	-- Combinational multiplexer: for segment 2..9 select one 3-bit key segment.
+	-- Combinational multiplexer: for segment 4..11 select one 3-bit key segment.
 	SEGMENT_MUX : process(shift_key_24bit, segment_counter)
 	begin
 		case to_integer(segment_counter) is
-			when 2 =>
-				current_3bit_segment <= shift_key_24bit(23 downto 21);
-			when 3 =>
-				current_3bit_segment <= shift_key_24bit(20 downto 18);
 			when 4 =>
-				current_3bit_segment <= shift_key_24bit(17 downto 15);
+				current_3bit_segment <= shift_key_24bit(23 downto 21);
 			when 5 =>
-				current_3bit_segment <= shift_key_24bit(14 downto 12);
+				current_3bit_segment <= shift_key_24bit(20 downto 18);
 			when 6 =>
-				current_3bit_segment <= shift_key_24bit(11 downto 9);
+				current_3bit_segment <= shift_key_24bit(17 downto 15);
 			when 7 =>
-				current_3bit_segment <= shift_key_24bit(8 downto 6);
+				current_3bit_segment <= shift_key_24bit(14 downto 12);
 			when 8 =>
-				current_3bit_segment <= shift_key_24bit(5 downto 3);
+				current_3bit_segment <= shift_key_24bit(11 downto 9);
 			when 9 =>
+				current_3bit_segment <= shift_key_24bit(8 downto 6);
+			when 10 =>
+				current_3bit_segment <= shift_key_24bit(5 downto 3);
+			when 11 =>
 				current_3bit_segment <= shift_key_24bit(2 downto 0);
 			when others =>
 				current_3bit_segment <= (others => '0');
 		end case;
 	end process;
 
-	-- Combinational decoder with preamble: [0]='#', [1]='3', [2..9]=encoded key.
+	-- Combinational decoder with preamble: [0]='#', [1]='#', [2]='3', [3]='#', [4..11]=encoded key.
 	SEGMENT_TO_DTMF_DECODER : process(segment_counter, current_3bit_segment)
 	begin
 		case to_integer(segment_counter) is
 			when 0 =>
 				dtmf_digit_to_send <= "1000000001"; -- DTMF '#'
 			when 1 =>
+				dtmf_digit_to_send <= "1000000001"; -- DTMF '#'
+			when 2 =>
 				dtmf_digit_to_send <= "0000000100"; -- DTMF '3'
+			when 3 =>
+				dtmf_digit_to_send <= "1000000001"; -- DTMF '#'
 			when others =>
 				case current_3bit_segment is
 					when "000" => -- DTMF '3'
@@ -378,7 +386,7 @@ begin
 						dtmf_tone_enable <= '0';
 						if sample_counter = SAMPLES_20MS - 1 then
 							sample_counter <= 0;
-							if segment_counter < to_unsigned(9, segment_counter'length) then
+							if segment_counter < to_unsigned(11, segment_counter'length) then
 								segment_counter <= segment_counter + 1;
 								current_state <= TRANSMIT;
 							else
@@ -416,6 +424,30 @@ begin
 			end case;
 		end if;
 	end process;
+
+	-- Receiver Sync Shift Register (Pattern Matcher)
+	process(clk)
+	begin
+		if rising_edge(clk) then
+			if rst = '1' then
+				sync_shift_reg <= (others => (others => '0'));
+				sync_start <= '0';
+			elsif dtmf_code_valid = '1' then
+				-- Shift left
+				sync_shift_reg(0 to 5) <= sync_shift_reg(1 to 6);
+				sync_shift_reg(6) <= dtmf_code_4bit;
+				
+				-- Check sequence: # (0010), Silence (0000), # (0010), Silence (0000), 3 (0011), Silence (0000), # (0010)
+				if sync_shift_reg(1) = "0010" and sync_shift_reg(2) = "0000" and
+				   sync_shift_reg(3) = "0010" and sync_shift_reg(4) = "0000" and
+				   sync_shift_reg(5) = "0011" and sync_shift_reg(6) = "0000" and
+				   dtmf_code_4bit = "0010" then
+					sync_start <= '1';
+				end if;
+			end if;
+		end if;
+	end process;
+
 
 end rtl;
 

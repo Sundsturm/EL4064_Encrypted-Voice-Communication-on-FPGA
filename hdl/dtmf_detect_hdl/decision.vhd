@@ -91,6 +91,12 @@ begin
                     elsif codelow = "100" and codehigh = "010" then
                         code_temp <= "1111"; -- DTMF 0
                         sevseg      <= "1000000";
+                    elsif codelow = "100" and codehigh = "011" then
+                        code_temp <= "0010"; -- DTMF # (sync sequence)
+                        sevseg      <= "0001000"; -- Custom sevseg for #
+                    elsif codelow = "001" and codehigh = "011" then
+                        code_temp <= "0011"; -- DTMF 3 (sync sequence)
+                        sevseg      <= "0110000"; -- '3'
                     else
                         code_temp <= "0000";
                         sevseg      <= "1111111";
