@@ -19,7 +19,12 @@ function [reconstructed_key, sync_lock_index, batch_sums] = dtmf_receiver_top(si
 
     % 1. Fase Demodulator IQ Kuadratur untuk Sinkronisasi Preamble
     fprintf('\n--- TAHAP 1: DETEKSI PREAMBLE & SINKRONISASI BINGKAI ---\n');
-    [sync_lock_index, batch_sums] = dtmf_iq_demodulator(sinyal_input, Fs);
+    
+    % Tambahkan path ke modul Sinkronisasi Bingkai v5 Kean
+    v5_path = fullfile(fileparts(mfilename('fullpath')), '..', '..', 'Frame Synchronization', 'exp 1.7 fixed point v5');
+    addpath(v5_path);
+    
+    [sync_lock_index, batch_sums] = frame_sync_top(sinyal_input, Fs);
     
     % Periksa apakah sinyal setelah sync_lock_index cukup untuk 8 simbol Payload
     if length(sinyal_input) < sync_lock_index + (8 * N)
