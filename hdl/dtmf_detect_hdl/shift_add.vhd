@@ -11,13 +11,13 @@ entity shift_add is
         in_ready    : out STD_LOGIC;
         out_valid   : out STD_LOGIC;
         input3      : in  std_logic_vector(3 downto 0); -- Input signal
-        output32    : out std_logic_vector(23 downto 0) -- Output signal
+        output32    : out std_logic_vector(31 downto 0) -- Output signal
     );
 end shift_add;
 
 architecture Behavioral of shift_add is
     signal counter   : integer range 0 to 8 := 0;
-    signal temp_sig  : std_logic_vector(23 downto 0) := (others => '0');
+    signal temp_sig  : std_logic_vector(31 downto 0) := (others => '0');
     type state_type is (IDLE, COMPUTE, STORE);
     signal state    : state_type;
 begin
@@ -48,14 +48,9 @@ begin
                     end if;
                 
                 when COMPUTE =>
-                    if input3(3) = '1' then
-                        temp_sig <= std_logic_vector(shift_left(unsigned(temp_sig), 3));
-                        temp_sig(2 downto 0) <= input3(2 downto 0);
-                        counter <= counter + 1;
-                    else
-                        temp_sig <= temp_sig;
-                        counter <= counter;
-                    end if;
+                    temp_sig <= std_logic_vector(shift_left(unsigned(temp_sig), 4));
+                    temp_sig(3 downto 0) <= input3;
+                    counter <= counter + 1;
                     state <= STORE;
 
                 when STORE =>

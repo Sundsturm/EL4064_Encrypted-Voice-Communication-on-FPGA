@@ -18,6 +18,9 @@ port
 	------------ SW ------------
 	SW              	:in    	std_logic_vector(9 downto 0);
 
+	------------ UART ------------
+	UART_RXD        	:in    	std_logic;
+
 	------------ LED ------------
 	LEDR            	:out   	std_logic_vector(9 downto 0);
 
@@ -84,9 +87,10 @@ architecture rtl of AcakCakap_Top is
 	signal power_1209 : std_logic_vector(16 downto 0);
 	signal power_1336 : std_logic_vector(16 downto 0);
 	signal power_1477 : std_logic_vector(16 downto 0);
+	signal power_1633 : std_logic_vector(16 downto 0);
 	signal dtmf_code_4bit : std_logic_vector(3 downto 0);
 	signal dtmf_code_valid : std_logic;
-	signal reconstructed_key_24bit : std_logic_vector(23 downto 0);
+	signal reconstructed_key_32bit : std_logic_vector(31 downto 0);
 	signal shift_add_in_ready : std_logic;
 	signal shift_add_out_valid : std_logic;
 	
@@ -99,14 +103,21 @@ architecture rtl of AcakCakap_Top is
 	signal dtmf_lout : signed(15 downto 0);  -- intermediate; Lout driven via MUX
 	signal command : std_logic;
 	signal dtmf_out : signed(15 downto 0);
-	signal tone_digit : std_logic_vector(9 downto 0);
+	signal tone_digit : std_logic_vector(3 downto 0);
 	signal shift_key_24bit : std_logic_vector(23 downto 0);
+    signal payload_data : std_logic_vector(31 downto 0);
 	signal segment_counter : unsigned(3 downto 0) := (others => '0');
-	signal current_3bit_segment : std_logic_vector(2 downto 0);
-	signal dtmf_digit_to_send : std_logic_vector(9 downto 0);
+	signal current_4bit_segment : std_logic_vector(3 downto 0);
+	signal dtmf_digit_to_send : std_logic_vector(3 downto 0);
+	
+	-- %% UART Interface %%
+	signal uart_rx_data  : std_logic_vector(7 downto 0);
+	signal uart_rx_valid : std_logic;
+	signal uart_key_reg  : std_logic_vector(31 downto 0) := (others => '0');
+	signal uart_trigger  : std_logic := '0';
 	
 	-- Phase 2 FSM sender control
-	type state_type is (IDLE, TRANSMIT, SILENCE);
+	type state_type is (IDLE, TRANSMIT);
 	signal current_state : state_type := IDLE;
 	signal sample_counter : integer range 0 to 640 := 0;
 	signal start_transmission : std_logic := '0';
@@ -123,26 +134,26 @@ architecture rtl of AcakCakap_Top is
 	signal button_state : command_state;
 	
 	-- Scrambler Component declaration (Verilog entity)
-	component Scrambler_TOP
-	port (
-		clock  	  : in std_logic;
-		reset      : in std_logic;
-		di_en 	  : in std_logic;
-		shift_key  : in std_logic_vector(23 downto 0);
-		in_real	  : in std_logic_vector(15 downto 0);
-		do_en	  	  : out std_logic;
-		out_real   : out std_logic_vector(15 downto 0)
-	);
-	end component Scrambler_TOP;
+	-- component Scrambler_TOP
+	-- port (
+	-- 	clock  	  : in std_logic;
+	-- 	reset      : in std_logic;
+	-- 	di_en 	  : in std_logic;
+	-- 	shift_key  : in std_logic_vector(23 downto 0);
+	-- 	in_real	  : in std_logic_vector(15 downto 0);
+	-- 	do_en	  	  : out std_logic;
+	-- 	out_real   : out std_logic_vector(15 downto 0)
+	-- );
+	-- end component Scrambler_TOP;
 
 begin
 
 -- body --
 	clk <= AUD_XCK;
 	rst <= not KEY(0);
-	start_transmission <= command;
+	start_transmission <= command OR uart_trigger; -- Dual-trigger mechanism
 	goertzel_enable <= enable;
-	shift_key <= reconstructed_key_24bit;
+	shift_key <= reconstructed_key_32bit(23 downto 0); -- Loopback legacy support (jika dibutuhkan)
 	
 	-- Audio interface core instantiation
 	Audio_interface: entity work.Audio_interface
@@ -182,17 +193,53 @@ begin
 		dtmf_out => dtmf_lout
 	);
 	
-	-- Scrambler instance
-	Scrambler_interface: Scrambler_TOP
+	-- Scrambler instance (COMMENTED OUT)
+	-- Scrambler_interface: Scrambler_TOP
+	-- port map (
+	-- 	clock => AUD_XCK,
+	-- 	reset => not KEY(0),
+	-- 	di_en => sync_start,
+	-- 	do_en => do_en,
+	-- 	shift_key => shift_key,
+	-- 	in_real => in_real,
+	-- 	out_real => out_real
+	-- );
+	
+	-- =========================================================
+	-- UART RX & Protocol Instance
+	-- Beroperasi di AUD_XCK (18.432 MHz) untuk sinkronisasi FSM
+	-- =========================================================
+	UART_RX_INST : entity work.uart_rx
+	generic map (
+		CLKS_PER_BIT => 160 -- 18.432 MHz / 115200 bps
+	)
 	port map (
-		clock => AUD_XCK,
-		reset => not KEY(0),
-		di_en => sync_start,
-		do_en => do_en,
-		shift_key => shift_key,
-		in_real => in_real,
-		out_real => out_real
+		clk       => AUD_XCK,
+		rst       => not KEY(0),
+		rx        => UART_RXD,
+		data_out  => uart_rx_data,
+		rx_valid  => uart_rx_valid
 	);
+
+	UART_PROTOCOL_FSM : process(AUD_XCK)
+	begin
+		if rising_edge(AUD_XCK) then
+			if KEY(0) = '0' then
+				uart_key_reg <= (others => '0');
+				uart_trigger <= '0';
+			else
+				uart_trigger <= '0'; -- Default to no trigger
+				if uart_rx_valid = '1' then
+					if uart_rx_data = x"0A" then -- 0x0A is Line Feed (\n)
+						uart_trigger <= '1';
+					else
+						-- Geser byte masuk ke LSB
+						uart_key_reg <= uart_key_reg(23 downto 0) & uart_rx_data;
+					end if;
+				end if;
+			end if;
+		end if;
+	end process;
 	
 	-- DTMF Correlator instantiation
 	DTMF_corr: entity work.toplevel_iq
@@ -241,7 +288,8 @@ begin
 		power_941 => power_941,
 		power_1209 => power_1209,
 		power_1336 => power_1336,
-		power_1477 => power_1477
+		power_1477 => power_1477,
+		power_1633 => power_1633
 	);
 
 	DTMF_ENCODER_RX : entity work.top_dtmfencode
@@ -257,11 +305,12 @@ begin
 		corr_1209 => power_1209,
 		corr_1336 => power_1336,
 		corr_1477 => power_1477,
+		corr_1633 => power_1633,
 		out_ready => '1',
 		out_valid => out_valid,
-		sevseg    => HEX0,
+		sevseg    => open, -- Tidak dipakai langsung, digantikan MUX Visualisasi
 		anode     => anode,
-		encode_out => encode_out,
+		encode_out => reconstructed_key_32bit,
 		dtmf_code_4bit => dtmf_code_4bit,
 		dtmf_code_valid => dtmf_code_valid
 	);
@@ -275,79 +324,53 @@ begin
 		in_ready => shift_add_in_ready,
 		out_valid => shift_add_out_valid,
 		input3   => dtmf_code_4bit,
-		output32 => reconstructed_key_24bit
+		output32 => open -- Dipetakan melalui encode_out
 	);
 	
 
 	-- =========================================================
-	-- MUX: SW(9)='0' → Bypass (ADC loopback ke DAC, tanpa Scrambler)
-	--      SW(9)='1' → Normal (keluaran Scrambler ke DAC)
-	-- Catatan: pada Normal Mode, DTMF sync tone (dtmf_lout) dijumlahkan
-	-- secara konseptual di luar MUX ini; jika perlu mixing, ganti
-	-- signed(out_real) dengan dtmf_lout + signed(out_real).
+	-- AUDIO LOOPBACK MUX (SCRAMBLER DISABLED)
 	-- =========================================================
-	Lout <= Lin                when SW(9) = '0' else signed(out_real);
-	Rout <= Rin                when SW(9) = '0' else signed(out_real);
+	-- Menjumlahkan langsung audio input dari mic dengan DTMF dari TX generator
+	Lout <= Lin + dtmf_lout;
+	Rout <= Rin + dtmf_lout;
 
-	-- Phase 1: prepare 24-bit key source for segmentation.
+	-- Phase 1: prepare 32-bit key source for segmentation.
 	shift_key_24bit <= shift_key;
+	
+	-- MUX untuk Injeksi Kunci Dinamis
+	-- Jika SW(8) = '1', gunakan kunci dinamis dari injeksi memori UART
+	-- Jika SW(8) = '0', gunakan kunci statis kombinasi fisik SW(7 downto 0)
+    payload_data <= uart_key_reg when SW(8) = '1' else 
+                    SW(7 downto 0) & SW(7 downto 0) & SW(7 downto 0) & SW(7 downto 0);
 
-	-- Combinational multiplexer: for segment 4..11 select one 3-bit key segment.
-	SEGMENT_MUX : process(shift_key_24bit, segment_counter)
+	-- Combinational multiplexer: for segment 4..11 select one 4-bit key segment.
+	SEGMENT_MUX : process(payload_data, segment_counter)
 	begin
 		case to_integer(segment_counter) is
-			when 4 =>
-				current_3bit_segment <= shift_key_24bit(23 downto 21);
-			when 5 =>
-				current_3bit_segment <= shift_key_24bit(20 downto 18);
-			when 6 =>
-				current_3bit_segment <= shift_key_24bit(17 downto 15);
-			when 7 =>
-				current_3bit_segment <= shift_key_24bit(14 downto 12);
-			when 8 =>
-				current_3bit_segment <= shift_key_24bit(11 downto 9);
-			when 9 =>
-				current_3bit_segment <= shift_key_24bit(8 downto 6);
-			when 10 =>
-				current_3bit_segment <= shift_key_24bit(5 downto 3);
-			when 11 =>
-				current_3bit_segment <= shift_key_24bit(2 downto 0);
-			when others =>
-				current_3bit_segment <= (others => '0');
+			when 4 => current_4bit_segment <= payload_data(31 downto 28);
+			when 5 => current_4bit_segment <= payload_data(27 downto 24);
+			when 6 => current_4bit_segment <= payload_data(23 downto 20);
+			when 7 => current_4bit_segment <= payload_data(19 downto 16);
+			when 8 => current_4bit_segment <= payload_data(15 downto 12);
+			when 9 => current_4bit_segment <= payload_data(11 downto 8);
+			when 10 => current_4bit_segment <= payload_data(7 downto 4);
+			when 11 => current_4bit_segment <= payload_data(3 downto 0);
+			when others => current_4bit_segment <= (others => '0');
 		end case;
 	end process;
 
 	-- Combinational decoder with preamble: [0]='#', [1]='#', [2]='3', [3]='#', [4..11]=encoded key.
-	SEGMENT_TO_DTMF_DECODER : process(segment_counter, current_3bit_segment)
+	SEGMENT_TO_DTMF_DECODER : process(segment_counter, current_4bit_segment)
 	begin
 		case to_integer(segment_counter) is
-			when 0 =>
-				dtmf_digit_to_send <= "1000000001"; -- DTMF '#'
-			when 1 =>
-				dtmf_digit_to_send <= "1000000001"; -- DTMF '#'
+			when 0 | 1 | 3 =>
+				dtmf_digit_to_send <= x"F"; -- DTMF '#'
 			when 2 =>
-				dtmf_digit_to_send <= "0000000100"; -- DTMF '3'
-			when 3 =>
-				dtmf_digit_to_send <= "1000000001"; -- DTMF '#'
+				dtmf_digit_to_send <= x"3"; -- DTMF '3'
 			when others =>
-				case current_3bit_segment is
-					when "000" => -- DTMF '3'
-						dtmf_digit_to_send <= "0000000100";
-					when "001" => -- DTMF '2'
-						dtmf_digit_to_send <= "0000000010";
-					when "010" => -- DTMF '4'
-						dtmf_digit_to_send <= "0000001000";
-					when "011" => -- DTMF '5'
-						dtmf_digit_to_send <= "0000010000";
-					when "100" => -- DTMF '7'
-						dtmf_digit_to_send <= "0001000000";
-					when "101" => -- DTMF '8'
-						dtmf_digit_to_send <= "0010000000";
-					when "110" => -- DTMF '0'
-						dtmf_digit_to_send <= "0000000000";
-					when others => -- "111" -> DTMF '*'
-						dtmf_digit_to_send <= "1000000000";
-				end case;
+                -- Segmen 4 s.d 11 adalah Payload
+				dtmf_digit_to_send <= current_4bit_segment;
 		end case;
 	end process;
 
@@ -377,18 +400,10 @@ begin
 						dtmf_tone_enable <= '1';
 						if sample_counter = SAMPLES_20MS - 1 then
 							sample_counter <= 0;
-							current_state <= SILENCE;
-						else
-							sample_counter <= sample_counter + 1;
-						end if;
-
-					when SILENCE =>
-						dtmf_tone_enable <= '0';
-						if sample_counter = SAMPLES_20MS - 1 then
-							sample_counter <= 0;
+							-- Sekuens 12 Simbol (Index 0 sampai 11)
 							if segment_counter < to_unsigned(11, segment_counter'length) then
 								segment_counter <= segment_counter + 1;
-								current_state <= TRANSMIT;
+								current_state <= TRANSMIT; -- Langsung sambung (NO SILENCE)
 							else
 								current_state <= IDLE;
 							end if;
@@ -407,21 +422,70 @@ begin
 			LED <= '0';
 			button_state <= WAIT_FOR_PRESS;
 			command <= '0';
-		elsif(AUD_XCK'event and AUD_XCK='1') then
-			command <= '0';
-			case button_state is
+		elsif(rising_edge(AUD_XCK)) then
+			case button_state is 
 				when WAIT_FOR_PRESS =>
-					if(KEY(1)='0') then
+					command <= '0';
+					LED <= '0';
+					if(KEY(1)='0') then 
 						button_state <= WAIT_FOR_RELEASE;
 					end if;
 				when WAIT_FOR_RELEASE =>
-					if(KEY(1)='1') then
+					if(KEY(1)='1') then 
 						button_state <= RELEASE_STATE;
 					end if;
-				when RELEASE_STATE =>
+				when RELEASE_STATE => 
 					command <= '1';
+					LED <= '1';
 					button_state <= WAIT_FOR_PRESS;
 			end case;
+		end if;
+	end process;
+
+	-- =========================================================
+	-- TUGAS 3: MULTIPLEXING VISUALISASI SEVEN-SEGMENT
+	-- =========================================================
+	VISUALIZATION_MUX : process(SW(0), reconstructed_key_32bit)
+		-- Fungsi internal konversi HEX ke Seven-Segment (Active-Low)
+		function hex_to_sevseg(hex_in : std_logic_vector(3 downto 0)) return std_logic_vector is
+		begin
+			case hex_in is
+				when x"0" => return "1000000";
+				when x"1" => return "1111001";
+				when x"2" => return "0100100";
+				when x"3" => return "0110000";
+				when x"4" => return "0011001";
+				when x"5" => return "0010010";
+				when x"6" => return "0000010";
+				when x"7" => return "1111000";
+				when x"8" => return "0000000";
+				when x"9" => return "0010000";
+				when x"A" => return "0001000";
+				when x"B" => return "0000011";
+				when x"C" => return "1000110";
+				when x"D" => return "0100001";
+				when x"E" => return "0000110";
+				when x"F" => return "0001110";
+				when others => return "0111111"; -- Karakter Strip '-'
+			end case;
+		end function;
+	begin
+		if SW(0) = '0' then
+			-- LSB Mode: Tampilkan 24-bit (6 digit) terbawah
+			HEX5 <= hex_to_sevseg(reconstructed_key_32bit(23 downto 20));
+			HEX4 <= hex_to_sevseg(reconstructed_key_32bit(19 downto 16));
+			HEX3 <= hex_to_sevseg(reconstructed_key_32bit(15 downto 12));
+			HEX2 <= hex_to_sevseg(reconstructed_key_32bit(11 downto 8));
+			HEX1 <= hex_to_sevseg(reconstructed_key_32bit(7 downto 4));
+			HEX0 <= hex_to_sevseg(reconstructed_key_32bit(3 downto 0));
+		else
+			-- MSB Mode: Tampilkan 8-bit (2 digit) teratas
+			HEX5 <= hex_to_sevseg(reconstructed_key_32bit(31 downto 28));
+			HEX4 <= hex_to_sevseg(reconstructed_key_32bit(27 downto 24));
+			HEX3 <= "0111111"; -- Karakter Strip '-' (Segmen G menyala)
+			HEX2 <= "0111111";
+			HEX1 <= "0111111";
+			HEX0 <= "0111111";
 		end if;
 	end process;
 

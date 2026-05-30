@@ -29,7 +29,8 @@ entity Goertzel_top is
         power_941    : out std_logic_vector(DATA_WIDTH  downto 0);
         power_1209   : out std_logic_vector(DATA_WIDTH  downto 0);
         power_1336   : out std_logic_vector(DATA_WIDTH  downto 0);
-        power_1477   : out std_logic_vector(DATA_WIDTH  downto 0)
+        power_1477   : out std_logic_vector(DATA_WIDTH  downto 0);
+        power_1633   : out std_logic_vector(DATA_WIDTH  downto 0)
     );
 end Goertzel_top;
 
@@ -42,21 +43,22 @@ architecture rtl of Goertzel_top is
     constant COEFF_1209     : real    := 1.943911740684265;  -- For frequency 1209 Hz
     constant COEFF_1336     : real    := 1.931580353106243;  -- For frequency 1336 Hz
     constant COEFF_1477     : real    := 1.916483020260862;  -- For frequency 1477 Hz
+    constant COEFF_1633     : real    := 1.898236173491410;  -- For frequency 1633 Hz
 
     -- Individual ready/valid signals
     signal ready_697, ready_770, ready_852, ready_941 : std_logic;
-    signal ready_1209, ready_1336, ready_1477 : std_logic;
+    signal ready_1209, ready_1336, ready_1477, ready_1633 : std_logic;
     signal valid_697, valid_770, valid_852, valid_941 : std_logic;
-    signal valid_1209, valid_1336, valid_1477 : std_logic;
+    signal valid_1209, valid_1336, valid_1477, valid_1633 : std_logic;
 
 begin
     -- Top-level ready is high only when all filters are ready
     in_ready <= ready_697 and ready_770 and ready_852 and ready_941 and 
-                ready_1209 and ready_1336 and ready_1477;
+                ready_1209 and ready_1336 and ready_1477 and ready_1633;
     
     -- Top-level valid is high only when all filters are valid
     out_valid <= valid_697 and valid_770 and valid_852 and valid_941 and 
-                 valid_1209 and valid_1336 and valid_1477;
+                 valid_1209 and valid_1336 and valid_1477 and valid_1633;
 
     GOERTZEL_697 : entity work.Goertzel(rtl)
     generic map (
@@ -175,6 +177,23 @@ begin
         in_ready => ready_1477,
         out_valid => valid_1477,
         power => power_1477
+    );
+
+    GOERTZEL_1633 : entity work.Goertzel(rtl)
+    generic map (
+        DATA_WIDTH => DATA_WIDTH,
+        BLOCK_SIZE => BLOCK_SIZE,
+        COEFF      => COEFF_1633 
+    )
+    port map (
+        clk => clk,
+        rst => rst,
+        in_valid => in_valid,
+        DTMF_sig => DTMF_sig,
+        out_ready => out_ready,
+        in_ready => ready_1633,
+        out_valid => valid_1633,
+        power => power_1633
     );
 
 end architecture;

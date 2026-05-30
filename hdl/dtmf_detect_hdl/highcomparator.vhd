@@ -11,6 +11,7 @@ entity highcomparator is
         input1209           : in STD_LOGIC_VECTOR(16 downto 0);
         input1336           : in STD_LOGIC_VECTOR(16 downto 0);
         input1477           : in STD_LOGIC_VECTOR(16 downto 0);
+        input1633           : in STD_LOGIC_VECTOR(16 downto 0);
         code                : out STD_LOGIC_VECTOR (2 downto 0)
     );
 end highcomparator;
@@ -57,15 +58,16 @@ begin
                     end if;
                 
                 when COMPUTE =>
-                    if (input1209 > input1336 and input1209 > input1477) and (input1209 > THRESHOLD) then
+                    if (input1209 > input1336 and input1209 > input1477 and input1209 > input1633) and (input1209 > THRESHOLD) then
                         code_temp <= "001"; 
-                    elsif (input1336 > input1209 and input1336 > input1477) and (input1336 > THRESHOLD) then
+                    elsif (input1336 > input1209 and input1336 > input1477 and input1336 > input1633) and (input1336 > THRESHOLD) then
                         code_temp <= "010"; 
-                    elsif (input1477 > input1209 and input1477 > input1336) and (input1477 > THRESHOLD) then
+                    elsif (input1477 > input1209 and input1477 > input1336 and input1477 > input1633) and (input1477 > THRESHOLD) then
                         code_temp <= "011"; 
+                    elsif (input1633 > input1209 and input1633 > input1336 and input1633 > input1477) and (input1633 > THRESHOLD) then
+                        code_temp <= "100";
                     else
-                        --out_temp <= (others => '0'); -- Equal case, could also set to either input1 or input2
-                        code_temp <= "000"; -- Code for equality
+                        code_temp <= "000"; -- Code for equality / silence
                     end if;
                     state <= STORE;
 

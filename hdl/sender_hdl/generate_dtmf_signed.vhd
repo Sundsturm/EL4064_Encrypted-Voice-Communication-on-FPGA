@@ -12,7 +12,7 @@ entity generate_dtmf_signed is
         clk         : in std_logic;
         rst         : in std_logic;
         command     : in std_logic;
-        tone_digit  : in std_logic_vector(9 downto 0);
+        tone_digit  : in std_logic_vector(3 downto 0);
         dtmf_out    : out signed(data_bits - 1 downto 0)
     );
 end generate_dtmf_signed;
@@ -30,91 +30,62 @@ architecture rtl of generate_dtmf_signed is
 
 begin
 
---    DIGIT_DECODER : process(tone_digit)
---    begin 
---        case tone_digit is
---            WHEN "0000000000" => -- Digit 0
---                phase_incr_low  <= to_unsigned(113006493, phase_incr_low'length); -- Freq 941
---                phase_incr_high <= to_unsigned(153654571, phase_incr_high'length); -- Freq 1336
---            WHEN "0000000001" => -- Digit 1
---                phase_incr_low  <= to_unsigned(86052438, phase_incr_low'length); -- Freq 697
---                phase_incr_high <= to_unsigned(140965780, phase_incr_high'length); -- Freq 1209
---            WHEN "0000000010" => -- Digit 2
---                phase_incr_low  <=  to_unsigned(86052438, phase_incr_low'length); -- Freq 697
---                phase_incr_high <=  to_unsigned(153654571, phase_incr_high'length); -- Freq 1336
---            WHEN "0000000100" => -- Digit 3
---                phase_incr_low  <= to_unsigned(86052438, phase_incr_low'length); -- Freq 697
---                phase_incr_high <= to_unsigned(167343745, phase_incr_high'length); -- Freq 1477
---            WHEN "0000001000" => -- Digit 4
---                phase_incr_low  <= to_unsigned(94273798, phase_incr_low'length); -- Freq 770
---                phase_incr_high <= to_unsigned(140965780, phase_incr_high'length); -- Freq 1209
---            WHEN "0000010000" => -- Digit 5
---                phase_incr_low <= to_unsigned(94273798, phase_incr_low'length); -- Freq 770
---                phase_incr_high <= to_unsigned(153654571, phase_incr_high'length); -- Freq 1336
---            WHEN "0000100000" => -- Digit 6
---                phase_incr_low <= to_unsigned(94273798, phase_incr_low'length); -- Freq 770
---                phase_incr_high <= to_unsigned(167343745, phase_incr_high'length); -- Freq 1477
---            WHEN "0001000000" => -- Digit 7
---                phase_incr_low <= to_unsigned(103347044, phase_incr_low'length); -- Freq 852
---                phase_incr_high <= to_unsigned(140965780, phase_incr_high'length); -- Freq 1209
---            WHEN "0010000000" => -- Digit 8
---                phase_incr_low <= to_unsigned(103347044, phase_incr_low'length); -- Freq 852
---                phase_incr_high <= to_unsigned(153654571, phase_incr_high'length); -- Freq 1336
---            WHEN "0100000000" => -- Digit 9
---                phase_incr_low <= to_unsigned(103347044, phase_incr_low'length); -- Freq 852
---                phase_incr_high <= to_unsigned(167343745, phase_incr_high'length); -- Freq 1477
---            WHEN "1000000000" => -- Digit *
---                phase_incr_low <= to_unsigned(113006493, phase_incr_low'length); -- Freq 941
---                phase_incr_high <= to_unsigned(140965780, phase_incr_high'length); -- Freq 1209;
---            WHEN "1000000001" => -- Digit #
---                phase_incr_low <= to_unsigned(113006493, phase_incr_low'length); -- Freq 941
---                phase_incr_high <= to_unsigned(167343745, phase_incr_high'length); -- Freq 1477
---            WHEN others => -- Send zero phase increment
---                phase_incr_low  <= to_unsigned(0, phase_incr_low'length); 
---                phase_incr_high <= to_unsigned(0, phase_incr_high'length); 
---        end case;
---    end process;
-
     DIGIT_DECODER : process(tone_digit)
     begin 
+        -- Default mappings to avoid latches
+        phase_incr_low  <= (others => '0');
+        phase_incr_high <= (others => '0');
+
         case tone_digit is
-            WHEN "0000000000" => -- Digit 0
-                phase_incr_low  <= to_unsigned(219224, phase_incr_low'length); -- Freq 941
-                phase_incr_high <= to_unsigned(311220, phase_incr_high'length); -- Freq 1336
-            WHEN "0000000001" => -- Digit 1
-                phase_incr_low  <= to_unsigned(162388, phase_incr_low'length); -- Freq 697
-                phase_incr_high <= to_unsigned(281644, phase_incr_high'length); -- Freq 1209
-            WHEN "0000000010" => -- Digit 2
-                phase_incr_low  <= to_unsigned(162388, phase_incr_low'length); -- Freq 697
-                phase_incr_high <= to_unsigned(311220, phase_incr_high'length); -- Freq 1336
-            WHEN "0000000100" => -- Digit 3
-                phase_incr_low  <= to_unsigned(162388, phase_incr_low'length); -- Freq 697
-                phase_incr_high <= to_unsigned(344056, phase_incr_high'length); -- Freq 1477
-            WHEN "0000001000" => -- Digit 4
-                phase_incr_low  <= to_unsigned(179393, phase_incr_low'length); -- Freq 770
-                phase_incr_high <= to_unsigned(281644, phase_incr_high'length); -- Freq 1209
-            WHEN "0000010000" => -- Digit 5
-                phase_incr_low  <= to_unsigned(179393, phase_incr_low'length); -- Freq 770
-                phase_incr_high <= to_unsigned(311220, phase_incr_high'length); -- Freq 1336
-            WHEN "0000100000" => -- Digit 6
-                phase_incr_low  <= to_unsigned(179393, phase_incr_low'length); -- Freq 770
-                phase_incr_high <= to_unsigned(344056, phase_incr_high'length); -- Freq 1477
-            WHEN "0001000000" => -- Digit 7
-                phase_incr_low  <= to_unsigned(198494, phase_incr_low'length); -- Freq 852
-                phase_incr_high <= to_unsigned(281644, phase_incr_high'length); -- Freq 1209
-            WHEN "0010000000" => -- Digit 8
-                phase_incr_low  <= to_unsigned(198494, phase_incr_low'length); -- Freq 852
-                phase_incr_high <= to_unsigned(311220, phase_incr_high'length); -- Freq 1336
-            WHEN "0100000000" => -- Digit 9
-                phase_incr_low  <= to_unsigned(198494, phase_incr_low'length); -- Freq 852
-                phase_incr_high <= to_unsigned(344056, phase_incr_high'length); -- Freq 1477
-            WHEN "1000000000" => -- Digit *
-                phase_incr_low  <= to_unsigned(219224, phase_incr_low'length); -- Freq 941
-                phase_incr_high <= to_unsigned(281644, phase_incr_high'length); -- Freq 1209
-            WHEN "1000000001" => -- Digit #
-                phase_incr_low  <= to_unsigned(219224, phase_incr_low'length); -- Freq 941
-                phase_incr_high <= to_unsigned(344056, phase_incr_high'length); -- Freq 1477
-            WHEN others => -- Send zero phase increment
+            when x"0" => -- Digit 0 (941, 1336)
+                phase_incr_low  <= to_unsigned(219224, phase_incr_low'length);
+                phase_incr_high <= to_unsigned(311220, phase_incr_high'length);
+            when x"1" => -- Digit 1 (697, 1209)
+                phase_incr_low  <= to_unsigned(162388, phase_incr_low'length);
+                phase_incr_high <= to_unsigned(281644, phase_incr_high'length);
+            when x"2" => -- Digit 2 (697, 1336)
+                phase_incr_low  <= to_unsigned(162388, phase_incr_low'length);
+                phase_incr_high <= to_unsigned(311220, phase_incr_high'length);
+            when x"3" => -- Digit 3 (697, 1477)
+                phase_incr_low  <= to_unsigned(162388, phase_incr_low'length);
+                phase_incr_high <= to_unsigned(344056, phase_incr_high'length);
+            when x"4" => -- Digit 4 (770, 1209)
+                phase_incr_low  <= to_unsigned(179393, phase_incr_low'length);
+                phase_incr_high <= to_unsigned(281644, phase_incr_high'length);
+            when x"5" => -- Digit 5 (770, 1336)
+                phase_incr_low  <= to_unsigned(179393, phase_incr_low'length);
+                phase_incr_high <= to_unsigned(311220, phase_incr_high'length);
+            when x"6" => -- Digit 6 (770, 1477)
+                phase_incr_low  <= to_unsigned(179393, phase_incr_low'length);
+                phase_incr_high <= to_unsigned(344056, phase_incr_high'length);
+            when x"7" => -- Digit 7 (852, 1209)
+                phase_incr_low  <= to_unsigned(198494, phase_incr_low'length);
+                phase_incr_high <= to_unsigned(281644, phase_incr_high'length);
+            when x"8" => -- Digit 8 (852, 1336)
+                phase_incr_low  <= to_unsigned(198494, phase_incr_low'length);
+                phase_incr_high <= to_unsigned(311220, phase_incr_high'length);
+            when x"9" => -- Digit 9 (852, 1477)
+                phase_incr_low  <= to_unsigned(198494, phase_incr_low'length);
+                phase_incr_high <= to_unsigned(344056, phase_incr_high'length);
+            when x"A" => -- Digit A (697, 1633)
+                phase_incr_low  <= to_unsigned(162388, phase_incr_low'length);
+                phase_incr_high <= to_unsigned(380394, phase_incr_high'length);
+            when x"B" => -- Digit B (770, 1633)
+                phase_incr_low  <= to_unsigned(179393, phase_incr_low'length);
+                phase_incr_high <= to_unsigned(380394, phase_incr_high'length);
+            when x"C" => -- Digit C (852, 1633)
+                phase_incr_low  <= to_unsigned(198494, phase_incr_low'length);
+                phase_incr_high <= to_unsigned(380394, phase_incr_high'length);
+            when x"D" => -- Digit D (941, 1633)
+                phase_incr_low  <= to_unsigned(219224, phase_incr_low'length);
+                phase_incr_high <= to_unsigned(380394, phase_incr_high'length);
+            when x"E" => -- Digit * (941, 1209)
+                phase_incr_low  <= to_unsigned(219224, phase_incr_low'length);
+                phase_incr_high <= to_unsigned(281644, phase_incr_high'length);
+            when x"F" => -- Digit # (941, 1477)
+                phase_incr_low  <= to_unsigned(219224, phase_incr_low'length);
+                phase_incr_high <= to_unsigned(344056, phase_incr_high'length);
+            when others =>
                 phase_incr_low  <= to_unsigned(0, phase_incr_low'length);
                 phase_incr_high <= to_unsigned(0, phase_incr_high'length);
         end case;

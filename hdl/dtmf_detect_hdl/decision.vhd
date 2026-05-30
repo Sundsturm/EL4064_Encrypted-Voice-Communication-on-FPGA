@@ -66,40 +66,65 @@ begin
                     end if;
                     
                 when COMPUTE =>
-                    -- Normal operation
+                    -- 697 Hz Row (codelow = "001")
                     if codelow = "001" and codehigh = "001" then
-                        code_temp   <= "1000"; -- DTMF 1
-                        sevseg      <= "1111001";
+                        code_temp <= "0001"; -- 1
+                        sevseg    <= "1111001";
                     elsif codelow = "001" and codehigh = "010" then
-                        code_temp <= "1001"; -- DTMF 2
-                        sevseg      <= "0100100";
-                    elsif codelow = "010" and codehigh = "001" then
-                        code_temp <= "1010"; -- DTMF 4
-                        sevseg      <= "0011001";
-                    elsif codelow = "010" and codehigh = "010" then
-                        code_temp <= "1011"; -- DTMF 5
-                        sevseg      <= "0010010";
-                    elsif codelow = "011" and codehigh = "001" then
-                        code_temp <= "1100"; -- DTMF 7
-                        sevseg      <= "1111000";
-                    elsif codelow = "011" and codehigh = "010" then
-                        code_temp <= "1101"; -- DTMF 8
-                        sevseg      <= "0000000";
-                    elsif codelow = "100" and codehigh = "001" then
-                        code_temp <= "1110"; -- DTMF *
-                        sevseg      <= "0111111";
-                    elsif codelow = "100" and codehigh = "010" then
-                        code_temp <= "1111"; -- DTMF 0
-                        sevseg      <= "1000000";
-                    elsif codelow = "100" and codehigh = "011" then
-                        code_temp <= "0010"; -- DTMF # (sync sequence)
-                        sevseg      <= "0001000"; -- Custom sevseg for #
+                        code_temp <= "0010"; -- 2
+                        sevseg    <= "0100100";
                     elsif codelow = "001" and codehigh = "011" then
-                        code_temp <= "0011"; -- DTMF 3 (sync sequence)
-                        sevseg      <= "0110000"; -- '3'
+                        code_temp <= "0011"; -- 3
+                        sevseg    <= "0110000";
+                    elsif codelow = "001" and codehigh = "100" then
+                        code_temp <= "1010"; -- A
+                        sevseg    <= "0001000"; 
+
+                    -- 770 Hz Row (codelow = "010")
+                    elsif codelow = "010" and codehigh = "001" then
+                        code_temp <= "0100"; -- 4
+                        sevseg    <= "0011001";
+                    elsif codelow = "010" and codehigh = "010" then
+                        code_temp <= "0101"; -- 5
+                        sevseg    <= "0010010";
+                    elsif codelow = "010" and codehigh = "011" then
+                        code_temp <= "0110"; -- 6
+                        sevseg    <= "0000010";
+                    elsif codelow = "010" and codehigh = "100" then
+                        code_temp <= "1011"; -- B
+                        sevseg    <= "0000000";
+
+                    -- 852 Hz Row (codelow = "011")
+                    elsif codelow = "011" and codehigh = "001" then
+                        code_temp <= "0111"; -- 7
+                        sevseg    <= "1111000";
+                    elsif codelow = "011" and codehigh = "010" then
+                        code_temp <= "1000"; -- 8
+                        sevseg    <= "0000000";
+                    elsif codelow = "011" and codehigh = "011" then
+                        code_temp <= "1001"; -- 9
+                        sevseg    <= "0010000";
+                    elsif codelow = "011" and codehigh = "100" then
+                        code_temp <= "1100"; -- C
+                        sevseg    <= "1000110";
+
+                    -- 941 Hz Row (codelow = "100")
+                    elsif codelow = "100" and codehigh = "001" then
+                        code_temp <= "1110"; -- * (E)
+                        sevseg    <= "0000110";
+                    elsif codelow = "100" and codehigh = "010" then
+                        code_temp <= "0000"; -- 0
+                        sevseg    <= "1000000";
+                    elsif codelow = "100" and codehigh = "011" then
+                        code_temp <= "1111"; -- # (F)
+                        sevseg    <= "0001110";
+                    elsif codelow = "100" and codehigh = "100" then
+                        code_temp <= "1101"; -- D
+                        sevseg    <= "0100001";
+
                     else
                         code_temp <= "0000";
-                        sevseg      <= "1111111";
+                        sevseg    <= "1111111";
                     end if;
                     state <= STORE;
 

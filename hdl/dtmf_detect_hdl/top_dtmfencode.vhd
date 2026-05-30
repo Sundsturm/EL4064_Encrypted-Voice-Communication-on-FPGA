@@ -12,16 +12,15 @@ entity top_dtmfencode is
         corr_770        : in STD_LOGIC_VECTOR(16 downto 0);
         corr_852        : in STD_LOGIC_VECTOR(16 downto 0);
         corr_941        : in STD_LOGIC_VECTOR(16 downto 0);
-        corr_1209       : in STD_LOGIC_VECTOR(16 downto 0);
-        corr_1336       : in STD_LOGIC_VECTOR(16 downto 0);
-        corr_1477       : in STD_LOGIC_VECTOR(16 downto 0);
-        
-
-        out_ready       : in STD_LOGIC;
+        corr_1209 : in STD_LOGIC_VECTOR(16 downto 0);
+        corr_1336 : in STD_LOGIC_VECTOR(16 downto 0);
+        corr_1477 : in STD_LOGIC_VECTOR(16 downto 0);
+        corr_1633 : in STD_LOGIC_VECTOR(16 downto 0);
+        out_ready   : in STD_LOGIC;
         out_valid       : out STD_LOGIC;
         sevseg          : out STD_LOGIC_VECTOR(6 downto 0);
         anode           : out STD_LOGIC;
-        encode_out      : out STD_LOGIC_VECTOR(23 downto 0);
+        encode_out      : out STD_LOGIC_VECTOR(31 downto 0);
         dtmf_code_4bit  : out STD_LOGIC_VECTOR(3 downto 0);
         dtmf_code_valid : out STD_LOGIC
     );
@@ -60,6 +59,7 @@ architecture Behavioral of top_dtmfencode is
             input1209           : in STD_LOGIC_VECTOR(16 downto 0);
             input1336           : in STD_LOGIC_VECTOR(16 downto 0);
             input1477           : in STD_LOGIC_VECTOR(16 downto 0);
+            input1633           : in STD_LOGIC_VECTOR(16 downto 0);
             code                : out STD_LOGIC_VECTOR (2 downto 0)
         );
     end component;
@@ -86,7 +86,7 @@ architecture Behavioral of top_dtmfencode is
         in_ready    : out STD_LOGIC;
         out_valid   : out STD_LOGIC;                    -- Reset signal
         input3                  : in  STD_LOGIC_VECTOR(3 downto 0);  -- 4-bit input
-        output32                : out STD_LOGIC_VECTOR(23 downto 0)   -- 8-bit output
+        output32                : out STD_LOGIC_VECTOR(31 downto 0)   -- 32-bit output
         );
     end component;
 
@@ -115,14 +115,15 @@ begin
         port map(
             clk         => clk,
             rst         => rst,
-            in_valid    => in_valid,
-            out_ready   => r2r2,
-            in_ready    => highready,
-            out_valid   => v2vh,
-            input1209   => corr_1209,
-            input1336   => corr_1336,
-            input1477   => corr_1477,
-            code        => codehigh
+            in_valid => in_valid,
+            out_ready => out_ready,
+            in_ready => highready,
+            out_valid => v2vh,
+            input1209 => corr_1209,
+            input1336 => corr_1336,
+            input1477 => corr_1477,
+            input1633 => corr_1633,
+            code => codehigh
         );
     
     
