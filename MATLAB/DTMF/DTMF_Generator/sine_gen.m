@@ -2,6 +2,15 @@ function [data, state] = sine_gen(phase_incr, num_samples, addr_bits, data_bits,
 %SINE_GEN MATLAB model of sine_gen_signed.vhd (quarter-wave LUT + NCO)
 %   data = sine_gen(phase_incr, num_samples, addr_bits, data_bits)
 %   [data, state] = sine_gen(..., state, rst)
+%
+%   Output amplitude (per tone, in Q3.13):
+%       ROM peak = 2^(rom_width-2) - 1 = 2^13 - 1 = 8191
+%       -> amplitude = 8191 / 8192 ≈ 1.0 in Q3.13
+%   Sum of two tones (as in generate_dtmf): amplitude ≈ 2.0 in Q3.13
+%   This matches the unit-sinusoid convention used by frame_sync
+%   (run_frame_sync_demo.m: sin(2πft), amplitude 1.0 per tone).
+%
+%   RTL equivalent: 1-bit arithmetic right shift on sine_gen_signed.vhd output.
 
     if nargin < 2 || isempty(num_samples)
         num_samples = 1;
@@ -116,6 +125,10 @@ end
 function rom = build_rom(rom_depth, rom_width)
     idx = 0:(rom_depth - 1);
     angle = double(idx) * ((pi / 2) / double(rom_depth));
-    sin_scaled = sin(angle) * (2^double(rom_width - 1) - 1);
+    % Amplitude per tone = 2^(rom_width-2) - 1 = 2^13 - 1 = 8191
+    % -> ~1.0 in Q3.13 (8191/8192). Sum of two tones -> ~2.0.
+    % (Sebelumnya: 2^(rom_width-1)-1 = 16383 -> ~2.0/tone, sum -> ~4.0, overflow.)
+    % RTL: setara dengan 1-bit arithmetic right shift di output sine_gen_signed.vhd.
+    sin_scaled = sin(angle) * (2^double(rom_width - 2) - 1);
     rom = uint32(round(sin_scaled));
 end
