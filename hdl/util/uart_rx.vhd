@@ -19,8 +19,8 @@ end uart_rx;
 
 architecture rtl of uart_rx is
 
-    type state_type is (IDLE, RX_START, RX_DATA, RX_STOP, CLEANUP);
-    signal current_state : state_type := IDLE;
+    type state_type is (ST_IDLE, ST_START, ST_DATA, ST_STOP, ST_CLEANUP);
+    signal current_state : state_type := ST_IDLE;
 
     signal clk_count : integer range 0 to CLKS_PER_BIT-1 := 0;
     signal bit_index : integer range 0 to 7 := 0;
@@ -43,7 +43,7 @@ begin
     begin
         if rising_edge(clk) then
             if rst = '1' then
-                current_state <= IDLE;
+                current_state <= ST_IDLE;
                 clk_count <= 0;
                 bit_index <= 0;
                 rx_data <= (others => '0');
@@ -51,28 +51,28 @@ begin
                 data_out <= (others => '0');
             else
                 case current_state is
-                    when IDLE =>
+                    when ST_IDLE =>
                         rx_valid <= '0';
                         clk_count <= 0;
                         bit_index <= 0;
                         
                         if rx_sync_2 = '0' then -- Start bit detected
-                            current_state <= RX_START;
+                            current_state <= ST_START;
                         end if;
 
-                    when RX_START =>
+                    when ST_START =>
                         if clk_count = (CLKS_PER_BIT-1)/2 then
                             if rx_sync_2 = '0' then -- Confirm still low
                                 clk_count <= 0;
-                                current_state <= RX_DATA;
+                                current_state <= ST_DATA;
                             else
-                                current_state <= IDLE;
+                                current_state <= ST_IDLE;
                             end if;
                         else
                             clk_count <= clk_count + 1;
                         end if;
 
-                    when RX_DATA =>
+                    when ST_DATA =>
                         if clk_count = CLKS_PER_BIT-1 then
                             clk_count <= 0;
                             rx_data(bit_index) <= rx_sync_2;
@@ -80,28 +80,28 @@ begin
                                 bit_index <= bit_index + 1;
                             else
                                 bit_index <= 0;
-                                current_state <= RX_STOP;
+                                current_state <= ST_STOP;
                             end if;
                         else
                             clk_count <= clk_count + 1;
                         end if;
 
-                    when RX_STOP =>
+                    when ST_STOP =>
                         if clk_count = CLKS_PER_BIT-1 then
                             rx_valid <= '1';
                             data_out <= rx_data;
-                            current_state <= CLEANUP;
+                            current_state <= ST_CLEANUP;
                             clk_count <= 0;
                         else
                             clk_count <= clk_count + 1;
                         end if;
 
-                    when CLEANUP =>
-                        current_state <= IDLE;
+                    when ST_CLEANUP =>
+                        current_state <= ST_IDLE;
                         rx_valid <= '0';
 
                     when others =>
-                        current_state <= IDLE;
+                        current_state <= ST_IDLE;
                 end case;
             end if;
         end if;
