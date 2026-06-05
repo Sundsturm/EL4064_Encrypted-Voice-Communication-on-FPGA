@@ -163,4 +163,152 @@ Script `run_sim.do` mendukung dua mode (set di baris pertama script):
 - [ ] System test (`dtmf_system_tb`) — verifikasi pipeline Goertzel + encode
 - [ ] Quartus Analysis & Synthesis — cek tidak ada error/warning width mismatch
 - [ ] Timing Analysis (TimeQuest) — cek Fmax di clock domain `AUD_XCK` (~18.432 MHz)
-- [ ] Hardware test di board DE2-115 — input audio DTMF nyata dari telepon/generator
+- [ ] Integrasi top-level (lihat panduan di bawah)
+- [ ] Hardware test di board DE2-115
+
+---
+
+## Panduan Integrasi Top-Level
+
+### Ketiga Komponen yang Terlibat
+
+| Komponen | Lokasi | Peran |
+|---|---|---|
+| **DTMF Generator** | `hdl/sender_hdl/generate_dtmf_signed.vhd` | Sender — membangkitkan sinyal audio DTMF dari kode 4-bit |
+| **Frame Synchronization** | `RTL/Component/Frame Synchronization_v3/toplevel_iq.vhd` | Receiver — mendeteksi batas frame via IQ demodulation 697 Hz |
+| **DecodeDTMF_v2** | `RTL/Component/DecodeDTMF_v2/hdl/dtmf_system.vhd` | Receiver — mendecode 8 simbol DTMF → 32-bit kunci |
+
+---
+
+### Arsitektur Sistem Terintegrasi
+
+```
+═══════════════════════════════════════════════════════════════════
+                     SENDER (FPGA Board A)
+═══════════════════════════════════════════════════════════════════
+  key_32bit[31:0]
+  (dibagi 8 nibble)
+       │
+       ▼
+  ┌──────────────────────┐
+  │  generate_dtmf_signed │   tone_digit[3:0] (natural hex, 4-bit/simbol)
+  │  (sender_hdl)         │◄── command (dari FSM pengiriman)
+  │                       │
+  │  Input:  tone_digit   │
+  │          command      │
+  │  Output: dtmf_out     │
+  └──────────┬───────────┘
+             │  dtmf_out : signed(15 downto 0)
+             ▼
+       [Audio Codec / Loopback / Channel]
+             │
+             ▼
+═══════════════════════════════════════════════════════════════════
+                    RECEIVER (FPGA Board B)
+═══════════════════════════════════════════════════════════════════
+             │  audio_in : std_logic_vector(15 downto 0)
+             │
+       ┌─────┴─────┐
+       │           │
+       ▼           ▼
+┌──────────────┐  ┌──────────────────────┐
+│  Frame Sync  │  │     DecodeDTMF_v2    │
+│  toplevel_iq │  │     dtmf_system      │
+│              │  │                      │
+│  Deteksi:    │  │  Deteksi: 8 filter   │
+│  697 Hz mark │  │  Goertzel (8 freq)   │
+│  941 Hz      │  │                      │
+│  1477 Hz     │  │  Output:             │
+│              │  │  encode_out[31:0]    │
+│  Output:     │  │  (32-bit kunci)      │
+│  enable      │  │                      │
+└──────┬───────┘  └──────────┬───────────┘
+       │                     │
+       │  enable             │  encode_out[31:0]
+       └──────────┬──────────┘
+                  ▼
+          ┌───────────────┐
+          │  Top-Level    │
+          │  Controller   │
+          │               │
+          │ Saat enable=1 │
+          │ → latch       │
+          │   encode_out  │
+          └───────────────┘
+```
+
+---
+
+### Interface Sinyal Antar Komponen
+
+#### DTMF Generator → (Audio Channel) → Receiver Input
+
+```vhdl
+-- Sender output (generate_dtmf_signed.vhd)
+dtmf_out : out signed(15 downto 0)
+
+-- Receiver input (dtmf_system.vhd dan toplevel_iq.vhd)
+-- Perlu konversi tipe sebelum dihubungkan:
+audio_in <= std_logic_vector(dtmf_out);  -- type cast
+```
+
+#### Audio Input → Frame Sync + DecodeDTMF (Paralel)
+
+```vhdl
+-- Keduanya menerima sinyal audio yang SAMA secara paralel
+frame_sync_inst : entity work.toplevel_iq
+    port map (
+        dataA    => audio_in,   -- std_logic_vector(15 downto 0)
+        in_valid => audio_valid,
+        enable   => frame_enable
+        -- ...
+    );
+
+dtmf_recv_inst : entity work.dtmf_system
+    port map (
+        dtmf_input => audio_in,   -- std_logic_vector(15 downto 0)
+        in_valid   => audio_valid,
+        encode_out => key_32bit
+        -- ...
+    );
+```
+
+#### Frame Sync `enable` → Latch `encode_out`
+
+```vhdl
+-- Contoh logika controller sederhana (di top-level)
+process(clk)
+begin
+    if rising_edge(clk) then
+        if frame_enable = '1' and dtmf_out_valid = '1' then
+            recovered_key <= encode_out;  -- std_logic_vector(31 downto 0)
+        end if;
+    end if;
+end process;
+```
+
+---
+
+### Kompatibilitas Encoding
+
+Generator (`generate_dtmf_signed.vhd`) dan Decoder (`decision.vhd`) menggunakan **natural hex encoding yang sama**:
+
+| Kode | Simbol | Generator | Decoder |
+|---|---|---|---|
+| `x"1"` | `'1'` | 697 + 1209 Hz ✅ | `"0001"` ✅ |
+| `x"5"` | `'5'` | 770 + 1336 Hz ✅ | `"0101"` ✅ |
+| `x"A"` | `'A'` | 697 + 1633 Hz ✅ | `"1010"` ✅ |
+| `x"E"` | `'*'` | 941 + 1209 Hz ✅ | `"1110"` ✅ |
+| `x"F"` | `'#'` | 941 + 1477 Hz ✅ | `"1111"` ✅ |
+
+> ✅ Tidak diperlukan konversi encoding — Generator dan Decoder sudah kompatibel langsung.
+
+---
+
+### Catatan Penting untuk Integrasi
+
+> **Frame Sync tidak mendeteksi 1633 Hz.** `toplevel_iq.vhd` hanya memiliki filter untuk 697, 941, dan 1477 Hz. Ini by design — Frame Sync hanya bertugas mendeteksi marker frame (bukan mendecode semua simbol). Simbol A/B/C/D yang menggunakan 1633 Hz tetap akan dideteksi dengan benar oleh DecodeDTMF_v2.
+
+> **Format audio:** Generator output `signed(15 downto 0)`, receiver input `std_logic_vector(15 downto 0)`. Gunakan type cast `std_logic_vector(dtmf_out)` untuk menghubungkannya.
+
+> **Sinkronisasi:** `enable` dari Frame Sync bisa digunakan sebagai trigger untuk mulai sampling `encode_out` dari DecodeDTMF. Desain controller top-level perlu mempertimbangkan latency antara kedua pipeline (Goertzel vs IQ demodulator).
