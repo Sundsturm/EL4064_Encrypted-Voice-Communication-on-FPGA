@@ -1,19 +1,18 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
-library ieee_proposed;
-use ieee_proposed.fixed_pkg.all;
+use ieee.fixed_pkg.all;
 
 entity multv6 is
     generic(
-        dataA_INT_BITS: natural := 2;
-        dataA_FRAC_BITS: natural := 14;
-        tempsin_INT_BITS: natural := 1;
-        tempsin_FRAC_BITS: natural := 15;
-        tempcos_INT_BITS: natural := 2;
-        tempcos_FRAC_BITS: natural := 14;
-        mult_INT_BITS: natural := 2;
-        mult_FRAC_BITS: natural := 14
+        dataA_INT_BITS: natural := 3;
+        dataA_FRAC_BITS: natural := 13;
+        tempsin_INT_BITS: natural := 3;
+        tempsin_FRAC_BITS: natural := 13;
+        tempcos_INT_BITS: natural := 3;
+        tempcos_FRAC_BITS: natural := 13;
+        mult_INT_BITS: natural := 3;
+        mult_FRAC_BITS: natural := 13
     );
     Port ( 
         clk, reset  : in STD_LOGIC;
@@ -48,7 +47,7 @@ architecture Behavioral of multv6 is
     signal state : state_type;
     signal address_internal : INTEGER range 0 to 640 := 0;
     signal tempinput    : SFIXED((dataA_INT_BITS-1) downto -dataA_FRAC_BITS);
-    -- Sinyal Temporary Sin
+    -- Sinyal Temporary Sin (Q3.13)
     signal tempsin697   : sfixed((tempsin_INT_BITS-1) downto -tempsin_FRAC_BITS);
     signal tempsin941   : sfixed((tempsin_INT_BITS-1) downto -tempsin_FRAC_BITS);
     signal tempsin1477  : sfixed((tempsin_INT_BITS-1) downto -tempsin_FRAC_BITS);
@@ -57,7 +56,7 @@ architecture Behavioral of multv6 is
     signal mult_sin1477 : SFIXED((mult_INT_BITS-1) downto -mult_FRAC_BITS);
     
 
-    -- Sinyal Temporary Cos
+    -- Sinyal Temporary Cos (Q3.13)
     signal tempcos697  : sfixed((tempcos_INT_BITS-1) downto -tempcos_FRAC_BITS);
     signal tempcos941  : sfixed((tempcos_INT_BITS-1) downto -tempcos_FRAC_BITS);
     signal tempcos1477 : sfixed((tempcos_INT_BITS-1) downto -tempcos_FRAC_BITS);
@@ -104,13 +103,13 @@ begin
             state <= state;
             case state is
                 when IDLE =>
-                    -- Convert LUT Sin to SFIXED (1).(0).(15)
+                    -- Convert LUT Sin to SFIXED Q3.13
                     tempinput   <= to_sfixed(dataA, dataA_INT_BITS-1, -dataA_FRAC_BITS);
                     tempsin697  <= to_sfixed(sin697, tempsin_INT_BITS-1, -tempsin_FRAC_BITS);
                     tempsin941  <= to_sfixed(sin941, tempsin_INT_BITS-1, -tempsin_FRAC_BITS);
                     tempsin1477 <= to_sfixed(sin1477, tempsin_INT_BITS-1, -tempsin_FRAC_BITS);
 
-                    -- Convert LUT Cos to SFIXED (1).(1).(14)
+                    -- Convert LUT Cos to SFIXED Q3.13
                     tempcos697 <= to_sfixed(cos697, tempcos_INT_BITS-1, -tempcos_FRAC_BITS);
                     tempcos941 <= to_sfixed(cos941, tempcos_INT_BITS-1, -tempcos_FRAC_BITS);
                     tempcos1477 <= to_sfixed(cos1477, tempcos_INT_BITS-1, -tempcos_FRAC_BITS);
@@ -126,7 +125,7 @@ begin
                     mult_sin941    <= resize(tempinput * tempsin941, mult_sin941);
                     mult_sin1477   <= resize(tempinput * tempsin1477, mult_sin1477);
 
-                    -- Cose Multipliery
+                    -- Cos Multiplier
                     mult_cos697    <= resize(tempinput * tempcos697, mult_cos697);
                     mult_cos941    <= resize(tempinput * tempcos941, mult_cos941);
                     mult_cos1477   <= resize(tempinput * tempcos1477, mult_cos1477);

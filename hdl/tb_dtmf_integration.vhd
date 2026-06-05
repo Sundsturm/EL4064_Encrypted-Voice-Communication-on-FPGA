@@ -1,300 +1,180 @@
 library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
-use std.textio.all;
-use ieee.std_logic_textio.all;
+
 entity tb_dtmf_integration is
 end entity;
 
 architecture sim of tb_dtmf_integration is
-    constant CLK_PERIOD : time := 54.25 ns; -- ~18.432 MHz
-    constant CLK_PER_SAMPLE : integer := 576; -- 18.432 MHz / 32 kHz
-    constant SAMPLES_20MS : integer := 640;
+    constant CLK_PERIOD : time := 20 ns; -- 50 MHz
+    constant UART_BIT_PERIOD : time := 8680.5 ns; -- 115200 bps
 
-    signal clk  : std_logic := '0';
-    signal rst  : std_logic := '1';
+    signal CLOCK_50 : std_logic := '0';
+    signal KEY : std_logic_vector(3 downto 0) := (others => '1');
+    signal SW : std_logic_vector(9 downto 0) := (others => '0');
+    signal UART_RXD : std_logic := '1';
+    
+    signal LEDR : std_logic_vector(9 downto 0);
+    signal HEX0, HEX1, HEX2, HEX3, HEX4, HEX5 : std_logic_vector(6 downto 0);
+    
+    signal AUD_ADCDAT : std_logic := '0';
+    signal AUD_ADCLRCK : std_logic;
+    signal AUD_BCLK : std_logic;
+    signal AUD_DACDAT : std_logic;
+    signal AUD_DACLRCK : std_logic;
+    signal AUD_XCK : std_logic;
+    signal FPGA_I2C_SCLK : std_logic;
+    signal FPGA_I2C_SDAT : std_logic := 'H'; -- Pull-up
 
-    signal start_tx : std_logic := '0';
-    signal test_key_in : std_logic_vector(23 downto 0) := (others => '0');
-    signal reconstructed_key_out : std_logic_vector(23 downto 0);
-
-    signal audio_loopback : std_logic_vector(15 downto 0);
-
-    -- Sender-side signals
-    signal sender_command : std_logic := '0';
-    signal sender_rst : std_logic := '1';
-    signal sender_tone_digit : std_logic_vector(9 downto 0) := (others => '0');
-    signal sender_dtmf_out : signed(15 downto 0);
-
-    type tx_state_type is (TX_IDLE, TX_TRANSMIT, TX_SILENCE);
-    signal tx_state : tx_state_type := TX_IDLE;
-    signal tx_sample_counter : integer range 0 to SAMPLES_20MS := 0;
-    signal tx_segment_counter : integer range 0 to 11 := 0;
-    signal goertzel_enable : std_logic := '0';
-    signal sample_div_counter : integer range 0 to CLK_PER_SAMPLE-1 := 0;
-    signal sample_tick : std_logic := '0';
-
-    -- Receiver-side interconnects
-    signal goertzel_in_ready : std_logic;
-    signal goertzel_out_valid : std_logic;
-    signal encoder_in_ready : std_logic;
-
-    signal power_697  : std_logic_vector(16 downto 0);
-    signal power_770  : std_logic_vector(16 downto 0);
-    signal power_852  : std_logic_vector(16 downto 0);
-    signal power_941  : std_logic_vector(16 downto 0);
-    signal power_1209 : std_logic_vector(16 downto 0);
-    signal power_1336 : std_logic_vector(16 downto 0);
-    signal power_1477 : std_logic_vector(16 downto 0);
-
-    signal encoder_out_valid : std_logic;
-    signal sevseg_dummy : std_logic_vector(6 downto 0);
-    signal anode_dummy : std_logic;
-    signal encode_out_dummy : std_logic_vector(23 downto 0);
-    signal dtmf_code_4bit : std_logic_vector(3 downto 0);
-    signal dtmf_code_valid : std_logic;
-
-    signal shift_add_in_ready : std_logic;
-    signal shift_add_out_valid : std_logic;
-    signal shift_add_valid_in : std_logic := '0';
-    signal payload_symbol_count : integer range 0 to 8 := 0;
-
-    function segment_to_tone(
-        segment_idx : integer;
-        key24 : std_logic_vector(23 downto 0)
-    ) return std_logic_vector is
-        variable key_bits : std_logic_vector(2 downto 0);
-        variable bit_hi : integer;
+    procedure UART_SEND_BYTE (
+        data : in std_logic_vector(7 downto 0);
+        signal tx : out std_logic
+    ) is
     begin
-        if segment_idx = 0 then
-            return "1000000001"; -- '#'
-        elsif segment_idx = 1 then
-            return "1000000001"; -- '#'
-        elsif segment_idx = 2 then
-            return "0000000100"; -- '3'
-        elsif segment_idx = 3 then
-            return "1000000001"; -- '#'
-        else
-            bit_hi := 23 - ((segment_idx - 4) * 3);
-            key_bits := key24(bit_hi downto bit_hi - 2);
-
-            case key_bits is
-                when "000" => return "0000000001"; -- '1'
-                when "001" => return "0000000010"; -- '2'
-                when "010" => return "0000001000"; -- '4'
-                when "011" => return "0000010000"; -- '5'
-                when "100" => return "0001000000"; -- '7'
-                when "101" => return "0010000000"; -- '8'
-                when "110" => return "1000000000"; -- '*'
-                when others => return "0000000000"; -- '0'
-            end case;
-        end if;
-    end function;
-
-    -- Fungsi untuk menerjemahkan nilai biner 3-bit menjadi karakter nada DTMF yang mudah dibaca
-    function code_to_char(
-        code3 : std_logic_vector(2 downto 0)
-    ) return string is
-    begin
-        case code3 is
-            when "000" => return "1";
-            when "001" => return "2";
-            when "010" => return "4";
-            when "011" => return "5";
-            when "100" => return "7";
-            when "101" => return "8";
-            when "110" => return "*";
-            when "111" => return "0";
-            when others => return "?";
-        end case;
-    end function;
+        -- Start bit
+        tx <= '0';
+        wait for UART_BIT_PERIOD;
+        -- Data bits (LSB first)
+        for i in 0 to 7 loop
+            tx <= data(i);
+            wait for UART_BIT_PERIOD;
+        end loop;
+        -- Stop bit
+        tx <= '1';
+        wait for UART_BIT_PERIOD;
+    end procedure;
 
 begin
-    -- 1) Clock generator
-    clk <= not clk after CLK_PERIOD / 2;
+    -- 0) Dummy I2C Slave to generate ACK
+    -- Karena modul master I2C bersifat open-drain (hanya menarik ke '0' atau lepas ke 'Z'),
+    -- dan ia hanya peduli membaca bit ACK (harus '0'), kita dapat secara aman
+    -- memaksa sinyal SDA ke '0' di testbench agar selalu terdeteksi sebagai ACK ("000").
+    -- Hal ini mencegah state-machine I2C macet dalam infinite loop.
+    FPGA_I2C_SDAT <= '0';
 
-    -- 32 kHz sample strobe derived from 18.432 MHz clock.
-    SAMPLE_TICK_PROC : process(clk)
-    begin
-        if rising_edge(clk) then
-            if rst = '1' then
-                sample_div_counter <= 0;
-                sample_tick <= '0';
-            elsif sample_div_counter = CLK_PER_SAMPLE - 1 then
-                sample_div_counter <= 0;
-                sample_tick <= '1';
-            else
-                sample_div_counter <= sample_div_counter + 1;
-                sample_tick <= '0';
-            end if;
-        end if;
-    end process;
+    -- 1) Clock generator
+    CLOCK_50 <= not CLOCK_50 after CLK_PERIOD / 2;
 
     -- 2) Audio loopback: sender output -> receiver input
-    -- audio_loopback <= std_logic_vector(sender_dtmf_out); -- Diganti dengan input file eksternal
+    AUD_ADCDAT <= AUD_DACDAT;
 
-    -- 3) Sender UUT: DTMF tone generator
-    -- UUT_SENDER : entity work.generate_dtmf_signed(rtl)
-    -- generic map (
-    --     addr_bits => 9,
-    --     data_bits => 16
-    -- )
-    -- port map (
-    --     clk => clk,
-    --     rst => sender_rst,
-    --     command => sender_command,
-    --     tone_digit => sender_tone_digit,
-    --     dtmf_out => sender_dtmf_out
-    -- );
-
-    -- Drive sender/receiver enables from transmission state.
-    -- sender_command <= '1' when tx_state = TX_TRANSMIT else '0';
-    -- sender_rst <= '0' when (rst = '0' and tx_state = TX_TRANSMIT) else '1';
-    -- sender_tone_digit <= segment_to_tone(tx_segment_counter, test_key_in) when tx_state = TX_TRANSMIT else (others => '0');
-    -- goertzel_enable <= '1' when tx_state = TX_TRANSMIT else '0';
-
-    -- Accept only first 8 payload symbols (bit3='1') for key reconstruction.
-    SHIFT_ADD_INPUT_CTRL : process(clk)
-    begin
-        if rising_edge(clk) then
-            if rst = '1' then
-                shift_add_valid_in <= '0';
-                payload_symbol_count <= 0;
-            else
-                shift_add_valid_in <= '0';
-                if (dtmf_code_valid = '1') and (dtmf_code_4bit(3) = '1') and (payload_symbol_count < 8) then
-                    report "RX payload symbol[" & integer'image(payload_symbol_count) & "] = Nada '" &
-                           code_to_char(dtmf_code_4bit(2 downto 0)) & "' (Indeks " &
-                           integer'image(to_integer(unsigned(dtmf_code_4bit(2 downto 0)))) & ")" severity note;
-                    payload_symbol_count <= payload_symbol_count + 1;
-                    shift_add_valid_in <= '1';
-                end if;
-            end if;
-        end if;
-    end process;
-
-    -- Sender control FSM in TB (12 segments, each 20 ms tone + 20 ms silence)
-    -- Proses ini digantikan dengan proses membaca file MATLAB.
-    FILE_READ_PROC: process(clk)
-        -- Sesuaikan path ini dengan direktori simulasi tools Anda (misal: ModelSim/Questa).
-        -- Jika gagal membaca, gunakan "Absolute Path" (contoh: "D:/Users/.../audio_test.txt")
-        file audio_file : text open read_mode is "../MATLAB/DTMF-Generation/audio_test.txt";
-        variable text_line : line;
-        variable audio_data_var : std_logic_vector(15 downto 0);
-    begin
-        if rising_edge(clk) then
-            if rst = '1' then
-                audio_loopback <= (others => '0');
-                goertzel_enable <= '0';
-            elsif sample_tick = '1' then
-                -- Membaca data baru setiap siklus frekuensi sampling (32 kHz)
-                if not endfile(audio_file) then
-                    readline(audio_file, text_line);
-                    hread(text_line, audio_data_var); -- Konversi HEX ke std_logic_vector
-                    audio_loopback <= audio_data_var;
-                    goertzel_enable <= '1'; -- Aktifkan penerima saat data tersedia
-                else
-                    -- Jika file habis (EOF), beri silence & matikan receiver
-                    audio_loopback <= (others => '0');
-                    goertzel_enable <= '0';
-                end if;
-            end if;
-        end if;
-    end process;
-
-    -- 4) Receiver UUT chain
-    UUT_GOERTZEL : entity work.Goertzel_top(rtl)
-    generic map (
-        DATA_WIDTH => 16,
-        BLOCK_SIZE => 640
-    )
+    -- 3) Instantiate Top-Level Design
+    DUT : entity work.AcakCakap_Top
     port map (
-        clk => clk,
-        rst => rst,
-        in_ready => goertzel_in_ready,
-        in_valid => goertzel_enable and sample_tick,
-        DTMF_sig => audio_loopback,
-        out_ready => encoder_in_ready,
-        out_valid => goertzel_out_valid,
-        power_697 => power_697,
-        power_770 => power_770,
-        power_852 => power_852,
-        power_941 => power_941,
-        power_1209 => power_1209,
-        power_1336 => power_1336,
-        power_1477 => power_1477
+        CLOCK2_50 => CLOCK_50,
+        CLOCK3_50 => CLOCK_50,
+        CLOCK4_50 => CLOCK_50,
+        CLOCK_50  => CLOCK_50,
+        
+        KEY => KEY,
+        SW  => SW,
+        UART_RXD => UART_RXD,
+        
+        LEDR => LEDR,
+        HEX0 => HEX0,
+        HEX1 => HEX1,
+        HEX2 => HEX2,
+        HEX3 => HEX3,
+        HEX4 => HEX4,
+        HEX5 => HEX5,
+        
+        AUD_ADCDAT => AUD_ADCDAT,
+        AUD_ADCLRCK => AUD_ADCLRCK,
+        AUD_BCLK => AUD_BCLK,
+        AUD_DACDAT => AUD_DACDAT,
+        AUD_DACLRCK => AUD_DACLRCK,
+        AUD_XCK => AUD_XCK,
+        
+        FPGA_I2C_SCLK => FPGA_I2C_SCLK,
+        FPGA_I2C_SDAT => FPGA_I2C_SDAT
     );
 
-    UUT_DTMF_ENCODER : entity work.top_dtmfencode(Behavioral)
-    port map (
-        clk => clk,
-        rst => rst,
-        in_valid => goertzel_out_valid,
-        in_ready => encoder_in_ready,
-        corr_697 => power_697,
-        corr_770 => power_770,
-        corr_852 => power_852,
-        corr_941 => power_941,
-        corr_1209 => power_1209,
-        corr_1336 => power_1336,
-        corr_1477 => power_1477,
-        out_ready => '1',
-        out_valid => encoder_out_valid,
-        sevseg => sevseg_dummy,
-        anode => anode_dummy,
-        encode_out => encode_out_dummy,
-        dtmf_code_4bit => dtmf_code_4bit,
-        dtmf_code_valid => dtmf_code_valid
-    );
-
-    UUT_SHIFT_ADD : entity work.shift_add(Behavioral)
-    port map (
-        clk => clk,
-        reset => rst,
-        in_valid => shift_add_valid_in,
-        out_ready => '1',
-        in_ready => shift_add_in_ready,
-        out_valid => shift_add_out_valid,
-        input3 => dtmf_code_4bit,
-        output32 => reconstructed_key_out
-    );
-
-    -- 5) Stimulus
+    -- 4) Stimulus Process
     STIM_PROC : process
     begin
-        -- Reset 100 ns
-        rst <= '1';
-        start_tx <= '0';
-        test_key_in <= (others => '0');
+        -- Initial State
+        UART_RXD <= '1';
+        SW <= (others => '0');
+        SW(8) <= '1'; -- Aktifkan injeksi kunci dinamis (UART)
+        SW(0) <= '0'; -- Mode tampilan Seven-Segment (24-bit LSB)
+        
+        -- Reset Aktif Low (Tahan selama 100 ns)
+        KEY(0) <= '0';
         wait for 100 ns;
-
-        -- Release reset + wait a few cycles
-        rst <= '0';
-        wait for 10 * CLK_PERIOD;
-
-        -- Load test key (Sesuaikan dengan hasil decode dari MATLAB Golden Model)
-        test_key_in <= x"29CBB8";
-        wait for 5 * CLK_PERIOD;
-
-        -- Pulse start trigger
-        start_tx <= '1';
+        KEY(0) <= '1';
+        
+        -- Berikan waktu tunggu sekitar 20 milidetik untuk memastikan:
+        -- 1. I2C selesai melakukan inisialisasi Codec
+        -- 2. PLL mengunci dan AUD_XCK mulai stabil
+        report "[TESTBENCH] Waiting for I2C and PLL to settle (20ms)..." severity note;
+        wait for 20 ms;
+        
+        -- Kirim 4 Byte Key (0x3A, 0x7C, 0x9B, 0x1D) secara berurutan
+        report "[TESTBENCH] Sending dynamic key: 0x3A7C9B1D via UART..." severity note;
+        UART_SEND_BYTE(x"3A", UART_RXD);
+        UART_SEND_BYTE(x"7C", UART_RXD);
+        UART_SEND_BYTE(x"9B", UART_RXD);
+        UART_SEND_BYTE(x"1D", UART_RXD);
+        -- Kirim karakter Line Feed (0x0A) untuk memberikan trigger via UART
+        -- sekaligus sebagai newline protocol.
+        -- Catatan: UART_TRIGGER akan secara otomatis men-trigger FSM TRANSMIT.
+        UART_SEND_BYTE(x"0A", UART_RXD);
+        
+        -- Tunggu sekitar 1 ms setelah UART selesai
         wait for 1 ms;
-        start_tx <= '0';
-
-        -- Wait long enough for 12 segments + receiver pipeline latency margin.
-        wait for 600 ms;
-
-        -- Result check
-        if reconstructed_key_out = test_key_in then
-            assert false report "INTEGRATION TEST PASSED" severity note;
+        
+        -- Pemicu Manual menggunakan KEY(1) (Opsional, karena 0x0A sudah memicu)
+        -- Jika FSM transmitter didesain untuk merespon trigger ganda, mari kita uji KEY(1).
+        -- FSM transmisi butuh pulse '0' pada KEY(1)
+        report "[TESTBENCH] Pressing KEY(1) to trigger manual transmission..." severity note;
+        KEY(1) <= '0';
+        wait for 500 us;
+        KEY(1) <= '1';
+        
+        report "[TESTBENCH] Transmission started! Waiting 250ms for completion..." severity note;
+        
+        -- Tunggu seluruh durasi 12 simbol DTMF
+        -- 12 simbol x 20 ms tone + (mungkin) silence. (Sekitar 240 ms total).
+        wait for 250 ms;
+        
+        -- =========================================================
+        -- TUGAS 3: Macro Assertion Penutup
+        -- =========================================================
+        report "[TESTBENCH] Checking visualization for LSB (SW(0) = '0')..." severity note;
+        SW(0) <= '0';
+        wait for 1 us; -- Tunggu propagasi kombinatorial MUX
+        
+        if (HEX5 = "1111000" and -- 7
+            HEX4 = "1000110" and -- C
+            HEX3 = "0010000" and -- 9
+            HEX2 = "0000011" and -- B
+            HEX1 = "1111001" and -- 1
+            HEX0 = "0100001") then -- D
+            report "[TESTBENCH] LSB Check PASSED." severity note;
         else
-            assert false
-                report "TEST FAILED | expected=" & integer'image(to_integer(unsigned(test_key_in))) &
-                       " got=" & integer'image(to_integer(unsigned(reconstructed_key_out)))
-                severity error;
+            report "FAIL: LSB visualization mismatch!" severity failure;
+            std.env.finish;
         end if;
-
-        wait;
+        
+        report "[TESTBENCH] Checking visualization for MSB (SW(0) = '1')..." severity note;
+        SW(0) <= '1';
+        wait for 1 us; -- Tunggu propagasi kombinatorial MUX
+        
+        if (HEX5 = "0110000" and -- 3
+            HEX4 = "0001000" and -- A
+            HEX3 = "0111111" and -- -
+            HEX2 = "0111111" and -- -
+            HEX1 = "0111111" and -- -
+            HEX0 = "0111111") then -- -
+            report "[TESTBENCH] MSB Check PASSED." severity note;
+        else
+            report "FAIL: MSB visualization mismatch!" severity failure;
+            std.env.finish;
+        end if;
+        
+        report "================== INTEGRATION TEST: PASS (Zero Bit Errors) ==================" severity note;
+        
+        std.env.finish;
     end process;
 
 end architecture;

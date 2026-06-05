@@ -59,22 +59,11 @@ architecture rtl of AcakCakap_Top is
 	signal Lin, Rin, Lout, Rout : signed(15 downto 0);
 	signal Ldone, Rdone : std_logic;
 	
-	-- For interfacing with the scrambler
-	signal in_real, out_real : std_logic_vector(15 downto 0);
-	signal do_en 	  : std_logic;
-	signal shift_key  : std_logic_vector(23 downto 0);
-	signal sync_start : std_logic := '0';
-	
-	-- Receiver Sync Shift Register Array
-	type sync_shift_reg_type is array (0 to 6) of std_logic_vector(3 downto 0);
-	signal sync_shift_reg : sync_shift_reg_type := (others => (others => '0'));
-	
 	-- For interfacing with correlator
 	signal corr_out_valid : std_logic;
 	signal out_valid : std_logic;
 	signal Aud_interface_ready : std_logic := '1';
 	signal enable : std_logic := '0';
-	signal dataA : std_logic_vector(15 downto 0);
 	signal goertzel_enable : std_logic := '0';
 	
 	-- Interconnect for Goertzel_top -> top_dtmfencode
@@ -104,7 +93,6 @@ architecture rtl of AcakCakap_Top is
 	signal command : std_logic;
 	signal dtmf_out : signed(15 downto 0);
 	signal tone_digit : std_logic_vector(3 downto 0);
-	signal shift_key_24bit : std_logic_vector(23 downto 0);
     signal payload_data : std_logic_vector(31 downto 0);
 	signal segment_counter : unsigned(3 downto 0) := (others => '0');
 	signal current_4bit_segment : std_logic_vector(3 downto 0);
@@ -127,24 +115,15 @@ architecture rtl of AcakCakap_Top is
 	-- Local clock/reset alias for synchronous FSM process
 	signal clk : std_logic;
 	signal rst : std_logic;
+	
+	-- Synchronized reset for AUD_XCK domain
+	signal aud_rst_reg : std_logic := '1';
+	signal aud_rst     : std_logic := '1';
 
 	signal LED : std_logic := '0';
 	-- State machine for button pressing 
 	type command_state is (WAIT_FOR_PRESS, WAIT_FOR_RELEASE, RELEASE_STATE);
 	signal button_state : command_state;
-	
-	-- Scrambler Component declaration (Verilog entity)
-	-- component Scrambler_TOP
-	-- port (
-	-- 	clock  	  : in std_logic;
-	-- 	reset      : in std_logic;
-	-- 	di_en 	  : in std_logic;
-	-- 	shift_key  : in std_logic_vector(23 downto 0);
-	-- 	in_real	  : in std_logic_vector(15 downto 0);
-	-- 	do_en	  	  : out std_logic;
-	-- 	out_real   : out std_logic_vector(15 downto 0)
-	-- );
-	-- end component Scrambler_TOP;
 
 begin
 
@@ -153,7 +132,6 @@ begin
 	rst <= not KEY(0);
 	start_transmission <= command OR uart_trigger; -- Dual-trigger mechanism
 	goertzel_enable <= enable;
-	shift_key <= reconstructed_key_32bit(23 downto 0); -- Loopback legacy support (jika dibutuhkan)
 	
 	-- Audio interface core instantiation
 	Audio_interface: entity work.Audio_interface
@@ -162,7 +140,7 @@ begin
 	)
 	port map (
 		clk => clock_50,
-		rst => not key(0),
+		rst => not KEY(0),
 		AUD_XCK => AUD_XCK,
 		I2C_SCLK => FPGA_I2C_SCLK,
 		I2C_SDAT => FPGA_I2C_SDAT,
@@ -179,6 +157,15 @@ begin
 		Lout => Lout
 	);
 	
+	-- Reset Synchronizer for AUD_XCK Domain
+	process(AUD_XCK)
+	begin
+		if rising_edge(AUD_XCK) then
+			aud_rst_reg <= not KEY(0);
+			aud_rst <= aud_rst_reg;
+		end if;
+	end process;
+	
 	-- DTMF Generator instance
 	DTMF_generator : entity work.generate_dtmf_signed(rtl)
 	generic map (
@@ -187,23 +174,11 @@ begin
 	)
 	port map (
 		clk => AUD_XCK,
-		rst => not KEY(0),
-		command => command,
+		rst => aud_rst,
+		command => dtmf_tone_enable,
 		tone_digit => tone_digit, 
 		dtmf_out => dtmf_lout
 	);
-	
-	-- Scrambler instance (COMMENTED OUT)
-	-- Scrambler_interface: Scrambler_TOP
-	-- port map (
-	-- 	clock => AUD_XCK,
-	-- 	reset => not KEY(0),
-	-- 	di_en => sync_start,
-	-- 	do_en => do_en,
-	-- 	shift_key => shift_key,
-	-- 	in_real => in_real,
-	-- 	out_real => out_real
-	-- );
 	
 	-- =========================================================
 	-- UART RX & Protocol Instance
@@ -215,7 +190,7 @@ begin
 	)
 	port map (
 		clk       => AUD_XCK,
-		rst       => not KEY(0),
+		rst       => aud_rst,
 		rx        => UART_RXD,
 		data_out  => uart_rx_data,
 		rx_valid  => uart_rx_valid
@@ -224,7 +199,7 @@ begin
 	UART_PROTOCOL_FSM : process(AUD_XCK)
 	begin
 		if rising_edge(AUD_XCK) then
-			if KEY(0) = '0' then
+			if aud_rst = '1' then
 				uart_key_reg <= (others => '0');
 				uart_trigger <= '0';
 			else
@@ -255,14 +230,14 @@ begin
 	)
 	port map (
 		clk		  => AUD_XCK,
-		reset 	  => not KEY(0),
+		reset 	  => aud_rst,
 		in_valid  => Ldone, 
 		out_ready => '1',
 		-- Output port 
 		in_ready  => Aud_interface_ready,
 		out_valid => corr_out_valid,
 		-- Data interfacing
-		dataA  	  => dataA,
+		dataA  	  => std_logic_vector(Lin),
 		enable    => enable
 	);
 	
@@ -276,7 +251,7 @@ begin
 	)
 	port map (
 		clk       => AUD_XCK,
-		rst       => not KEY(0),
+		rst       => aud_rst,
 		in_ready  => in_ready,
 		in_valid  => goertzel_enable,
 		DTMF_sig  => std_logic_vector(Lin),
@@ -295,7 +270,7 @@ begin
 	DTMF_ENCODER_RX : entity work.top_dtmfencode
 	port map (
 		clk       => AUD_XCK,
-		rst       => not KEY(0),
+		rst       => aud_rst,
 		in_valid  => goertzel_out_valid,
 		in_ready  => encoder_in_ready,
 		corr_697  => power_697,
@@ -318,7 +293,7 @@ begin
 	SHIFT_ADD_RX : entity work.shift_add
 	port map (
 		clk      => AUD_XCK,
-		reset    => not KEY(0),
+		reset    => aud_rst,
 		in_valid => dtmf_code_valid,
 		out_ready => '1',
 		in_ready => shift_add_in_ready,
@@ -326,18 +301,15 @@ begin
 		input3   => dtmf_code_4bit,
 		output32 => open -- Dipetakan melalui encode_out
 	);
-	
 
 	-- =========================================================
-	-- AUDIO LOOPBACK MUX (SCRAMBLER DISABLED)
+	-- AUDIO MULTIPLEXER (MODEM TRANSCEIVER)
 	-- =========================================================
-	-- Menjumlahkan langsung audio input dari mic dengan DTMF dari TX generator
-	Lout <= Lin + dtmf_lout;
-	Rout <= Rin + dtmf_lout;
+	-- Di SISI PENGIRIM (TX): Jalur mikrofon (Lin/Rin) di-mute total selama pengiriman
+	-- Di SISI PENERIMA (RX): Jalur Lin diloopsback ke Lout untuk speaker
+	Lout <= dtmf_lout when dtmf_tone_enable = '1' else Lin;
+	Rout <= dtmf_lout when dtmf_tone_enable = '1' else Rin;
 
-	-- Phase 1: prepare 32-bit key source for segmentation.
-	shift_key_24bit <= shift_key;
-	
 	-- MUX untuk Injeksi Kunci Dinamis
 	-- Jika SW(8) = '1', gunakan kunci dinamis dari injeksi memori UART
 	-- Jika SW(8) = '0', gunakan kunci statis kombinasi fisik SW(7 downto 0)
@@ -381,7 +353,7 @@ begin
 	FSM_DTMF_TRANSMITTER : process(clk)
 	begin
 		if rising_edge(clk) then
-			if rst = '1' then
+			if aud_rst = '1' then
 				current_state <= IDLE;
 				sample_counter <= 0;
 				segment_counter <= (others => '0');
@@ -398,17 +370,19 @@ begin
 
 					when TRANSMIT =>
 						dtmf_tone_enable <= '1';
-						if sample_counter = SAMPLES_20MS - 1 then
-							sample_counter <= 0;
-							-- Sekuens 12 Simbol (Index 0 sampai 11)
-							if segment_counter < to_unsigned(11, segment_counter'length) then
-								segment_counter <= segment_counter + 1;
-								current_state <= TRANSMIT; -- Langsung sambung (NO SILENCE)
+						if Ldone = '1' then
+							if sample_counter = SAMPLES_20MS - 1 then
+								sample_counter <= 0;
+								-- Sekuens 12 Simbol (Index 0 sampai 11)
+								if segment_counter < to_unsigned(11, segment_counter'length) then
+									segment_counter <= segment_counter + 1;
+									current_state <= TRANSMIT; -- Langsung sambung (NO SILENCE)
+								else
+									current_state <= IDLE;
+								end if;
 							else
-								current_state <= IDLE;
+								sample_counter <= sample_counter + 1;
 							end if;
-						else
-							sample_counter <= sample_counter + 1;
 						end if;
 				end case;
 			end if;
@@ -416,29 +390,31 @@ begin
 	end process;
 
 	-- FSM for issueing the "Go" command of transmitting DTMF
-	FSM_COMMAND : process(AUD_XCK, KEY(0)) 
+	FSM_COMMAND : process(AUD_XCK) 
 	begin 
-		if(KEY(0)='0') then
-			LED <= '0';
-			button_state <= WAIT_FOR_PRESS;
-			command <= '0';
-		elsif(rising_edge(AUD_XCK)) then
-			case button_state is 
-				when WAIT_FOR_PRESS =>
-					command <= '0';
-					LED <= '0';
-					if(KEY(1)='0') then 
-						button_state <= WAIT_FOR_RELEASE;
-					end if;
-				when WAIT_FOR_RELEASE =>
-					if(KEY(1)='1') then 
-						button_state <= RELEASE_STATE;
-					end if;
-				when RELEASE_STATE => 
-					command <= '1';
-					LED <= '1';
-					button_state <= WAIT_FOR_PRESS;
-			end case;
+		if rising_edge(AUD_XCK) then
+			if aud_rst = '1' then
+				LED <= '0';
+				button_state <= WAIT_FOR_PRESS;
+				command <= '0';
+			else
+				case button_state is 
+					when WAIT_FOR_PRESS =>
+						command <= '0';
+						LED <= '0';
+						if(KEY(1)='0') then 
+							button_state <= WAIT_FOR_RELEASE;
+						end if;
+					when WAIT_FOR_RELEASE =>
+						if(KEY(1)='1') then 
+							button_state <= RELEASE_STATE;
+						end if;
+					when RELEASE_STATE => 
+						command <= '1';
+						LED <= '1';
+						button_state <= WAIT_FOR_PRESS;
+				end case;
+			end if;
 		end if;
 	end process;
 
@@ -489,28 +465,6 @@ begin
 		end if;
 	end process;
 
-	-- Receiver Sync Shift Register (Pattern Matcher)
-	process(clk)
-	begin
-		if rising_edge(clk) then
-			if rst = '1' then
-				sync_shift_reg <= (others => (others => '0'));
-				sync_start <= '0';
-			elsif dtmf_code_valid = '1' then
-				-- Shift left
-				sync_shift_reg(0 to 5) <= sync_shift_reg(1 to 6);
-				sync_shift_reg(6) <= dtmf_code_4bit;
-				
-				-- Check sequence: # (0010), Silence (0000), # (0010), Silence (0000), 3 (0011), Silence (0000), # (0010)
-				if sync_shift_reg(1) = "0010" and sync_shift_reg(2) = "0000" and
-				   sync_shift_reg(3) = "0010" and sync_shift_reg(4) = "0000" and
-				   sync_shift_reg(5) = "0011" and sync_shift_reg(6) = "0000" and
-				   dtmf_code_4bit = "0010" then
-					sync_start <= '1';
-				end if;
-			end if;
-		end if;
-	end process;
 
 
 end rtl;

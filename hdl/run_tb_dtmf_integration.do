@@ -1,39 +1,53 @@
 ###############################################################################
 # run_tb_dtmf_integration.do
-#
 # Compile + run dedicated integration testbench: tb_dtmf_integration
-#
-# Usage from hdl/ folder:
-#   do run_tb_dtmf_integration.do
-#
-# Usage from Top-Level/ folder:
-#   vsim -do hdl/run_tb_dtmf_integration.do
 ###############################################################################
 
 onerror {abort all}
 transcript on
 
 puts ""
-puts {=== [1/5] Setup libraries ===}
-if {![file exists work]} { vlib work }
-if {![file exists floatfixlib]} { vlib floatfixlib }
-if {![file exists ieee_proposed]} { vlib ieee_proposed }
-vmap work work
-vmap floatfixlib floatfixlib
-vmap ieee_proposed ieee_proposed
+puts {=== [1/6] Setup libraries ===}
+if {![file exists work]}     { vlib work     }
+if {![file exists audiopll]} { vlib audiopll }
+
+# Create local directories for floatfixlib and ieee_proposed to prevent 
+# modifying the read-only system installation libraries in modern Questa/ModelSim.
+if {![file exists local_floatfixlib]}     { vlib local_floatfixlib }
+vmap floatfixlib local_floatfixlib
+
+if {![file exists local_ieee_proposed]}   { vlib local_ieee_proposed }
+vmap ieee_proposed local_ieee_proposed
 
 puts ""
-puts {=== [2/5] Compile fixed-point support libraries ===}
-vcom -93 -work floatfixlib ../intelFPGA_lite/18.1/modelsim_ase/vhdl_src/floatfixlib/fixed_float_types_c.vhd
-vcom -93 -work ieee_proposed ../intelFPGA_lite/18.1/modelsim_ase/vhdl_src/floatfixlib/fixed_pkg_c.vhd
+puts {=== [2/6] Compile PLL / audio base ===}
+vcom -2008 -work audiopll ../quartus/AudioPLL_sim/AudioPLL.vho
+vcom -2008 -work work i2c.vhd
+vcom -2008 -work work Audio_interface.vhd
 
 puts ""
-puts {=== [3/5] Compile sender blocks ===}
+puts {=== [3/6] Compile DTMF sender ===}
 vcom -2008 -work work sender_hdl/sine_gen_signed.vhd
 vcom -2008 -work work sender_hdl/generate_dtmf_signed.vhd
 
 puts ""
-puts {=== [4/5] Compile receiver/detector blocks ===}
+puts {=== [3.5/6] Compile fixed-point support libraries ===}
+vcom -93 -work floatfixlib ../intelFPGA_lite/18.1/modelsim_ase/vhdl_src/floatfixlib/fixed_float_types_c.vhd
+vcom -93 -work ieee_proposed ../intelFPGA_lite/18.1/modelsim_ase/vhdl_src/floatfixlib/fixed_pkg_c.vhd
+
+puts ""
+puts {=== [4/6] Compile DTMF detector and receiver ===}
+vcom -2008 -work work receiver_hdl/lutcos_block.vhd
+vcom -2008 -work work receiver_hdl/lutsin_block.vhd
+vcom -2008 -work work receiver_hdl/multv6.vhd
+vcom -2008 -work work receiver_hdl/powercalcv1.vhd
+vcom -2008 -work work receiver_hdl/slidingv5.vhd
+vcom -2008 -work work receiver_hdl/markingv1.vhd
+vcom -2008 -work work receiver_hdl/Framingv2.vhd
+vcom -2008 -work work receiver_hdl/flaggingv2.vhd
+vcom -2008 -work work receiver_hdl/dec_control.vhd
+vcom -2008 -work work receiver_hdl/toplevel_iq.vhd
+
 vcom -2008 -work work dtmf_detect_hdl/shift_add.vhd
 vcom -2008 -work work dtmf_detect_hdl/Goertzel.vhd
 vcom -2008 -work work dtmf_detect_hdl/Goertzel_top.vhd
@@ -43,51 +57,51 @@ vcom -2008 -work work dtmf_detect_hdl/decision.vhd
 vcom -2008 -work work dtmf_detect_hdl/top_dtmfencode.vhd
 
 puts ""
-puts {=== [5/5] Compile and run testbench ===}
+puts {=== [5/6] Compile top-level & testbench ===}
+vcom -2008 -work work util/uart_rx.vhd
+vcom -2008 -work work AcakCakap_Top.vhd
 vcom -2008 -work work tb_dtmf_integration.vhd
 
-if {[catch {vsim -quiet -t 1ps -lib work work.tb_dtmf_integration} sim_result]} {
+if {[catch {vsim -quiet -voptargs="+acc" -t 1ps -lib work work.tb_dtmf_integration} sim_result]} {
     puts ""
     puts {=== ERROR: Elaboration failed for work.tb_dtmf_integration ===}
     error $sim_result
 }
 
-# === KONFIGURASI WAVEFORM UNTUK ANALISIS THRESHOLD ===
-# Buka jendela wave jika belum terbuka
+# --- Setup Waveform Window ---
 view wave
 
-# Masukkan sinyal-sinyal penting ke Waveform
-add wave -noupdate -divider "Control & Input"
-add wave -noupdate -color Yellow sim:/tb_dtmf_integration/clk
-add wave -noupdate -color Yellow sim:/tb_dtmf_integration/rst
-add wave -noupdate -color Cyan -format analog-step -radix decimal -height 60 -max 32767 -min -32768 sim:/tb_dtmf_integration/audio_loopback
-add wave -noupdate sim:/tb_dtmf_integration/sample_tick
+add wave -noupdate -divider "System Clock & Reset"
+add wave -noupdate -color Yellow sim:/tb_dtmf_integration/CLOCK_50
+add wave -noupdate -color Orange sim:/tb_dtmf_integration/KEY
+add wave -noupdate -color Violet sim:/tb_dtmf_integration/UART_RXD
 
-add wave -noupdate -divider "Goertzel Power Outputs (Unsigned)"
-add wave -noupdate sim:/tb_dtmf_integration/goertzel_out_valid
-add wave -noupdate -color Magenta -radix unsigned sim:/tb_dtmf_integration/power_697
-add wave -noupdate -color Magenta -radix unsigned sim:/tb_dtmf_integration/power_770
-add wave -noupdate -color Magenta -radix unsigned sim:/tb_dtmf_integration/power_852
-add wave -noupdate -color Magenta -radix unsigned sim:/tb_dtmf_integration/power_941
-add wave -noupdate -color Green -radix unsigned sim:/tb_dtmf_integration/power_1209
-add wave -noupdate -color Green -radix unsigned sim:/tb_dtmf_integration/power_1336
-add wave -noupdate -color Green -radix unsigned sim:/tb_dtmf_integration/power_1477
+add wave -noupdate -divider "FSM Internal State"
+add wave -noupdate -color White sim:/tb_dtmf_integration/DUT/current_state
+add wave -noupdate -color Green sim:/tb_dtmf_integration/DUT/dtmf_tone_enable
+add wave -noupdate -color Cyan sim:/tb_dtmf_integration/DUT/segment_counter
 
-add wave -noupdate -divider "Decoder Outputs"
-add wave -noupdate -radix binary sim:/tb_dtmf_integration/dtmf_code_4bit
-add wave -noupdate sim:/tb_dtmf_integration/payload_symbol_count
-add wave -noupdate -radix hex sim:/tb_dtmf_integration/reconstructed_key_out
+add wave -noupdate -divider "Audio Signals"
+add wave -noupdate -color Red -format analog-step -radix decimal -height 60 -max 32767 -min -32768 sim:/tb_dtmf_integration/AUD_DACDAT
+add wave -noupdate -color Blue -format analog-step -radix decimal -height 60 -max 32767 -min -32768 sim:/tb_dtmf_integration/AUD_ADCDAT
 
-# TB waits 520 ms before pass/fail assert. Run slightly longer.
-run 550 ms
+add wave -noupdate -divider "Receiver Outputs"
+add wave -noupdate -radix binary sim:/tb_dtmf_integration/DUT/dtmf_code_4bit
+add wave -noupdate sim:/tb_dtmf_integration/DUT/dtmf_code_valid
+add wave -noupdate -radix hex sim:/tb_dtmf_integration/DUT/reconstructed_key_32bit
 
-# Format tampilan agar seluruh sinyal muat di layar
+add wave -noupdate -divider "Outputs"
+add wave -noupdate -radix hex sim:/tb_dtmf_integration/HEX5
+add wave -noupdate -radix hex sim:/tb_dtmf_integration/HEX4
+add wave -noupdate -radix hex sim:/tb_dtmf_integration/HEX3
+add wave -noupdate -radix hex sim:/tb_dtmf_integration/HEX2
+add wave -noupdate -radix hex sim:/tb_dtmf_integration/HEX1
+add wave -noupdate -radix hex sim:/tb_dtmf_integration/HEX0
+
+# Run the simulation (Wait 20ms I2C/PLL + 1ms UART + 250ms DTMF => 271 ms total)
+run 275 ms
+
 wave zoom full
 
 puts ""
 puts {=== DONE: tb_dtmf_integration simulation finished ===}
-puts {=== Silakan analisis nilai power_* pada Waveform untuk menentukan THRESHOLD ===}
-
-# [PENTING] Comment-out perintah quit di bawah agar GUI ModelSim tidak tertutup otomatis!
-# quit -sim
-# quit

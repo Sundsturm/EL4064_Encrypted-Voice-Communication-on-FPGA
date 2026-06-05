@@ -3,8 +3,10 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 use ieee.fixed_pkg.all;
 
-entity toplevel_iq is
+entity toplevelv1 is
     generic(
+        dataA_INT_BITS:     natural := 3;
+        dataA_FRAC_BITS:    natural := 13;
         mult_INT_BITS:      natural := 3;
         mult_FRAC_BITS:     natural := 13;
         acc_INT_BITS:       natural := 8;
@@ -21,13 +23,19 @@ entity toplevel_iq is
         in_ready    : out STD_LOGIC;
         out_valid   : out STD_LOGIC;
         -- Bus Data
-        dataA       : in std_logic_vector(15 downto 0);
-        enable      : out std_logic
+        dataA       : in SFIXED((dataA_INT_BITS-1) downto -dataA_FRAC_BITS);
+        enable      : out std_logic;
+        -- Debug Ports
+        dbg_sum697      : out SFIXED((batch_INT_BITS-1) downto -batch_FRAC_BITS);
+        dbg_sum941      : out SFIXED((batch_INT_BITS-1) downto -batch_FRAC_BITS);
+        dbg_sum1477     : out SFIXED((batch_INT_BITS-1) downto -batch_FRAC_BITS);
+        dbg_batch_valid : out STD_LOGIC
     );
-end toplevel_iq;
+end toplevelv1;
 
-architecture Behavioral of toplevel_iq is
-    signal address_signal : std_logic_vector(9 downto 0);
+architecture Behavioral of toplevelv1 is
+    signal address_signal : std_logic_vector(9 downto 0) := (others => '0');
+    signal dataA_slv      : std_logic_vector(15 downto 0);
     -- I/O signal
     signal r2r1           : STD_LOGIC;
     signal v2v1           : STD_LOGIC;
@@ -261,6 +269,12 @@ architecture Behavioral of toplevel_iq is
     end component;
 
 begin
+    dataA_slv <= to_slv(dataA);
+    -- Debug assignments
+    dbg_sum697      <= sum697;
+    dbg_sum941      <= sum941;
+    dbg_sum1477     <= sum1477;
+    dbg_batch_valid <= v2v4;
     cntrl_unit  : component dec_control
         port map(
             clk         => clk,
@@ -402,7 +416,7 @@ begin
             out_ready       => r2r1,
             in_ready        => in_ready,
             out_valid       => v2v1,
-            dataA           => dataA,
+            dataA           => dataA_slv,
             sin697          => sine_697,
             sin941          => sine_941,
             sin1477         => sine_1477,
