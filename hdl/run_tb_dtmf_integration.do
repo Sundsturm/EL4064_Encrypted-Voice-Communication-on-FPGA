@@ -81,16 +81,19 @@ add wave -noupdate -color White sim:/tb_dtmf_integration/DUT/current_state
 add wave -noupdate -color Green sim:/tb_dtmf_integration/DUT/dtmf_tone_enable
 add wave -noupdate -color Cyan sim:/tb_dtmf_integration/DUT/segment_counter
 
-add wave -noupdate -divider "Audio Signals"
-add wave -noupdate -color Red -format analog-step -radix decimal -height 60 -max 32767 -min -32768 sim:/tb_dtmf_integration/AUD_DACDAT
-add wave -noupdate -color Blue -format analog-step -radix decimal -height 60 -max 32767 -min -32768 sim:/tb_dtmf_integration/AUD_ADCDAT
+add wave -noupdate -divider "DTMF Transmitter Audio Path"
+add wave -noupdate -color Red   -format analog-step -radix decimal -height 60 -max 32767 -min -32768 sim:/tb_dtmf_integration/DUT/dtmf_lout
+add wave -noupdate -color Red   sim:/tb_dtmf_integration/AUD_DACDAT
+add wave -noupdate -color Blue  sim:/tb_dtmf_integration/AUD_ADCDAT
+add wave -noupdate -color Green -format analog-step -radix decimal -height 60 -max 32767 -min -32768 sim:/tb_dtmf_integration/DUT/Lin
 
 add wave -noupdate -divider "Receiver Outputs"
 add wave -noupdate -radix binary sim:/tb_dtmf_integration/DUT/dtmf_code_4bit
-add wave -noupdate sim:/tb_dtmf_integration/DUT/dtmf_code_valid
-add wave -noupdate -radix hex sim:/tb_dtmf_integration/DUT/reconstructed_key_32bit
+add wave -noupdate                sim:/tb_dtmf_integration/DUT/dtmf_code_valid
+add wave -noupdate -radix hex     sim:/tb_dtmf_integration/DUT/reconstructed_key_32bit
+add wave -noupdate -radix hex     sim:/tb_dtmf_integration/probe_key
 
-add wave -noupdate -divider "Outputs"
+add wave -noupdate -divider "HEX Display Outputs"
 add wave -noupdate -radix hex sim:/tb_dtmf_integration/HEX5
 add wave -noupdate -radix hex sim:/tb_dtmf_integration/HEX4
 add wave -noupdate -radix hex sim:/tb_dtmf_integration/HEX3
