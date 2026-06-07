@@ -27,11 +27,11 @@ architecture rtl of I2C is
 	constant address : std_logic_vector(7 downto 0) := X"34";	
 	type codec is array (0 to 9) of std_logic_vector(15 downto 0);
 	constant Audio_init: codec :=
-         (	x"0015", -- SET_LIN_L//L-line, modernately high gain; max=1F
-				x"0215", -- SET_LIN_R//R-line, modernately high gain; max=1F
+         (	x"001F", -- SET_LIN_L//L-line, maximum gain; max=1F
+				x"021F", -- SET_LIN_R//R-line, maximum gain; max=1F
 				x"0475", -- SET_HEAD_L//L-phone out, medium volume; max=79
 				x"0675", -- SET_HEAD_R//R-phone out, medium volume; max=79
-				x"081D", -- A_PATH_CTRL//Line-> ADC, DAC on, no bypass
+				x"0812", -- A_PATH_CTRL//Line-> ADC, DAC on, no bypass
 				x"0A06", -- D_PATH_CTRL//deemph to 48KHz
 				x"0C00", -- POWER_ON//all on
 				x"0E01", -- SET_FORMAT//MSB first, left justified, 16-bit

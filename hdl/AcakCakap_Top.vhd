@@ -131,12 +131,9 @@ begin
 	clk <= AUD_XCK;
 	rst <= not KEY(0);
 	start_transmission <= command OR uart_trigger; -- Dual-trigger mechanism
-	-- Bypass IQ correlator (toplevel_iq) gating: feed Goertzel directly from audio sample-ready pulse.
-	-- The IQ correlator's fixed-point pipeline picks up meta-value 'U' before AUD_XCK starts,
-	-- permanently freezing 'enable' at 0 in simulation. The Goertzel filter itself handles
-	-- false detections safely: when Lin=0 (silence), all power outputs are 0 and the
-	-- DTMF encoder will not assert any valid code.
-	goertzel_enable <= Ldone;
+	-- Gated by IQ correlator 'enable' for robust symbol boundary synchronization on hardware.
+	-- (For simulation bypass, set: goertzel_enable <= Ldone;)
+	goertzel_enable <= Ldone and enable;
 	
 	-- Audio interface core instantiation
 	Audio_interface: entity work.Audio_interface

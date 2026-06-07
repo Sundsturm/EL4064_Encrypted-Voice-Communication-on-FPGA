@@ -11,6 +11,8 @@ set_global_assignment -name PROJECT_CREATION_TIME_DATE "08:00:27 FEBRUARY 05,202
 set_global_assignment -name DEVICE_FILTER_PACKAGE FBGA
 set_global_assignment -name DEVICE_FILTER_PIN_COUNT 896
 set_global_assignment -name DEVICE_FILTER_SPEED_GRADE 6
+set_global_assignment -name NUM_PARALLEL_PROCESSORS ALL
+set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
 
 #============================================================
 # CLOCK
@@ -217,20 +219,21 @@ set_global_assignment -name VHDL_FILE ../hdl/dtmf_detect_hdl/Goertzel.vhd
 set_global_assignment -name VHDL_FILE ../hdl/dtmf_detect_hdl/dtmf_system.vhd
 set_global_assignment -name VHDL_FILE ../hdl/dtmf_detect_hdl/DecodeDTMF.vhd
 set_global_assignment -name VHDL_FILE ../hdl/dtmf_detect_hdl/decision.vhd
-set_global_assignment -name VERILOG_FILE ../hdl/Twiddle.v
-set_global_assignment -name VERILOG_FILE ../hdl/SdfUnit2.v
-set_global_assignment -name VERILOG_FILE ../hdl/SdfUnit.v
-set_global_assignment -name VERILOG_FILE ../hdl/Scrambler_TOP.v
-set_global_assignment -name VERILOG_FILE ../hdl/ReverseBitOrder.v
-set_global_assignment -name VERILOG_FILE ../hdl/ReorderXk.v
-set_global_assignment -name VERILOG_FILE ../hdl/Multiply.v
-set_global_assignment -name VERILOG_FILE ../hdl/Mult128.v
+# set_global_assignment -name VERILOG_FILE ../hdl/Twiddle.v
+# set_global_assignment -name VERILOG_FILE ../hdl/SdfUnit2.v
+# set_global_assignment -name VERILOG_FILE ../hdl/SdfUnit.v
+# set_global_assignment -name VERILOG_FILE ../hdl/Scrambler_TOP.v
+# set_global_assignment -name VERILOG_FILE ../hdl/ReverseBitOrder.v
+# set_global_assignment -name VERILOG_FILE ../hdl/ReorderXk.v
+# set_global_assignment -name VERILOG_FILE ../hdl/Multiply.v
+# set_global_assignment -name VERILOG_FILE ../hdl/Mult128.v
 set_global_assignment -name VHDL_FILE ../hdl/i2c.vhd
-set_global_assignment -name VERILOG_FILE ../hdl/GenPermutationKey.v
-set_global_assignment -name VERILOG_FILE ../hdl/FFT.v
-set_global_assignment -name VERILOG_FILE ../hdl/DelayBuffer.v
-set_global_assignment -name VERILOG_FILE ../hdl/Butterfly.v
+# set_global_assignment -name VERILOG_FILE ../hdl/GenPermutationKey.v
+# set_global_assignment -name VERILOG_FILE ../hdl/FFT.v
+# set_global_assignment -name VERILOG_FILE ../hdl/DelayBuffer.v
+# set_global_assignment -name VERILOG_FILE ../hdl/Butterfly.v
 set_global_assignment -name VHDL_FILE ../hdl/Audio_interface.vhd
+set_global_assignment -name VHDL_FILE ../hdl/util/uart_rx.vhd
 set_global_assignment -name VHDL_FILE ../hdl/AcakCakap_Top.vhd
 set_global_assignment -name VHDL_FILE "D:/intelFPGA_lite/18.1/modelsim_ase/vhdl_src/floatfixlib/fixed_pkg_c.vhd" -hdl_version VHDL_1993 -library ieee_proposed
 set_global_assignment -name VHDL_FILE "D:/intelFPGA_lite/18.1/modelsim_ase/vhdl_src/floatfixlib/fixed_float_types_c.vhd" -hdl_version VHDL_1993 -library floatfixlib

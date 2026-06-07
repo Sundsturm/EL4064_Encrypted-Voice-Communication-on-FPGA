@@ -1,7 +1,8 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
-use ieee.fixed_pkg.all;
+library ieee_proposed;
+use ieee_proposed.fixed_pkg.all;
 
 -- ============================================================================
 -- markingv1: Deteksi simbol DTMF "3" (697 Hz) setelah flag "##" dikonfirmasi
