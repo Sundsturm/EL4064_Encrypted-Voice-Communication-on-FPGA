@@ -90,6 +90,9 @@ add wave -noupdate -color Green -format analog-step -radix decimal -height 60 -m
 add wave -noupdate -divider "Receiver Outputs"
 add wave -noupdate -radix binary sim:/tb_dtmf_integration/DUT/dtmf_code_4bit
 add wave -noupdate                sim:/tb_dtmf_integration/DUT/dtmf_code_valid
+add wave -noupdate                sim:/tb_dtmf_integration/DUT/DTMF_ENCODER_RX/tone_valid
+add wave -noupdate                sim:/tb_dtmf_integration/DUT/DTMF_ENCODER_RX/frame_state
+add wave -noupdate                sim:/tb_dtmf_integration/DUT/DTMF_ENCODER_RX/frame_done
 add wave -noupdate -radix hex     sim:/tb_dtmf_integration/DUT/reconstructed_key_32bit
 add wave -noupdate -radix hex     sim:/tb_dtmf_integration/probe_key
 
@@ -101,8 +104,8 @@ add wave -noupdate -radix hex sim:/tb_dtmf_integration/HEX2
 add wave -noupdate -radix hex sim:/tb_dtmf_integration/HEX1
 add wave -noupdate -radix hex sim:/tb_dtmf_integration/HEX0
 
-# Run the simulation (Wait 20ms I2C/PLL + 1ms UART + 250ms DTMF => 271 ms total)
-run 275 ms
+# Testbench owns the bounded wait and calls std.env.finish.
+run -all
 
 wave zoom full
 

@@ -33,6 +33,13 @@ architecture Behavioral of top_dtmfencode is
     -- Signal Out tiap blok
     signal codelow, codehigh                        : STD_LOGIC_VECTOR(2 downto 0);    
     signal code_dtmf                                : STD_LOGIC_VECTOR(3 downto 0);  
+    signal tone_valid                               : STD_LOGIC;
+    signal framed_key                               : STD_LOGIC_VECTOR(31 downto 0) := (others => '0');
+    signal payload_shift                            : STD_LOGIC_VECTOR(31 downto 0) := (others => '0');
+    signal frame_done                               : STD_LOGIC := '0';
+    signal payload_count                            : integer range 0 to 8 := 0;
+    type frame_state_type is (WAIT_HASH, GOT_HASH, GOT_HASH_HASH, GOT_HASH_THREE, COLLECT_PAYLOAD);
+    signal frame_state                              : frame_state_type := WAIT_HASH;
     -- Componen Declarations
     component lowcomparator is
         Port (
@@ -94,7 +101,74 @@ begin
     in_ready <= lowready and highready;
     v2v2     <= v2vl and v2vh;
     dtmf_code_4bit <= code_dtmf;
-    dtmf_code_valid <= v2v3;
+    tone_valid <= '1' when (v2v3 = '1' and codelow /= "000" and codehigh /= "000") else '0';
+    dtmf_code_valid <= tone_valid;
+    encode_out <= framed_key;
+    out_valid <= frame_done;
+    r2r1 <= '1';
+
+    FRAME_COLLECTOR : process(clk, rst)
+        variable next_payload : STD_LOGIC_VECTOR(31 downto 0);
+    begin
+        if rst = '1' then
+            framed_key <= (others => '0');
+            payload_shift <= (others => '0');
+            payload_count <= 0;
+            frame_state <= WAIT_HASH;
+            frame_done <= '0';
+        elsif rising_edge(clk) then
+            frame_done <= '0';
+            if tone_valid = '1' then
+                case frame_state is
+                    when WAIT_HASH =>
+                        if code_dtmf = x"F" then
+                            frame_state <= GOT_HASH;
+                        end if;
+
+                    when GOT_HASH =>
+                        if code_dtmf = x"F" then
+                            frame_state <= GOT_HASH_HASH;
+                        elsif code_dtmf = x"3" then
+                            -- Also accept the shortened #,3,# view if the first
+                            -- repeated # was consumed while the receiver was settling.
+                            frame_state <= GOT_HASH_THREE;
+                        else
+                            frame_state <= WAIT_HASH;
+                        end if;
+
+                    when GOT_HASH_HASH =>
+                        if code_dtmf = x"3" then
+                            frame_state <= GOT_HASH_THREE;
+                        elsif code_dtmf = x"F" then
+                            frame_state <= GOT_HASH_HASH;
+                        else
+                            frame_state <= WAIT_HASH;
+                        end if;
+
+                    when GOT_HASH_THREE =>
+                        if code_dtmf = x"F" then
+                            payload_shift <= (others => '0');
+                            payload_count <= 0;
+                            frame_state <= COLLECT_PAYLOAD;
+                        else
+                            frame_state <= WAIT_HASH;
+                        end if;
+
+                    when COLLECT_PAYLOAD =>
+                        next_payload := payload_shift(27 downto 0) & code_dtmf;
+                        payload_shift <= next_payload;
+                        if payload_count = 7 then
+                            framed_key <= next_payload;
+                            frame_done <= '1';
+                            payload_count <= 0;
+                            frame_state <= WAIT_HASH;
+                        else
+                            payload_count <= payload_count + 1;
+                        end if;
+                end case;
+            end if;
+        end if;
+    end process;
     -- Instance of comparator for frequency 697 and 770 Hz
     comp_low : component lowcomparator
         port map(
@@ -142,15 +216,4 @@ begin
             dtmf_code   => code_dtmf
         );
     
-    encoder : component shift_add
-        port map(
-            clk         => clk,
-            reset       => rst,
-            in_valid    => v2v3,
-            out_ready   => out_ready,
-            in_ready    => r2r1,
-            out_valid   => out_valid,
-            input3      => code_dtmf,
-            output32    => encode_out
-        );
 end Behavioral;

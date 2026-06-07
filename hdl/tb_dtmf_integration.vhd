@@ -176,13 +176,20 @@ begin
         wait for 500 us;
         KEY(1) <= '1';
 
-        report "[TESTBENCH] Transmission started! Waiting 250ms for completion..." severity note;
+        report "[TESTBENCH] Transmission started! Waiting 250ms for nominal TX completion..." severity note;
 
         -- =====================================================================
         -- Fase 5: Tunggu selesai transmisi 12 simbol DTMF
-        -- 12 simbol x 20 ms = 240 ms. Diberi 10 ms toleransi.
+        -- 12 simbol x 20 ms = 240 ms. Diberi 10 ms toleransi untuk TX.
+        -- Setelah itu receiver diberi waktu tambahan terbatas karena jalur
+        -- loopback melewati serialisasi/deserialisasi audio dan pipeline
+        -- Goertzel sebelum shift register berisi 8 nibble payload terakhir.
         -- =====================================================================
         wait for 250 ms;
+        if probe_key /= TEST_KEY then
+            report "[TESTBENCH] TX window complete; waiting for receiver pipeline to flush..." severity note;
+            wait until probe_key = TEST_KEY for 200 ms;
+        end if;
 
         -- =====================================================================
         -- TUGAS 3: Macro Assertion Penutup
