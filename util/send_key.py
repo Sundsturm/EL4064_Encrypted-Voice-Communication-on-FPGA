@@ -3,7 +3,7 @@ import time
 
 # GANTI 'COM3' dengan port serial USB-to-UART papan pengirim (TX) Anda
 # Anda bisa mengecek nomor COM port di Device Manager Windows
-COM_PORT = 'COM3' 
+COM_PORT = 'COM7' 
 BAUD_RATE = 115200
 
 try:

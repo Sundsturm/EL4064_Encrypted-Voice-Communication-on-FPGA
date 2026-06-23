@@ -3,47 +3,46 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 entity AcakCakap_Top is
-port
-(
+	port (
 
-	------------ CLOCK ------------
-	CLOCK2_50       	:in    	std_logic;
-	CLOCK3_50       	:in    	std_logic;
-	CLOCK4_50       	:in    	std_logic;
-	CLOCK_50        	:in    	std_logic;
+		------------ CLOCK ------------
+		CLOCK2_50 : in std_logic;
+		CLOCK3_50 : in std_logic;
+		CLOCK4_50 : in std_logic;
+		CLOCK_50 : in std_logic;
 
-	------------ KEY ------------
-	KEY             	:in    	std_logic_vector(3 downto 0);
+		------------ KEY ------------
+		KEY : in std_logic_vector(3 downto 0);
 
-	------------ SW ------------
-	SW              	:in    	std_logic_vector(9 downto 0);
+		------------ SW ------------
+		SW : in std_logic_vector(9 downto 0);
 
-	------------ UART ------------
-	UART_RXD        	:in    	std_logic;
+		------------ UART ------------
+		UART_RXD : in std_logic;
 
-	------------ LED ------------
-	LEDR            	:out   	std_logic_vector(9 downto 0);
+		------------ LED ------------
+		LEDR : out std_logic_vector(9 downto 0);
 
-	------------ Seg7 ------------
-	HEX0            	:out   	std_logic_vector(6 downto 0);
-	HEX1            	:out   	std_logic_vector(6 downto 0);
-	HEX2            	:out   	std_logic_vector(6 downto 0);
-	HEX3            	:out   	std_logic_vector(6 downto 0);
-	HEX4            	:out   	std_logic_vector(6 downto 0);
-	HEX5            	:out   	std_logic_vector(6 downto 0);
+		------------ Seg7 ------------
+		HEX0 : out std_logic_vector(6 downto 0);
+		HEX1 : out std_logic_vector(6 downto 0);
+		HEX2 : out std_logic_vector(6 downto 0);
+		HEX3 : out std_logic_vector(6 downto 0);
+		HEX4 : out std_logic_vector(6 downto 0);
+		HEX5 : out std_logic_vector(6 downto 0);
 
-	------------ Audio ------------
-	AUD_ADCDAT      	:in    	std_logic;
-	AUD_ADCLRCK     	:inout 	std_logic;
-	AUD_BCLK        	:inout 	std_logic;
-	AUD_DACDAT      	:out   	std_logic;
-	AUD_DACLRCK     	:inout 	std_logic;
-	AUD_XCK         	:buffer  std_logic;
+		------------ Audio ------------
+		AUD_ADCDAT : in std_logic;
+		AUD_ADCLRCK : inout std_logic;
+		AUD_BCLK : inout std_logic;
+		AUD_DACDAT : out std_logic;
+		AUD_DACLRCK : inout std_logic;
+		AUD_XCK : buffer std_logic;
 
-	------------ I2C for Audio and Video-In ------------
-	FPGA_I2C_SCLK   	:out   	std_logic;
-	FPGA_I2C_SDAT   	:inout 	std_logic
-);
+		------------ I2C for Audio and Video-In ------------
+		FPGA_I2C_SCLK : out std_logic;
+		FPGA_I2C_SDAT : inout std_logic
+	);
 
 end entity;
 
@@ -51,28 +50,27 @@ end entity;
 --  Structural coding
 ---------------------------------------------------------
 
-
 architecture rtl of AcakCakap_Top is
 
--- declare --
+	-- declare --
 	-- For interfacing with the Audio Interface design
 	signal Lin, Rin, Lout, Rout : signed(15 downto 0);
 	signal Ldone, Rdone : std_logic;
-	
+
 	-- For interfacing with correlator
 	signal corr_out_valid : std_logic;
 	signal out_valid : std_logic;
 	signal Aud_interface_ready : std_logic := '1';
 	signal enable : std_logic := '0';
 	signal goertzel_enable : std_logic := '0';
-	
+
 	-- Interconnect for Goertzel_top -> top_dtmfencode
 	signal goertzel_out_valid : std_logic;
 	signal encoder_in_ready : std_logic;
-	signal power_697  : std_logic_vector(16 downto 0);
-	signal power_770  : std_logic_vector(16 downto 0);
-	signal power_852  : std_logic_vector(16 downto 0);
-	signal power_941  : std_logic_vector(16 downto 0);
+	signal power_697 : std_logic_vector(16 downto 0);
+	signal power_770 : std_logic_vector(16 downto 0);
+	signal power_852 : std_logic_vector(16 downto 0);
+	signal power_941 : std_logic_vector(16 downto 0);
 	signal power_1209 : std_logic_vector(16 downto 0);
 	signal power_1336 : std_logic_vector(16 downto 0);
 	signal power_1477 : std_logic_vector(16 downto 0);
@@ -82,28 +80,34 @@ architecture rtl of AcakCakap_Top is
 	signal reconstructed_key_32bit : std_logic_vector(31 downto 0);
 	signal shift_add_in_ready : std_logic;
 	signal shift_add_out_valid : std_logic;
-	
+
 	-- For interfacing with the Tone Detection Design 
-	signal in_ready  : std_logic; 
-	signal anode 	  : std_logic;
-	signal encode_out: std_logic_vector(23 downto 0);
-	
+	signal in_ready : std_logic;
+	signal anode : std_logic;
+	signal encode_out : std_logic_vector(23 downto 0);
+
 	-- %% For interfacing with the DTMF Generator %%
-	signal dtmf_lout : signed(15 downto 0);  -- intermediate; Lout driven via MUX
+	signal dtmf_lout : signed(15 downto 0); -- intermediate; Lout driven via MUX
 	signal command : std_logic;
 	signal dtmf_out : signed(15 downto 0);
 	signal tone_digit : std_logic_vector(3 downto 0);
-    signal payload_data : std_logic_vector(31 downto 0);
+	signal payload_data : std_logic_vector(31 downto 0);
 	signal segment_counter : unsigned(3 downto 0) := (others => '0');
 	signal current_4bit_segment : std_logic_vector(3 downto 0);
 	signal dtmf_digit_to_send : std_logic_vector(3 downto 0);
-	
+
 	-- %% UART Interface %%
-	signal uart_rx_data  : std_logic_vector(7 downto 0);
+	signal uart_rx_data : std_logic_vector(7 downto 0);
 	signal uart_rx_valid : std_logic;
-	signal uart_key_reg  : std_logic_vector(31 downto 0) := (others => '0');
-	signal uart_trigger  : std_logic := '0';
-	
+	signal uart_key_reg : std_logic_vector(31 downto 0) := (others => '0');
+	signal uart_trigger : std_logic := '0';
+	-- CDC (Clock-Domain Crossing)
+	signal uart_valid_meta : std_logic := '0';
+	signal uart_valid_sync : std_logic := '0';
+	signal uart_data_latch : std_logic_vector(7 downto 0) := (others => '0');
+	signal uart_valid_synced : std_logic := '0'; -- stable di AUD_XCK domain
+	signal rst_50mhz : std_logic := '1'; -- reset untuk domain CLOCK_50
+
 	-- Phase 2 FSM sender control
 	type state_type is (IDLE, TRANSMIT);
 	signal current_state : state_type := IDLE;
@@ -111,14 +115,14 @@ architecture rtl of AcakCakap_Top is
 	signal start_transmission : std_logic := '0';
 	signal dtmf_tone_enable : std_logic := '0';
 	constant SAMPLES_20MS : integer := 640;
-	
+
 	-- Local clock/reset alias for synchronous FSM process
 	signal clk : std_logic;
 	signal rst : std_logic;
-	
+
 	-- Synchronized reset for AUD_XCK domain
 	signal aud_rst_reg : std_logic := '1';
-	signal aud_rst     : std_logic := '1';
+	signal aud_rst : std_logic := '1';
 
 	signal LED : std_logic := '0';
 	-- State machine for button pressing 
@@ -127,199 +131,230 @@ architecture rtl of AcakCakap_Top is
 
 begin
 
--- body --
+	-- body --
 	clk <= AUD_XCK;
 	rst <= not KEY(0);
-	start_transmission <= command OR uart_trigger; -- Dual-trigger mechanism
-	-- Gated by IQ correlator 'enable' for robust symbol boundary synchronization on hardware.
-	-- (For simulation bypass, set: goertzel_enable <= Ldone;)
+	start_transmission <= command or uart_trigger; -- Dual-trigger mechanism
 	goertzel_enable <= Ldone and enable;
-	
+
 	-- Audio interface core instantiation
-	Audio_interface: entity work.Audio_interface
-	generic map (
-		SAMPLE_RATE => 32 --in KHz
-	)
-	port map (
-		clk => clock_50,
-		rst => not KEY(0),
-		AUD_XCK => AUD_XCK,
-		I2C_SCLK => FPGA_I2C_SCLK,
-		I2C_SDAT => FPGA_I2C_SDAT,
-		AUD_BCLK => AUD_BCLK,
-		AUD_DACLRCK => AUD_DACLRCK,
-		AUD_ADCLRCK => AUD_ADCLRCK,
-		AUD_ADCDAT => AUD_ADCDAT,
-		AUD_DACDAT => AUD_DACDAT,
-		Lin => Lin,
-		Rin => Rin,
-		Ldone => Ldone,
-		Rdone => Rdone,
-		Rout => Rout,
-		Lout => Lout
-	);
-	
+	Audio_interface : entity work.Audio_interface
+		generic map(
+			SAMPLE_RATE => 32 --in KHz
+		)
+		port map(
+			clk => clock_50,
+			rst => not KEY(0),
+			AUD_XCK => AUD_XCK,
+			I2C_SCLK => FPGA_I2C_SCLK,
+			I2C_SDAT => FPGA_I2C_SDAT,
+			AUD_BCLK => AUD_BCLK,
+			AUD_DACLRCK => AUD_DACLRCK,
+			AUD_ADCLRCK => AUD_ADCLRCK,
+			AUD_ADCDAT => AUD_ADCDAT,
+			AUD_DACDAT => AUD_DACDAT,
+			Lin => Lin,
+			Rin => Rin,
+			Ldone => Ldone,
+			Rdone => Rdone,
+			Rout => Rout,
+			Lout => Lout
+		);
+
 	-- Reset Synchronizer for AUD_XCK Domain
-	process(AUD_XCK)
+	process (AUD_XCK)
 	begin
 		if rising_edge(AUD_XCK) then
 			aud_rst_reg <= not KEY(0);
 			aud_rst <= aud_rst_reg;
 		end if;
 	end process;
-	
+
 	-- DTMF Generator instance
 	DTMF_generator : entity work.generate_dtmf_signed(rtl)
-	generic map (
-		addr_bits => 9,
-		data_bits => 16
-	)
-	port map (
-		clk => AUD_XCK,
-		rst => aud_rst,
-		command => dtmf_tone_enable,
-		tone_digit => tone_digit, 
-		dtmf_out => dtmf_lout
-	);
-	
+		generic map(
+			addr_bits => 9,
+			data_bits => 16
+		)
+		port map(
+			clk => AUD_XCK,
+			rst => aud_rst,
+			command => dtmf_tone_enable,
+			tone_digit => tone_digit,
+			dtmf_out => dtmf_lout
+		);
+
 	-- =========================================================
 	-- UART RX & Protocol Instance
-	-- Beroperasi di AUD_XCK (18.432 MHz) untuk sinkronisasi FSM
 	-- =========================================================
-	UART_RX_INST : entity work.uart_rx
-	generic map (
-		CLKS_PER_BIT => 160 -- 18.432 MHz / 115200 bps
-	)
-	port map (
-		clk       => AUD_XCK,
-		rst       => aud_rst,
-		rx        => UART_RXD,
-		data_out  => uart_rx_data,
-		rx_valid  => uart_rx_valid
-	);
+	rst_50mhz <= not KEY(0); -- reset sinkron domain 50 MHz
 
-	UART_PROTOCOL_FSM : process(AUD_XCK)
+	UART_RX_INST : entity work.uart_rx
+		generic map(
+			CLKS_PER_BIT => 434 -- 50 MHz / 115200 bps = 434
+		)
+		port map(
+			clk => CLOCK_50,
+			rst => rst_50mhz,
+			rx => UART_RXD,
+			data_out => uart_rx_data,
+			rx_valid => uart_rx_valid
+		);
+
+	-- =========================================================
+	-- CDC: Sinkronisasi uart_rx_valid dari domain CLOCK_50
+	-- ke domain AUD_XCK menggunakan 2-FF synchronizer
+	-- =========================================================
+	CDC_UART_VALID : process (AUD_XCK)
+	begin
+		if rising_edge(AUD_XCK) then
+			uart_valid_meta <= uart_rx_valid;
+			uart_valid_sync <= uart_valid_meta;
+			uart_valid_synced <= uart_valid_sync;
+		end if;
+	end process;
+
+	-- Latch data saat valid di domain CLOCK_50
+	-- (uart_rx_data stabil selama rx_valid='1' di CLOCK_50, aman dibaca)
+	CDC_LATCH_DATA : process (CLOCK_50)
+	begin
+		if rising_edge(CLOCK_50) then
+			if uart_rx_valid = '1' then
+				uart_data_latch <= uart_rx_data;
+			end if;
+		end if;
+	end process;
+
+	-- UART Protocol FSM berjalan di AUD_XCK, menggunakan sinyal
+	-- yang sudah disinkronisasi (uart_valid_synced & uart_data_latch)
+	UART_PROTOCOL_FSM : process (AUD_XCK)
+		variable prev_valid : std_logic := '0';
 	begin
 		if rising_edge(AUD_XCK) then
 			if aud_rst = '1' then
 				uart_key_reg <= (others => '0');
 				uart_trigger <= '0';
+				prev_valid := '0';
 			else
 				uart_trigger <= '0'; -- Default to no trigger
-				if uart_rx_valid = '1' then
-					if uart_rx_data = x"0A" then -- 0x0A is Line Feed (\n)
+				-- Rising edge detect pada uart_valid_synced
+				if uart_valid_synced = '1' and prev_valid = '0' then
+					if uart_data_latch = x"0A" then -- 0x0A = Line Feed (\n) = trigger
 						uart_trigger <= '1';
 					else
 						-- Geser byte masuk ke LSB
-						uart_key_reg <= uart_key_reg(23 downto 0) & uart_rx_data;
+						uart_key_reg <= uart_key_reg(23 downto 0) & uart_data_latch;
 					end if;
 				end if;
+				prev_valid := uart_valid_synced;
 			end if;
 		end if;
 	end process;
-	
+
 	-- DTMF Correlator instantiation
-	DTMF_corr: entity work.toplevel_iq
-	generic map (
-		mult_INT_BITS   => 2,
-		mult_FRAC_BITS  => 14,
-		acc_INT_BITS    => 6,
-		acc_FRAC_BITS   => 10,
-		power_INT_BITS  => 10,
-		power_FRAC_BITS => 6,
-		batch_INT_BITS  => 14,
-		batch_FRAC_BITS => 2
-	)
-	port map (
-		clk		  => AUD_XCK,
-		reset 	  => aud_rst,
-		in_valid  => Ldone, 
-		out_ready => '1',
-		-- Output port 
-		in_ready  => Aud_interface_ready,
-		out_valid => corr_out_valid,
-		-- Data interfacing
-		dataA  	  => std_logic_vector(Lin),
-		enable    => enable
-	);
-	
+	DTMF_corr : entity work.toplevel_iq
+		generic map(
+			mult_INT_BITS => 2,
+			mult_FRAC_BITS => 14,
+			acc_INT_BITS => 6,
+			acc_FRAC_BITS => 10,
+			power_INT_BITS => 10,
+			power_FRAC_BITS => 6,
+			batch_INT_BITS => 14,
+			batch_FRAC_BITS => 2
+		)
+		port map(
+			clk => AUD_XCK,
+			reset => aud_rst,
+			in_valid => Ldone,
+			out_ready => '1',
+			-- Output port 
+			in_ready => Aud_interface_ready,
+			out_valid => corr_out_valid,
+			-- Data interfacing
+			dataA => std_logic_vector(Lin),
+			enable => enable
+		);
+
 	-- =========================================================
 	-- Receiver Phase 4: Goertzel power bank + DTMF encoder chain
 	-- =========================================================
 	GOERTZEL_RX : entity work.Goertzel_top
-	generic map (
-		DATA_WIDTH => 16,
-		BLOCK_SIZE => 640
-	)
-	port map (
-		clk       => AUD_XCK,
-		rst       => aud_rst,
-		in_ready  => in_ready,
-		in_valid  => goertzel_enable,
-		DTMF_sig  => std_logic_vector(Lin),
-		out_ready => encoder_in_ready,
-		out_valid => goertzel_out_valid,
-		power_697 => power_697,
-		power_770 => power_770,
-		power_852 => power_852,
-		power_941 => power_941,
-		power_1209 => power_1209,
-		power_1336 => power_1336,
-		power_1477 => power_1477,
-		power_1633 => power_1633
-	);
+		generic map(
+			DATA_WIDTH => 16,
+			BLOCK_SIZE => 640
+		)
+		port map(
+			clk => AUD_XCK,
+			rst => aud_rst,
+			in_ready => in_ready,
+			in_valid => goertzel_enable,
+			DTMF_sig => std_logic_vector(Lin),
+			out_ready => encoder_in_ready,
+			out_valid => goertzel_out_valid,
+			power_697 => power_697,
+			power_770 => power_770,
+			power_852 => power_852,
+			power_941 => power_941,
+			power_1209 => power_1209,
+			power_1336 => power_1336,
+			power_1477 => power_1477,
+			power_1633 => power_1633
+		);
 
 	DTMF_ENCODER_RX : entity work.top_dtmfencode
-	port map (
-		clk       => AUD_XCK,
-		rst       => aud_rst,
-		in_valid  => goertzel_out_valid,
-		in_ready  => encoder_in_ready,
-		corr_697  => power_697,
-		corr_770  => power_770,
-		corr_852  => power_852,
-		corr_941  => power_941,
-		corr_1209 => power_1209,
-		corr_1336 => power_1336,
-		corr_1477 => power_1477,
-		corr_1633 => power_1633,
-		out_ready => '1',
-		out_valid => out_valid,
-		sevseg    => open, -- Tidak dipakai langsung, digantikan MUX Visualisasi
-		anode     => anode,
-		encode_out => reconstructed_key_32bit,
-		dtmf_code_4bit => dtmf_code_4bit,
-		dtmf_code_valid => dtmf_code_valid
-	);
+		port map(
+			clk => AUD_XCK,
+			rst => aud_rst,
+			in_valid => goertzel_out_valid,
+			in_ready => encoder_in_ready,
+			corr_697 => power_697,
+			corr_770 => power_770,
+			corr_852 => power_852,
+			corr_941 => power_941,
+			corr_1209 => power_1209,
+			corr_1336 => power_1336,
+			corr_1477 => power_1477,
+			corr_1633 => power_1633,
+			out_ready => '1',
+			out_valid => out_valid,
+			sevseg => open, -- Tidak dipakai langsung, digantikan MUX Visualisasi
+			anode => anode,
+			encode_out => reconstructed_key_32bit,
+			dtmf_code_4bit => dtmf_code_4bit,
+			dtmf_code_valid => dtmf_code_valid
+		);
 
 	SHIFT_ADD_RX : entity work.shift_add
-	port map (
-		clk      => AUD_XCK,
-		reset    => aud_rst,
-		in_valid => dtmf_code_valid,
-		out_ready => '1',
-		in_ready => shift_add_in_ready,
-		out_valid => shift_add_out_valid,
-		input3   => dtmf_code_4bit,
-		output32 => open -- Dipetakan melalui encode_out
-	);
+		port map(
+			clk => AUD_XCK,
+			reset => aud_rst,
+			in_valid => dtmf_code_valid,
+			out_ready => '1',
+			in_ready => shift_add_in_ready,
+			out_valid => shift_add_out_valid,
+			input3 => dtmf_code_4bit,
+			output32 => open -- Dipetakan melalui encode_out
+		);
 
 	-- =========================================================
 	-- AUDIO MULTIPLEXER (MODEM TRANSCEIVER)
 	-- =========================================================
 	-- Di SISI PENGIRIM (TX): Jalur mikrofon (Lin/Rin) di-mute total selama pengiriman
 	-- Di SISI PENERIMA (RX): Jalur Lin diloopsback ke Lout untuk speaker
-	Lout <= dtmf_lout when dtmf_tone_enable = '1' else Lin;
-	Rout <= dtmf_lout when dtmf_tone_enable = '1' else Rin;
+	Lout <= dtmf_lout when dtmf_tone_enable = '1' else
+		Lin;
+	Rout <= dtmf_lout when dtmf_tone_enable = '1' else
+		Rin;
 
 	-- MUX untuk Injeksi Kunci Dinamis
 	-- Jika SW(8) = '1', gunakan kunci dinamis dari injeksi memori UART
 	-- Jika SW(8) = '0', gunakan kunci statis kombinasi fisik SW(7 downto 0)
-    payload_data <= uart_key_reg when SW(8) = '1' else 
-                    SW(7 downto 0) & SW(7 downto 0) & SW(7 downto 0) & SW(7 downto 0);
+	payload_data <= uart_key_reg when SW(8) = '1' else
+		SW(7 downto 0) & SW(7 downto 0) & SW(7 downto 0) & SW(7 downto 0);
 
 	-- Combinational multiplexer: for segment 4..11 select one 4-bit key segment.
-	SEGMENT_MUX : process(payload_data, segment_counter)
+	SEGMENT_MUX : process (payload_data, segment_counter)
 	begin
 		case to_integer(segment_counter) is
 			when 4 => current_4bit_segment <= payload_data(31 downto 28);
@@ -335,7 +370,7 @@ begin
 	end process;
 
 	-- Combinational decoder with preamble: [0]='#', [1]='#', [2]='3', [3]='#', [4..11]=encoded key.
-	SEGMENT_TO_DTMF_DECODER : process(segment_counter, current_4bit_segment)
+	SEGMENT_TO_DTMF_DECODER : process (segment_counter, current_4bit_segment)
 	begin
 		case to_integer(segment_counter) is
 			when 0 | 1 | 3 =>
@@ -343,16 +378,17 @@ begin
 			when 2 =>
 				dtmf_digit_to_send <= x"3"; -- DTMF '3'
 			when others =>
-                -- Segmen 4 s.d 11 adalah Payload
+				-- Segmen 4 s.d 11 adalah Payload
 				dtmf_digit_to_send <= current_4bit_segment;
 		end case;
 	end process;
 
 	-- Apply DTMF tone only during TRANSMIT state.
-	tone_digit <= dtmf_digit_to_send when dtmf_tone_enable = '1' else (others => '0');
+	tone_digit <= dtmf_digit_to_send when dtmf_tone_enable = '1' else
+		(others => '0');
 
 	-- Phase 2 sequential FSM for DTMF transmission timing
-	FSM_DTMF_TRANSMITTER : process(clk)
+	FSM_DTMF_TRANSMITTER : process (clk)
 	begin
 		if rising_edge(clk) then
 			if aud_rst = '1' then
@@ -392,26 +428,26 @@ begin
 	end process;
 
 	-- FSM for issueing the "Go" command of transmitting DTMF
-	FSM_COMMAND : process(AUD_XCK) 
-	begin 
+	FSM_COMMAND : process (AUD_XCK)
+	begin
 		if rising_edge(AUD_XCK) then
 			if aud_rst = '1' then
 				LED <= '0';
 				button_state <= WAIT_FOR_PRESS;
 				command <= '0';
 			else
-				case button_state is 
+				case button_state is
 					when WAIT_FOR_PRESS =>
 						command <= '0';
 						LED <= '0';
-						if(KEY(1)='0') then 
+						if (KEY(1) = '0') then
 							button_state <= WAIT_FOR_RELEASE;
 						end if;
 					when WAIT_FOR_RELEASE =>
-						if(KEY(1)='1') then 
+						if (KEY(1) = '1') then
 							button_state <= RELEASE_STATE;
 						end if;
-					when RELEASE_STATE => 
+					when RELEASE_STATE =>
 						command <= '1';
 						LED <= '1';
 						button_state <= WAIT_FOR_PRESS;
@@ -423,7 +459,7 @@ begin
 	-- =========================================================
 	-- TUGAS 3: MULTIPLEXING VISUALISASI SEVEN-SEGMENT
 	-- =========================================================
-	VISUALIZATION_MUX : process(SW(0), reconstructed_key_32bit)
+	VISUALIZATION_MUX : process (SW(0), reconstructed_key_32bit)
 		-- Fungsi internal konversi HEX ke Seven-Segment (Active-Low)
 		function hex_to_sevseg(hex_in : std_logic_vector(3 downto 0)) return std_logic_vector is
 		begin
@@ -467,7 +503,4 @@ begin
 		end if;
 	end process;
 
-
-
 end rtl;
-
