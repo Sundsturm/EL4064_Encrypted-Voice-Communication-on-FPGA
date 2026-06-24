@@ -199,6 +199,12 @@ set_location_assignment PIN_Y24 -to FPGA_I2C_SCLK
 set_location_assignment PIN_Y23 -to FPGA_I2C_SDAT
 
 #============================================================
+# UART
+#============================================================
+set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to UART_RXD
+set_location_assignment PIN_W15 -to UART_RXD
+
+#============================================================
 # End of pin assignments by Terasic System Builder
 #============================================================
 

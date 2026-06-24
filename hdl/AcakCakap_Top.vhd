@@ -99,14 +99,16 @@ architecture rtl of AcakCakap_Top is
 	-- %% UART Interface %%
 	signal uart_rx_data : std_logic_vector(7 downto 0);
 	signal uart_rx_valid : std_logic;
-	signal uart_key_reg : std_logic_vector(31 downto 0) := (others => '0');
-	signal uart_trigger : std_logic := '0';
-	-- CDC (Clock-Domain Crossing)
-	signal uart_valid_meta : std_logic := '0';
-	signal uart_valid_sync : std_logic := '0';
-	signal uart_data_latch : std_logic_vector(7 downto 0) := (others => '0');
-	signal uart_valid_synced : std_logic := '0'; -- stable di AUD_XCK domain
-	signal rst_50mhz : std_logic := '1'; -- reset untuk domain CLOCK_50
+	signal uart_key_reg  : std_logic_vector(31 downto 0) := (others => '0');
+	signal uart_trigger  : std_logic := '0';
+	-- Toggle-based CDC: CLOCK_50 -> AUD_XCK
+	-- Setiap byte diterima, uart_toggle di-flip (tidak bergantung pulse width)
+	signal uart_toggle      : std_logic := '0'; -- domain CLOCK_50
+	signal uart_data_latch  : std_logic_vector(7 downto 0) := (others => '0'); -- domain CLOCK_50
+	signal uart_tog_meta    : std_logic := '0'; -- 2-FF sync di AUD_XCK
+	signal uart_tog_sync    : std_logic := '0';
+	signal uart_tog_prev    : std_logic := '0'; -- untuk edge detection
+	signal rst_50mhz        : std_logic := '1'; -- reset domain CLOCK_50
 
 	-- Phase 2 FSM sender control
 	type state_type is (IDLE, TRANSMIT);
@@ -202,51 +204,52 @@ begin
 		);
 
 	-- =========================================================
-	-- CDC: Sinkronisasi uart_rx_valid dari domain CLOCK_50
-	-- ke domain AUD_XCK menggunakan 2-FF synchronizer
+	-- CDC: Toggle-based synchronizer CLOCK_50 -> AUD_XCK
+	-- Setiap byte valid dari UART RX, uart_toggle di-flip di CLOCK_50.
+	-- Di AUD_XCK, toggle di-sync 2-FF lalu edge-detected.
+	-- Metode ini andal untuk pulse < 1 period clock tujuan.
 	-- =========================================================
-	CDC_UART_VALID : process (AUD_XCK)
-	begin
-		if rising_edge(AUD_XCK) then
-			uart_valid_meta <= uart_rx_valid;
-			uart_valid_sync <= uart_valid_meta;
-			uart_valid_synced <= uart_valid_sync;
-		end if;
-	end process;
-
-	-- Latch data saat valid di domain CLOCK_50
-	-- (uart_rx_data stabil selama rx_valid='1' di CLOCK_50, aman dibaca)
-	CDC_LATCH_DATA : process (CLOCK_50)
+	CDC_TOGGLE_GEN : process(CLOCK_50)
 	begin
 		if rising_edge(CLOCK_50) then
-			if uart_rx_valid = '1' then
-				uart_data_latch <= uart_rx_data;
+			if rst_50mhz = '1' then
+				uart_toggle    <= '0';
+				uart_data_latch <= (others => '0');
+			elsif uart_rx_valid = '1' then
+				uart_data_latch <= uart_rx_data; -- Latch data dulu
+				uart_toggle     <= not uart_toggle; -- Flip toggle
 			end if;
 		end if;
 	end process;
 
-	-- UART Protocol FSM berjalan di AUD_XCK, menggunakan sinyal
-	-- yang sudah disinkronisasi (uart_valid_synced & uart_data_latch)
-	UART_PROTOCOL_FSM : process (AUD_XCK)
-		variable prev_valid : std_logic := '0';
+	CDC_TOGGLE_SYNC : process(AUD_XCK)
+	begin
+		if rising_edge(AUD_XCK) then
+			uart_tog_meta <= uart_toggle;   -- FF1 (metastability)
+			uart_tog_sync <= uart_tog_meta; -- FF2 (stable)
+		end if;
+	end process;
+
+	-- UART Protocol FSM: jalan di AUD_XCK, mendeteksi setiap byte baru
+	-- lewat perubahan uart_tog_sync (edge detection)
+	UART_PROTOCOL_FSM : process(AUD_XCK)
 	begin
 		if rising_edge(AUD_XCK) then
 			if aud_rst = '1' then
-				uart_key_reg <= (others => '0');
-				uart_trigger <= '0';
-				prev_valid := '0';
+				uart_key_reg  <= (others => '0');
+				uart_trigger  <= '0';
+				uart_tog_prev <= '0';
 			else
-				uart_trigger <= '0'; -- Default to no trigger
-				-- Rising edge detect pada uart_valid_synced
-				if uart_valid_synced = '1' and prev_valid = '0' then
-					if uart_data_latch = x"0A" then -- 0x0A = Line Feed (\n) = trigger
-						uart_trigger <= '1';
+				uart_trigger <= '0'; -- Default: tidak trigger
+				uart_tog_prev <= uart_tog_sync;
+				-- Edge detection: setiap perubahan toggle = 1 byte baru
+				if uart_tog_sync /= uart_tog_prev then
+					if uart_data_latch = x"0A" then
+						uart_trigger <= '1'; -- LF = trigger transmisi
 					else
-						-- Geser byte masuk ke LSB
 						uart_key_reg <= uart_key_reg(23 downto 0) & uart_data_latch;
 					end if;
 				end if;
-				prev_valid := uart_valid_synced;
 			end if;
 		end if;
 	end process;
