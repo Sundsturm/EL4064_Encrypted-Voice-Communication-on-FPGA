@@ -19,22 +19,50 @@ import random
 COM_PORT = 'COM3'
 BAUD_RATE = 115200
 
+# Mode pengiriman kunci: 'hardcoded' atau 'random'
+KEY_MODE = 'random'
+
 try:
     # Membuka koneksi port serial
     ser = serial.Serial(COM_PORT, BAUD_RATE, timeout=1)
     time.sleep(0.5) # Tunggu inisialisasi koneksi
     
-    # Payload kunci dinamis: 0x3A7C9B1D + 0x0A (Line Feed = trigger transmisi)
-    # Urutan byte: MSB dulu, diakhiri 0x0A sebagai trigger
-    # payload = bytes([0x3A, 0x7C, 0x9B, 0x1D, 0x0A])
-    key = random.randint(0x00000000, 0xFFFFFFFF)
-    payload = key.to_bytes(4, byteorder='big') + b'\x0a'
+    # Payload kunci dinamis: diakhiri 0x0A sebagai trigger (Line Feed)
+    # Urutan byte: MSB dulu
+    if KEY_MODE == 'hardcoded':
+        key = 0x3A7C9B1D
+        payload = bytes([0x3A, 0x7C, 0x9B, 0x1D, 0x0A])
+        print(f"Mengirim kunci dinamis via CP2102 ke {COM_PORT} (Key: 0x{key:08X}, Mode: {KEY_MODE})...")
+    else:
+        key = 0
+        payload = b''
+        print(f"Mengirim kunci dinamis via CP2102 ke {COM_PORT} (Mode: {KEY_MODE})...")
     
-    # print("Mengirim kunci dinamis via CP2102 ke {COM_PORT} (Key: 0x{key:08X})...")
-    print(f"Mengirim kunci dinamis via CP2102 ke {COM_PORT} (Key: 0x{key:08X})...")
-    ser.write(payload)
-    ser.flush()
-    print("Kunci dinamis berhasil dikirim!")
+    # =========================================================
+    # AUTO-RETRANSMIT: Kirim 2x dengan jeda 350ms
+    # =========================================================
+    # Masalah: Window Goertzel penerima berjalan dengan fase acak
+    # relatif terhadap awal transmisi. Trigger pertama bisa saja
+    # terpotong di tengah window sehingga preamble ##3# tidak terdeteksi.
+    # Solusi: Kirim ulang setelah satu transmisi penuh selesai (~240ms).
+    # =========================================================
+    RETRANSMIT_COUNT = 50           # Jumlah pengiriman
+    RETRANSMIT_DELAY = 5       # Jeda antar pengiriman (> 240ms = 12 simbol × 20ms)
+    
+    for i in range(RETRANSMIT_COUNT):
+        if KEY_MODE == 'random':
+            key = random.randint(0x00000000, 0xFFFFFFFF)
+            payload = key.to_bytes(4, byteorder='big') + b'\x0a'
+            print(f"  Paket ke-{i+1}/{RETRANSMIT_COUNT} dikirim (Key: 0x{key:08X}).")
+        else:
+            print(f"  Paket ke-{i+1}/{RETRANSMIT_COUNT} dikirim.")
+            
+        ser.write(payload)
+        ser.flush()
+        if i < RETRANSMIT_COUNT - 1:
+            time.sleep(RETRANSMIT_DELAY)  # Tunggu transmisi DTMF selesai
+    
+    print("Selesai.")
     
     ser.close()
 except Exception as e:

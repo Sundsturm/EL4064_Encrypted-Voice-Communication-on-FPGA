@@ -113,10 +113,10 @@ architecture rtl of AcakCakap_Top is
 	-- Phase 2 FSM sender control
 	type state_type is (IDLE, TRANSMIT);
 	signal current_state : state_type := IDLE;
-	signal sample_counter : integer range 0 to 640 := 0;
+	signal sample_counter  : integer range 0 to 640 := 0;
 	signal start_transmission : std_logic := '0';
 	signal dtmf_tone_enable : std_logic := '0';
-	constant SAMPLES_20MS : integer := 640;
+	constant SAMPLES_20MS : integer := 640; -- Durasi 1 simbol DTMF @ 32kHz
 
 	-- Local clock/reset alias for synchronous FSM process
 	signal clk : std_logic;
@@ -130,6 +130,12 @@ architecture rtl of AcakCakap_Top is
 	-- State machine for button pressing 
 	type command_state is (WAIT_FOR_PRESS, WAIT_FOR_RELEASE, RELEASE_STATE);
 	signal button_state : command_state;
+
+	-- Debouncer untuk SW(0) — mencegah glitch saat ganti mode tampilan
+	-- DEBOUNCE_LIMIT = 50.000 cycles CLOCK_50 = 1 ms
+	constant DEBOUNCE_LIMIT : integer := 50000;
+	signal sw0_stable    : std_logic := '0';
+	signal debounce_cnt  : integer range 0 to DEBOUNCE_LIMIT := 0;
 
 begin
 
@@ -169,6 +175,30 @@ begin
 		if rising_edge(AUD_XCK) then
 			aud_rst_reg <= not KEY(0);
 			aud_rst <= aud_rst_reg;
+		end if;
+	end process;
+
+	-- =========================================================
+	-- DEBOUNCER DIGITAL untuk SW(0)
+	-- SW(0) harus stabil selama DEBOUNCE_LIMIT cycles CLOCK_50
+	-- (~1 ms) sebelum sw0_stable diperbarui.
+	-- Ini mencegah glitch/bounce pada transisi slide switch.
+	-- =========================================================
+	DEBOUNCE_SW0 : process(CLOCK_50)
+	begin
+		if rising_edge(CLOCK_50) then
+			if SW(0) /= sw0_stable then
+				-- SW(0) berubah: mulai hitung
+				if debounce_cnt = DEBOUNCE_LIMIT then
+					sw0_stable   <= SW(0); -- Stabil selama 1ms -> terima
+					debounce_cnt <= 0;
+				else
+					debounce_cnt <= debounce_cnt + 1;
+				end if;
+			else
+				-- SW(0) sama dengan stable: reset counter
+				debounce_cnt <= 0;
+			end if;
 		end if;
 	end process;
 
@@ -395,18 +425,18 @@ begin
 	begin
 		if rising_edge(clk) then
 			if aud_rst = '1' then
-				current_state <= IDLE;
-				sample_counter <= 0;
-				segment_counter <= (others => '0');
+				current_state    <= IDLE;
+				sample_counter   <= 0;
+				segment_counter  <= (others => '0');
 				dtmf_tone_enable <= '0';
 			else
 				case current_state is
 					when IDLE =>
 						dtmf_tone_enable <= '0';
-						sample_counter <= 0;
+						sample_counter   <= 0;
 						if start_transmission = '1' then
 							segment_counter <= (others => '0');
-							current_state <= TRANSMIT;
+							current_state   <= TRANSMIT;
 						end if;
 
 					when TRANSMIT =>
@@ -417,7 +447,7 @@ begin
 								-- Sekuens 12 Simbol (Index 0 sampai 11)
 								if segment_counter < to_unsigned(11, segment_counter'length) then
 									segment_counter <= segment_counter + 1;
-									current_state <= TRANSMIT; -- Langsung sambung (NO SILENCE)
+									current_state   <= TRANSMIT; -- Langsung sambung (NO SILENCE)
 								else
 									current_state <= IDLE;
 								end if;
@@ -462,7 +492,7 @@ begin
 	-- =========================================================
 	-- TUGAS 3: MULTIPLEXING VISUALISASI SEVEN-SEGMENT
 	-- =========================================================
-	VISUALIZATION_MUX : process (SW(0), reconstructed_key_32bit)
+	VISUALIZATION_MUX : process(sw0_stable, reconstructed_key_32bit)
 		-- Fungsi internal konversi HEX ke Seven-Segment (Active-Low)
 		function hex_to_sevseg(hex_in : std_logic_vector(3 downto 0)) return std_logic_vector is
 		begin
@@ -487,7 +517,7 @@ begin
 			end case;
 		end function;
 	begin
-		if SW(0) = '0' then
+		if sw0_stable = '0' then
 			-- LSB Mode: Tampilkan 24-bit (6 digit) terbawah
 			HEX5 <= hex_to_sevseg(reconstructed_key_32bit(23 downto 20));
 			HEX4 <= hex_to_sevseg(reconstructed_key_32bit(19 downto 16));

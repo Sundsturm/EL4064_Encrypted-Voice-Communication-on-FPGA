@@ -1,4 +1,4 @@
-﻿# Walkthrough: Skenario Pengujian 2 — Injeksi Kunci Dinamis via UART (Hardware)
+# Walkthrough: Skenario Pengujian 2 — Injeksi Kunci Dinamis via UART (Hardware)
 
 ## 1. Pendahuluan
 
@@ -163,71 +163,48 @@ Berikut riwayat masalah yang ditemui selama pengujian hardware, sebagai referens
 
 ---
 
-## 8. Temuan & Rencana Optimasi
+## 8. Temuan & Hasil Optimasi
 
-### 8.1 Diperlukan Multiple Trigger untuk Update Seven-Segment Penerima
+### 8.1 Perilaku Trigger Pertama dan Retransmisi Kunci Dinamis
 
-**Gejala:** Trigger pertama kerap hanya membunyikan speaker tanpa memperbarui tampilan
-Seven-Segment. Trigger kedua diperlukan untuk tampilan berubah.
-
-**Dugaan penyebab:**
-- Timing window IQ Correlator/Goertzel belum sinkron dengan awal penerimaan nada DTMF pada
-  trigger pertama. Penerima menangkap paket di pertengahan frame sehingga rekonstruksi 32-bit
-  kunci tidak lengkap.
-- FSM `top_dtmfencode` membutuhkan seluruh 12 simbol (`##3#` + 8 nibble) untuk men-commit kunci
-  ke `reconstructed_key_32bit`. Jika satu simbol terpotong, kunci tidak terupdate.
-
-**Rencana perbaikan:** Kirim payload dua kali berturut-turut dengan jeda 50-100 ms, atau
-tambahkan mekanisme retransmission otomatis di `send_key.py`.
+**Temuan & Perilaku:**
+- **Perilaku "Warm Up":** Trigger sekali atau pertama kali setelah papan pertama kali diprogram seringkali tidak memengaruhi tampilan Seven-Segment. Namun, pada iterasi/pengiriman selanjutnya, tampilan lebih sering menampilkan nilai yang benar. Beberapa kali tampilan masih bisa salah (*ngaco*) akibat implementasi sisi penerima (Goertzel/IQ Correlator) yang masih kurang optimal. Sistem seakan-akan perlu dipanaskan (*warm up*) terlebih dahulu begitu diprogram.
+- **Solusi Retransmisi:** Masalah di atas diatasi dengan melakukan modifikasi pada skrip Python [`util/send_key.py`](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/util/send_key.py) untuk mengirimkan payload kunci secara berulang (multi-transmit/auto-retransmit) dengan jeda waktu tertentu. Penyesuaian jumlah pengiriman kunci ganda berdasarkan modifikasi skrip Python ini berhasil meminimalisasi tampilan Seven-Segment yang *ngaco*.
 
 ---
 
 ### 8.2 Segmen Tengah HEX[4] (Segmen G) Tidak Menyala
 
-**Gejala:** Strip horizontal tengah pada display HEX[4] tidak pernah menyala, terlepas
-dari nilai digit yang ditampilkan.
-
-**Dugaan penyebab:** Pin `HEX4[6]` salah di-assign di QSF, atau ada kerusakan hardware
-(dry joint/open trace) di papan yang bersangkutan.
-
-**Langkah verifikasi:**
-1. Cek pin assignment `HEX4[6]` di QSF vs. tabel manual DE10-Standard.
-2. Uji dengan program sederhana yang menyalakan semua segmen HEX4 (output `"0000000"`)
-   untuk konfirmasi apakah masalah di hardware atau software.
+**Temuan:**
+Setelah dilakukan analisis dan pengujian (termasuk saat inisialisasi awal papan di mana semua segmen HEX lain menyala menampilkan angka '8'), dapat dikonfirmasi bahwa **LED Segmen G pada HEX[4] rusak** secara fisik pada papan DE10-Standard yang digunakan. Ini murni masalah hardware dan bukan disebabkan oleh kesalahan software atau kesalahan pemetaan pin di berkas `.qsf`.
 
 ---
 
 ### 8.3 Bouncing / Glitch pada SW[0] saat Ganti Mode Tampilan
 
-**Gejala:** Saat mengubah `SW[0]` dari ON (mode MSB) ke OFF (mode LSB), tampilan terkadang
-masih menunjukkan MSB. Diperlukan penekanan ulang beberapa kali untuk beralih ke LSB.
-
-**Root cause:** Proses `VISUALIZATION_MUX` bersifat **kombinasional murni** tanpa debouncing.
-Slide switch DE10-Standard tidak memiliki rangkaian debounce hardware, sehingga transisi
-menghasilkan pulsa palsu (bounce).
+**Tindakan & Temuan:**
+- **Tindakan:** Kami telah mengimplementasikan algoritma debouncing digital di dalam desain FPGA ([`AcakCakap_Top.vhd`](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl/AcakCakap_Top.vhd)). Sinyal `SW[0]` dilewatkan melalui proses debouncer berbasis counter 1 ms (`DEBOUNCE_SW0` menggunakan clock 50 MHz) untuk menyaring glitch sebelum masuk ke selektor MUX visualisasi.
+- **Hasil Temuan:** Bouncing/glitch pada `SW[0]` saat berpindah mode tampilan (MSB-LSB) belum hilang sepenuhnya, tetapi sudah terasa sedikit terminimalisasi dibandingkan sebelum adanya debouncer. Diasumsikan bahwa sisa gangguan/glitch ini timbul akibat kerusakan atau kelonggaran mekanik pada saklar fisik `SW[0]` papan itu sendiri atau masalah sejenis.
 
 ```vhdl
--- Kondisi saat ini (rentan bounce):
-VISUALIZATION_MUX : process(SW(0), reconstructed_key_32bit)
-```
+-- Potongan kode debouncer yang telah diimplementasikan di AcakCakap_Top.vhd:
+constant DEBOUNCE_LIMIT : integer := 50000; -- ~1 ms pada clock 50 MHz
+signal sw0_stable    : std_logic := '0';
+signal debounce_cnt  : integer range 0 to DEBOUNCE_LIMIT := 0;
 
-**Rencana perbaikan:** Tambahkan debouncer digital pada `SW(0)`:
-
-```vhdl
--- Debouncer berbasis counter ~1-5 ms (DEBOUNCE_LIMIT = 50000 untuk CLOCK_50 = 50 MHz -> 1 ms)
 DEBOUNCE_SW0 : process(CLOCK_50)
 begin
     if rising_edge(CLOCK_50) then
         if SW(0) /= sw0_stable then
-            debounce_cnt <= debounce_cnt + 1;
             if debounce_cnt = DEBOUNCE_LIMIT then
                 sw0_stable   <= SW(0);
                 debounce_cnt <= 0;
+            else
+                debounce_cnt <= debounce_cnt + 1;
             end if;
         else
             debounce_cnt <= 0;
         end if;
     end if;
 end process;
--- Gunakan sw0_stable sebagai selektor MUX, bukan SW(0) langsung
 ```
