@@ -1,0 +1,43 @@
+======================================================================
+  KALKULATOR PERFORMA MODEM DTMF (WER, SER, BER)
+======================================================================
+Membaca file TX: D:\Users\Rafi Ananta Alden\Documents\Kuliah\Semester 8\EL4064\Enkripsi-Suara-FPGA\Demo\Top-Level\hdl\results\TX.txt
+Membaca file RX: D:\Users\Rafi Ananta Alden\Documents\Kuliah\Semester 8\EL4064\Enkripsi-Suara-FPGA\Demo\Top-Level\hdl\results\RX.txt
+
+No.  | TX Key     | RX Key     | Key Match  | Sym Errors | Bit Errors
+----------------------------------------------------------------------
+1    | B4486AE4   | 41E8883E   | MISMATCH   | 7          | 17        
+2    | 3BE68B07   | 41E8883E   | MISMATCH   | 6          | 14        
+3    | 9B29DA80   | 41E8883E   | MISMATCH   | 8          | 17        
+4    | E088FC08   | E088FC08   | OK         | 0          | 0         
+5    | DA96CC4F   | DA96CC4E   | MISMATCH   | 1          | 1         
+6    | C5FF6188   | C5FF6188   | OK         | 0          | 0         
+7    | 3D2CF965   | 3D2CF965   | OK         | 0          | 0         
+8    | AB791AFF   | AB791AFF   | OK         | 0          | 0         
+9    | 2ACDA63C   | 2ACDA63C   | OK         | 0          | 0         
+10   | 6BC3A44C   | 6BC3A44C   | OK         | 0          | 0         
+11   | AF7DF066   | AF7DE096   | MISMATCH   | 2          | 5         
+12   | 72DA2D52   | E1DA2D52   | MISMATCH   | 2          | 4         
+13   | 773760A0   | 773740A0   | MISMATCH   | 1          | 1         
+14   | 4E069FBC   | 773740A0   | MISMATCH   | 8          | 17        
+15   | 724EF0B8   | 722F0558   | MISMATCH   | 5          | 12        
+16   | B19103A1   | 722F0558   | MISMATCH   | 7          | 18        
+17   | F8091EA3   | 00891EA3   | MISMATCH   | 3          | 6         
+18   | 5C608130   | 5C608130   | OK         | 0          | 0         
+19   | CE90B136   | CE90A136   | MISMATCH   | 1          | 1         
+20   | A7737201   | A7737201   | OK         | 0          | 0         
+----------------------------------------------------------------------
+
+================== RINGKASAN METRIK PERFORMA ==================
+Total Kunci/Word yang Diuji : 20
+Kunci Salah (Word Errors)   : 12 paket
+Word Error Rate (WER)       : 60.00 %
+-----------------------------------------------
+Total Simbol/Digit Diuji    : 160 digit
+Simbol Salah (Sym Errors)   : 51 digit
+Symbol Error Rate (SER)     : 31.87 %
+-----------------------------------------------
+Total Bit Data Diuji        : 640 bit
+Bit Salah (Bit Errors)      : 113 bit
+Bit Error Rate (BER)        : 17.66 %
+===============================================================

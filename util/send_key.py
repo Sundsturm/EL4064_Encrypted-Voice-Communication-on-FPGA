@@ -46,8 +46,8 @@ try:
     # terpotong di tengah window sehingga preamble ##3# tidak terdeteksi.
     # Solusi: Kirim ulang setelah satu transmisi penuh selesai (~240ms).
     # =========================================================
-    RETRANSMIT_COUNT = 50           # Jumlah pengiriman
-    RETRANSMIT_DELAY = 5       # Jeda antar pengiriman (> 240ms = 12 simbol × 20ms)
+    RETRANSMIT_COUNT = 100       # Jumlah pengiriman
+    RETRANSMIT_DELAY = 3       # Jeda antar pengiriman (> 240ms = 12 simbol × 20ms)
     
     for i in range(RETRANSMIT_COUNT):
         if KEY_MODE == 'random':
