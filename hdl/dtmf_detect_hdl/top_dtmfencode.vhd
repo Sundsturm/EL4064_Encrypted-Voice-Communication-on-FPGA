@@ -40,6 +40,12 @@ architecture Behavioral of top_dtmfencode is
     signal payload_count                            : integer range 0 to 8 := 0;
     type frame_state_type is (WAIT_HASH, GOT_HASH, GOT_HASH_HASH, GOT_HASH_THREE, COLLECT_PAYLOAD);
     signal frame_state                              : frame_state_type := WAIT_HASH;
+    -- Fix 3: Timeout counter untuk mencegah FSM stuck-state
+    -- Jika FSM aktif (bukan WAIT_HASH) tanpa tone_valid selama
+    -- FRAME_TIMEOUT_LIMIT siklus, FSM kembali ke WAIT_HASH.
+    -- 368640 siklus = 20ms @ AUD_XCK 18.432 MHz
+    signal frame_timeout     : integer range 0 to 524288 := 0;
+    constant FRAME_TIMEOUT_LIMIT : integer := 368640;
     -- Componen Declarations
     component lowcomparator is
         Port (
@@ -111,14 +117,17 @@ begin
         variable next_payload : STD_LOGIC_VECTOR(31 downto 0);
     begin
         if rst = '1' then
-            framed_key <= (others => '0');
+            framed_key    <= (others => '0');
             payload_shift <= (others => '0');
             payload_count <= 0;
-            frame_state <= WAIT_HASH;
-            frame_done <= '0';
+            frame_state   <= WAIT_HASH;
+            frame_done    <= '0';
+            frame_timeout <= 0; -- Fix 3
         elsif rising_edge(clk) then
             frame_done <= '0';
             if tone_valid = '1' then
+                -- Fix 3: Reset timeout setiap kali tone valid datang
+                frame_timeout <= 0;
                 case frame_state is
                     when WAIT_HASH =>
                         if code_dtmf = x"F" then
@@ -149,7 +158,7 @@ begin
                         if code_dtmf = x"F" then
                             payload_shift <= (others => '0');
                             payload_count <= 0;
-                            frame_state <= COLLECT_PAYLOAD;
+                            frame_state   <= COLLECT_PAYLOAD;
                         else
                             frame_state <= WAIT_HASH;
                         end if;
@@ -158,22 +167,38 @@ begin
                         next_payload := payload_shift(27 downto 0) & code_dtmf;
                         payload_shift <= next_payload;
                         if payload_count = 7 then
-                            framed_key <= next_payload;
-                            frame_done <= '1';
+                            framed_key    <= next_payload;
+                            frame_done    <= '1';
                             payload_count <= 0;
-                            frame_state <= WAIT_HASH;
+                            frame_state   <= WAIT_HASH;
                         else
                             payload_count <= payload_count + 1;
                         end if;
                 end case;
+
+            else
+                -- Fix 3: Tidak ada tone — increment timeout jika FSM sedang aktif
+                if frame_state /= WAIT_HASH then
+                    if frame_timeout >= FRAME_TIMEOUT_LIMIT then
+                        -- Timeout tercapai: reset FSM ke WAIT_HASH
+                        -- Mencegah stuck-state saat preamble ##3# terdeteksi
+                        -- setengah jalan lalu sinyal menghilang
+                        frame_state   <= WAIT_HASH;
+                        payload_count <= 0;
+                        payload_shift <= (others => '0');
+                        frame_timeout <= 0;
+                    else
+                        frame_timeout <= frame_timeout + 1;
+                    end if;
+                end if;
             end if;
         end if;
     end process;
     -- Instance of comparator for frequency 697 and 770 Hz
     comp_low : component lowcomparator
         port map(
-            clk     => clk ,
-            rst     => rst ,
+            clk     => clk,
+            rst     => rst,
             in_valid        => in_valid,
             out_ready       => r2r2,
             in_ready        => lowready,

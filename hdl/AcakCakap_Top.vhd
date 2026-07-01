@@ -3,6 +3,12 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 entity AcakCakap_Top is
+	generic (
+		-- Opsi A: Simulation bypass untuk goertzel_enable
+		-- Set SIM_MODE=true di testbench agar Goertzel aktif tanpa menunggu
+		-- warm-up pipeline IQ correlator (~60ms). Di hardware, selalu false.
+		SIM_MODE : boolean := false
+	);
 	port (
 
 		------------ CLOCK ------------
@@ -111,7 +117,7 @@ architecture rtl of AcakCakap_Top is
 	signal rst_50mhz        : std_logic := '1'; -- reset domain CLOCK_50
 
 	-- Phase 2 FSM sender control
-	type state_type is (IDLE, TRANSMIT);
+	type state_type is (IDLE, TRANSMIT, SILENCE); -- Fix 1: tambah state SILENCE antar paket
 	signal current_state : state_type := IDLE;
 	signal sample_counter  : integer range 0 to 640 := 0;
 	signal start_transmission : std_logic := '0';
@@ -143,7 +149,10 @@ begin
 	clk <= AUD_XCK;
 	rst <= not KEY(0);
 	start_transmission <= command or uart_trigger; -- Dual-trigger mechanism
-	goertzel_enable <= Ldone and enable;
+	-- Opsi A: SIM_MODE=true => bypass IQ correlator gate (simulasi lebih cepat)
+	--         SIM_MODE=false => hardware normal: Goertzel hanya aktif setelah
+	--         preamble ##3# terdeteksi oleh IQ correlator
+	goertzel_enable <= Ldone when SIM_MODE else (Ldone and enable);
 
 	-- Audio interface core instantiation
 	Audio_interface : entity work.Audio_interface
@@ -402,12 +411,15 @@ begin
 		end case;
 	end process;
 
-	-- Combinational decoder with preamble: [0]='#', [1]='#', [2]='3', [3]='#', [4..11]=encoded key.
+	-- Fix 4: Decoder dengan preamble + payload + guard symbol:
+	--   [0]='#', [1]='#', [2]='3', [3]='#' → preamble ##3#
+	--   [4..11] = 8 nibble kunci (MSN-first)
+	--   [12]='#' → guard symbol penutup (Fix 4)
 	SEGMENT_TO_DTMF_DECODER : process (segment_counter, current_4bit_segment)
 	begin
 		case to_integer(segment_counter) is
-			when 0 | 1 | 3 =>
-				dtmf_digit_to_send <= x"F"; -- DTMF '#'
+			when 0 | 1 | 3 | 12 =>
+				dtmf_digit_to_send <= x"F"; -- DTMF '#' (preamble + guard)
 			when 2 =>
 				dtmf_digit_to_send <= x"3"; -- DTMF '3'
 			when others =>
@@ -444,17 +456,34 @@ begin
 						if Ldone = '1' then
 							if sample_counter = SAMPLES_20MS - 1 then
 								sample_counter <= 0;
-								-- Sekuens 12 Simbol (Index 0 sampai 11)
-								if segment_counter < to_unsigned(11, segment_counter'length) then
+								-- Sekuens 13 Simbol (Index 0 sampai 12)
+								-- Fix 4: index 12 adalah guard symbol '#' penutup
+								if segment_counter < to_unsigned(12, segment_counter'length) then
 									segment_counter <= segment_counter + 1;
-									current_state   <= TRANSMIT; -- Langsung sambung (NO SILENCE)
+									current_state   <= TRANSMIT; -- Sambung simbol berikutnya
 								else
-									current_state <= IDLE;
+									-- Fix 1: Paket selesai -> masuk SILENCE 20ms
+									-- agar pipeline IQ correlator receiver sempat flush
+									current_state <= SILENCE;
 								end if;
 							else
 								sample_counter <= sample_counter + 1;
 							end if;
 						end if;
+
+					-- Fix 1: State SILENCE — audio diam selama 1 x SAMPLES_20MS (20ms @ 32kHz)
+					-- dtmf_tone_enable='0' selama silence: output audio kembali ke loopback Lin
+					when SILENCE =>
+						dtmf_tone_enable <= '0';
+						if Ldone = '1' then
+							if sample_counter = SAMPLES_20MS - 1 then
+								sample_counter <= 0;
+								current_state  <= IDLE;
+							else
+								sample_counter <= sample_counter + 1;
+							end if;
+						end if;
+
 				end case;
 			end if;
 		end if;

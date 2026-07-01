@@ -17,7 +17,13 @@ use ieee_proposed.fixed_pkg.all;
 --   KONDISI 2 (guard): curr_697 > curr_941  AND  curr_1477 > curr_941
 --              (697 Hz dominan di atas 941 Hz, DAN 1477 Hz juga di atas 941 Hz)
 --
---   Jika KONDISI 1 DAN KONDISI 2 terpenuhi → enable di-assert '1' (permanen).
+--   Jika KONDISI 1 DAN KONDISI 2 terpenuhi → enable di-assert '1'.
+--
+-- Fix 2 — Auto-Reset SR Latch (timeout-based):
+--   Jika 697 Hz tidak menunjukkan kenaikan (curr_697 <= prev_697) selama
+--   QUIET_THRESHOLD_M = 16 batch berturut-turut (≈20ms @ 32kHz),
+--   enable_i direset ke '0', memungkinkan deteksi ulang simbol "3"
+--   pada paket berikutnya tanpa hardware reset.
 --
 -- Timing:
 --   Modul ini hanya aktif setelah dec_control menyalakan jalur marking
@@ -63,6 +69,12 @@ architecture Behavioral of markingv1 is
     -- SR latch internal: mencegah enable di-toggle setelah pertama kali assert
     signal enable_i  : STD_LOGIC := '0';
 
+    -- Fix 2: Quiet counter untuk auto-reset enable_i
+    -- Naik setiap batch di mana 697Hz tidak naik; reset jika naik.
+    -- Saat mencapai QUIET_THRESHOLD_M, enable_i direset ke '0'.
+    signal quiet_count_m    : integer range 0 to 31 := 0;
+    constant QUIET_THRESHOLD_M : integer := 16; -- 16 batch ≈ 20ms @ 32kHz
+
 begin
 
     -- enable output mengikuti internal SR latch
@@ -84,13 +96,14 @@ begin
     process(clk, reset)
     begin
         if reset = '1' then
-            state    <= IDLE;
-            enable_i <= '0';
-            out_valid <= '0';
-            prev_697 <= (others => '0');
-            curr_697 <= (others => '0');
-            curr_941 <= (others => '0');
-            curr_1477 <= (others => '0');
+            state         <= IDLE;
+            enable_i      <= '0';
+            out_valid     <= '0';
+            prev_697      <= (others => '0');
+            curr_697      <= (others => '0');
+            curr_941      <= (others => '0');
+            curr_1477     <= (others => '0');
+            quiet_count_m <= 0;
 
         elsif rising_edge(clk) then
             case state is
@@ -125,10 +138,32 @@ begin
                             -- 941 Hz, DAN 1477 Hz juga di atas 941 Hz?
                             -- (Memastikan ini benar-benar DTMF "3", bukan noise)
                             if curr_697 > curr_941 and curr_1477 > curr_941 then
-                                enable_i <= '1';  -- SR latch: permanen
+                                enable_i <= '1';  -- SR latch: aktif
                             end if;
 
                         end if;
+                    end if;
+
+                    -- -----------------------------------------------------------
+                    -- Fix 2: Auto-Reset enable_i (timeout-based)
+                    -- Jika 697 Hz tidak menunjukkan kenaikan selama
+                    -- QUIET_THRESHOLD_M batch berturut-turut → reset enable_i.
+                    -- Ini memungkinkan deteksi ulang simbol "3" pada paket berikutnya.
+                    -- -----------------------------------------------------------
+                    if curr_697 <= prev_697 then
+                        -- 697 Hz tidak naik: increment quiet counter
+                        if quiet_count_m < QUIET_THRESHOLD_M then
+                            quiet_count_m <= quiet_count_m + 1;
+                        end if;
+                    else
+                        -- 697 Hz naik: reset quiet counter
+                        quiet_count_m <= 0;
+                    end if;
+
+                    if quiet_count_m >= QUIET_THRESHOLD_M then
+                        -- Periode diam terpenuhi: reset SR latch
+                        enable_i      <= '0';
+                        quiet_count_m <= 0;
                     end if;
 
                     -- Update prev_697 untuk perbandingan batch berikutnya

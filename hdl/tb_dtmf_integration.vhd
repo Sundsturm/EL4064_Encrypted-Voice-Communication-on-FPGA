@@ -84,6 +84,14 @@ begin
     -- 3) Instantiasi DUT (Device Under Test)
     -- =========================================================================
     DUT : entity work.AcakCakap_Top
+    -- SIM_MODE=true: bypass IQ correlator gate pada goertzel_enable.
+    -- Goertzel aktif langsung sejak audio tersedia (Ldone='1'), tanpa
+    -- menunggu warm-up pipeline IQ correlator (~60ms) yang menyebabkan
+    -- 'enable' tidak pernah assert dalam window simulasi.
+    -- Di hardware (SIM_MODE default=false), perilaku asli tetap terjaga.
+    generic map (
+        SIM_MODE => true
+    )
     port map (
         CLOCK2_50 => CLOCK_50,
         CLOCK3_50 => CLOCK_50,
@@ -209,7 +217,7 @@ begin
         -- ---- Cek 1: Tampilan Seven-Segment LSB (SW(0) = '0') ----
         report "[TESTBENCH] Checking visualization for LSB (SW(0) = '0')..." severity note;
         SW(0) <= '0';
-        wait for 1 us;
+        wait for 2 ms; -- Tunggu debouncer SW(0): 50000 x 20ns = 1ms + margin
 
         -- Cek apakah HEX menampilkan potongan 24 LSB dari reconstructed_key_32bit
         -- Pola yang diharapkan untuk 0x7C9B1D:
@@ -239,7 +247,7 @@ begin
         -- ---- Cek 2: Tampilan Seven-Segment MSB (SW(0) = '1') ----
         report "[TESTBENCH] Checking visualization for MSB (SW(0) = '1')..." severity note;
         SW(0) <= '1';
-        wait for 1 us;
+        wait for 2 ms; -- Tunggu debouncer SW(0): 50000 x 20ns = 1ms + margin
 
         if (HEX5 = "0110000" and  -- '3'
             HEX4 = "0001000" and  -- 'A'
