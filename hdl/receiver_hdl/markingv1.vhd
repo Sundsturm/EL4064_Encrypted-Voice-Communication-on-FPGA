@@ -19,12 +19,6 @@ use ieee_proposed.fixed_pkg.all;
 --
 --   Jika KONDISI 1 DAN KONDISI 2 terpenuhi → enable di-assert '1'.
 --
--- Fix 2 — Auto-Reset SR Latch (timeout-based):
---   Jika 697 Hz tidak menunjukkan kenaikan (curr_697 <= prev_697) selama
---   QUIET_THRESHOLD_M = 16 batch berturut-turut (≈20ms @ 32kHz),
---   enable_i direset ke '0', memungkinkan deteksi ulang simbol "3"
---   pada paket berikutnya tanpa hardware reset.
---
 -- Timing:
 --   Modul ini hanya aktif setelah dec_control menyalakan jalur marking
 --   (via in_valid dari mark_enable='1'). Nilai prev_697 di-update setiap
@@ -49,7 +43,8 @@ entity markingv1 is
         in_697    : in  SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
         in_941    : in  SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);  -- guard condition
         in_1477   : in  SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);  -- guard condition
-        enable    : out STD_LOGIC  -- SR latch: '1' setelah "3" terdeteksi
+        enable    : out STD_LOGIC;  -- SR latch: '1' setelah "3" terdeteksi
+        latch_reset : in STD_LOGIC  -- Opsi C: reset eksternal dari session timeout
     );
 end markingv1;
 
@@ -69,11 +64,6 @@ architecture Behavioral of markingv1 is
     -- SR latch internal: mencegah enable di-toggle setelah pertama kali assert
     signal enable_i  : STD_LOGIC := '0';
 
-    -- Fix 2: Quiet counter untuk auto-reset enable_i
-    -- Naik setiap batch di mana 697Hz tidak naik; reset jika naik.
-    -- Saat mencapai QUIET_THRESHOLD_M, enable_i direset ke '0'.
-    signal quiet_count_m    : integer range 0 to 31 := 0;
-    constant QUIET_THRESHOLD_M : integer := 16; -- 16 batch ≈ 20ms @ 32kHz
 
 begin
 
@@ -103,7 +93,6 @@ begin
             curr_697      <= (others => '0');
             curr_941      <= (others => '0');
             curr_1477     <= (others => '0');
-            quiet_count_m <= 0;
 
         elsif rising_edge(clk) then
             case state is
@@ -145,26 +134,14 @@ begin
                     end if;
 
                     -- -----------------------------------------------------------
-                    -- Fix 2: Auto-Reset enable_i (timeout-based)
-                    -- Jika 697 Hz tidak menunjukkan kenaikan selama
-                    -- QUIET_THRESHOLD_M batch berturut-turut → reset enable_i.
-                    -- Ini memungkinkan deteksi ulang simbol "3" pada paket berikutnya.
+                    -- Opsi C: Reset enable_i via sinyal eksternal
+                    -- Dikendalikan oleh session timeout counter di top-level.
                     -- -----------------------------------------------------------
-                    if curr_697 <= prev_697 then
-                        -- 697 Hz tidak naik: increment quiet counter
-                        if quiet_count_m < QUIET_THRESHOLD_M then
-                            quiet_count_m <= quiet_count_m + 1;
-                        end if;
-                    else
-                        -- 697 Hz naik: reset quiet counter
-                        quiet_count_m <= 0;
+                    if latch_reset = '1' then
+                        enable_i <= '0';
                     end if;
 
-                    if quiet_count_m >= QUIET_THRESHOLD_M then
-                        -- Periode diam terpenuhi: reset SR latch
-                        enable_i      <= '0';
-                        quiet_count_m <= 0;
-                    end if;
+
 
                     -- Update prev_697 untuk perbandingan batch berikutnya
                     prev_697 <= curr_697;

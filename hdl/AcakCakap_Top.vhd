@@ -4,9 +4,6 @@ use ieee.numeric_std.all;
 
 entity AcakCakap_Top is
 	generic (
-		-- Opsi A: Simulation bypass untuk goertzel_enable
-		-- Set SIM_MODE=true di testbench agar Goertzel aktif tanpa menunggu
-		-- warm-up pipeline IQ correlator (~60ms). Di hardware, selalu false.
 		SIM_MODE : boolean := false
 	);
 	port (
@@ -105,24 +102,29 @@ architecture rtl of AcakCakap_Top is
 	-- %% UART Interface %%
 	signal uart_rx_data : std_logic_vector(7 downto 0);
 	signal uart_rx_valid : std_logic;
-	signal uart_key_reg  : std_logic_vector(31 downto 0) := (others => '0');
-	signal uart_trigger  : std_logic := '0';
+	signal uart_key_reg : std_logic_vector(31 downto 0) := (others => '0');
+	signal uart_trigger : std_logic := '0';
 	-- Toggle-based CDC: CLOCK_50 -> AUD_XCK
 	-- Setiap byte diterima, uart_toggle di-flip (tidak bergantung pulse width)
-	signal uart_toggle      : std_logic := '0'; -- domain CLOCK_50
-	signal uart_data_latch  : std_logic_vector(7 downto 0) := (others => '0'); -- domain CLOCK_50
-	signal uart_tog_meta    : std_logic := '0'; -- 2-FF sync di AUD_XCK
-	signal uart_tog_sync    : std_logic := '0';
-	signal uart_tog_prev    : std_logic := '0'; -- untuk edge detection
-	signal rst_50mhz        : std_logic := '1'; -- reset domain CLOCK_50
+	signal uart_toggle : std_logic := '0'; -- domain CLOCK_50
+	signal uart_data_latch : std_logic_vector(7 downto 0) := (others => '0'); -- domain CLOCK_50
+	signal uart_tog_meta : std_logic := '0'; -- 2-FF sync di AUD_XCK
+	signal uart_tog_sync : std_logic := '0';
+	signal uart_tog_prev : std_logic := '0'; -- untuk edge detection
+	signal rst_50mhz : std_logic := '1'; -- reset domain CLOCK_50
 
 	-- Phase 2 FSM sender control
-	type state_type is (IDLE, TRANSMIT, SILENCE); -- Fix 1: tambah state SILENCE antar paket
+	type state_type is (IDLE, TRANSMIT);
 	signal current_state : state_type := IDLE;
-	signal sample_counter  : integer range 0 to 640 := 0;
+	signal sample_counter : integer range 0 to 640 := 0;
 	signal start_transmission : std_logic := '0';
 	signal dtmf_tone_enable : std_logic := '0';
 	constant SAMPLES_20MS : integer := 640; -- Durasi 1 simbol DTMF @ 32kHz
+
+	-- Opsi C: Session timeout — reset SR latch setelah ~2 detik tanpa DTMF
+	signal latch_reset : std_logic := '0';
+	signal dtmf_quiet_cnt : integer range 0 to 40_000_000 := 0;
+	constant DTMF_QUIET_LIMIT : integer := 40_000_000; -- ~2.17 detik @ 18.432 MHz
 
 	-- Local clock/reset alias for synchronous FSM process
 	signal clk : std_logic;
@@ -140,8 +142,8 @@ architecture rtl of AcakCakap_Top is
 	-- Debouncer untuk SW(0) — mencegah glitch saat ganti mode tampilan
 	-- DEBOUNCE_LIMIT = 50.000 cycles CLOCK_50 = 1 ms
 	constant DEBOUNCE_LIMIT : integer := 50000;
-	signal sw0_stable    : std_logic := '0';
-	signal debounce_cnt  : integer range 0 to DEBOUNCE_LIMIT := 0;
+	signal sw0_stable : std_logic := '0';
+	signal debounce_cnt : integer range 0 to DEBOUNCE_LIMIT := 0;
 
 begin
 
@@ -149,10 +151,9 @@ begin
 	clk <= AUD_XCK;
 	rst <= not KEY(0);
 	start_transmission <= command or uart_trigger; -- Dual-trigger mechanism
-	-- Opsi A: SIM_MODE=true => bypass IQ correlator gate (simulasi lebih cepat)
-	--         SIM_MODE=false => hardware normal: Goertzel hanya aktif setelah
-	--         preamble ##3# terdeteksi oleh IQ correlator
-	goertzel_enable <= Ldone when SIM_MODE else (Ldone and enable);
+	-- goertzel_enable <= Ldone when SIM_MODE else
+	-- 	(Ldone and enable);
+	goertzel_enable <= Ldone;
 
 	-- Audio interface core instantiation
 	Audio_interface : entity work.Audio_interface
@@ -193,13 +194,13 @@ begin
 	-- (~1 ms) sebelum sw0_stable diperbarui.
 	-- Ini mencegah glitch/bounce pada transisi slide switch.
 	-- =========================================================
-	DEBOUNCE_SW0 : process(CLOCK_50)
+	DEBOUNCE_SW0 : process (CLOCK_50)
 	begin
 		if rising_edge(CLOCK_50) then
 			if SW(0) /= sw0_stable then
 				-- SW(0) berubah: mulai hitung
 				if debounce_cnt = DEBOUNCE_LIMIT then
-					sw0_stable   <= SW(0); -- Stabil selama 1ms -> terima
+					sw0_stable <= SW(0); -- Stabil selama 1ms -> terima
 					debounce_cnt <= 0;
 				else
 					debounce_cnt <= debounce_cnt + 1;
@@ -248,35 +249,35 @@ begin
 	-- Di AUD_XCK, toggle di-sync 2-FF lalu edge-detected.
 	-- Metode ini andal untuk pulse < 1 period clock tujuan.
 	-- =========================================================
-	CDC_TOGGLE_GEN : process(CLOCK_50)
+	CDC_TOGGLE_GEN : process (CLOCK_50)
 	begin
 		if rising_edge(CLOCK_50) then
 			if rst_50mhz = '1' then
-				uart_toggle    <= '0';
+				uart_toggle <= '0';
 				uart_data_latch <= (others => '0');
 			elsif uart_rx_valid = '1' then
 				uart_data_latch <= uart_rx_data; -- Latch data dulu
-				uart_toggle     <= not uart_toggle; -- Flip toggle
+				uart_toggle <= not uart_toggle; -- Flip toggle
 			end if;
 		end if;
 	end process;
 
-	CDC_TOGGLE_SYNC : process(AUD_XCK)
+	CDC_TOGGLE_SYNC : process (AUD_XCK)
 	begin
 		if rising_edge(AUD_XCK) then
-			uart_tog_meta <= uart_toggle;   -- FF1 (metastability)
+			uart_tog_meta <= uart_toggle; -- FF1 (metastability)
 			uart_tog_sync <= uart_tog_meta; -- FF2 (stable)
 		end if;
 	end process;
 
 	-- UART Protocol FSM: jalan di AUD_XCK, mendeteksi setiap byte baru
 	-- lewat perubahan uart_tog_sync (edge detection)
-	UART_PROTOCOL_FSM : process(AUD_XCK)
+	UART_PROTOCOL_FSM : process (AUD_XCK)
 	begin
 		if rising_edge(AUD_XCK) then
 			if aud_rst = '1' then
-				uart_key_reg  <= (others => '0');
-				uart_trigger  <= '0';
+				uart_key_reg <= (others => '0');
+				uart_trigger <= '0';
 				uart_tog_prev <= '0';
 			else
 				uart_trigger <= '0'; -- Default: tidak trigger
@@ -315,7 +316,8 @@ begin
 			out_valid => corr_out_valid,
 			-- Data interfacing
 			dataA => std_logic_vector(Lin),
-			enable => enable
+			enable => enable,
+			latch_reset => latch_reset -- Opsi C: session timeout reset
 		);
 
 	-- =========================================================
@@ -411,15 +413,12 @@ begin
 		end case;
 	end process;
 
-	-- Fix 4: Decoder dengan preamble + payload + guard symbol:
-	--   [0]='#', [1]='#', [2]='3', [3]='#' → preamble ##3#
-	--   [4..11] = 8 nibble kunci (MSN-first)
-	--   [12]='#' → guard symbol penutup (Fix 4)
+	-- Combinational decoder with preamble: [0]='#', [1]='#', [2]='3', [3]='#', [4..11]=encoded key.
 	SEGMENT_TO_DTMF_DECODER : process (segment_counter, current_4bit_segment)
 	begin
 		case to_integer(segment_counter) is
-			when 0 | 1 | 3 | 12 =>
-				dtmf_digit_to_send <= x"F"; -- DTMF '#' (preamble + guard)
+			when 0 | 1 | 3 =>
+				dtmf_digit_to_send <= x"F"; -- DTMF '#'
 			when 2 =>
 				dtmf_digit_to_send <= x"3"; -- DTMF '3'
 			when others =>
@@ -432,23 +431,49 @@ begin
 	tone_digit <= dtmf_digit_to_send when dtmf_tone_enable = '1' else
 		(others => '0');
 
+	-- =========================================================
+	-- Opsi C: DTMF Session Timeout
+	-- Jika dtmf_code_valid tidak pernah '1' selama DTMF_QUIET_LIMIT siklus
+	-- (~2.17 detik @ 18.432 MHz), assert latch_reset selama 1 siklus untuk
+	-- me-reset SR latch di flaggingv2 dan markingv1. Counter di-reset setiap
+	-- kali ada DTMF tone yang valid terdeteksi.
+	-- =========================================================
+	DTMF_SESSION_TIMEOUT : process (AUD_XCK)
+	begin
+		if rising_edge(AUD_XCK) then
+			latch_reset <= '0'; -- default: tidak reset
+			if aud_rst = '1' then
+				dtmf_quiet_cnt <= 0;
+			elsif dtmf_code_valid = '1' then
+				-- Ada DTMF terdeteksi: reset counter
+				dtmf_quiet_cnt <= 0;
+			elsif dtmf_quiet_cnt >= DTMF_QUIET_LIMIT then
+				-- Timeout: assert reset 1 siklus, kembalikan counter
+				latch_reset <= '1';
+				dtmf_quiet_cnt <= 0;
+			else
+				dtmf_quiet_cnt <= dtmf_quiet_cnt + 1;
+			end if;
+		end if;
+	end process;
+
 	-- Phase 2 sequential FSM for DTMF transmission timing
 	FSM_DTMF_TRANSMITTER : process (clk)
 	begin
 		if rising_edge(clk) then
 			if aud_rst = '1' then
-				current_state    <= IDLE;
-				sample_counter   <= 0;
-				segment_counter  <= (others => '0');
+				current_state <= IDLE;
+				sample_counter <= 0;
+				segment_counter <= (others => '0');
 				dtmf_tone_enable <= '0';
 			else
 				case current_state is
 					when IDLE =>
 						dtmf_tone_enable <= '0';
-						sample_counter   <= 0;
+						sample_counter <= 0;
 						if start_transmission = '1' then
 							segment_counter <= (others => '0');
-							current_state   <= TRANSMIT;
+							current_state <= TRANSMIT;
 						end if;
 
 					when TRANSMIT =>
@@ -456,34 +481,17 @@ begin
 						if Ldone = '1' then
 							if sample_counter = SAMPLES_20MS - 1 then
 								sample_counter <= 0;
-								-- Sekuens 13 Simbol (Index 0 sampai 12)
-								-- Fix 4: index 12 adalah guard symbol '#' penutup
-								if segment_counter < to_unsigned(12, segment_counter'length) then
+								-- Sekuens 12 Simbol (Index 0 sampai 11)
+								if segment_counter < to_unsigned(11, segment_counter'length) then
 									segment_counter <= segment_counter + 1;
-									current_state   <= TRANSMIT; -- Sambung simbol berikutnya
+									current_state <= TRANSMIT; -- Langsung sambung (NO SILENCE)
 								else
-									-- Fix 1: Paket selesai -> masuk SILENCE 20ms
-									-- agar pipeline IQ correlator receiver sempat flush
-									current_state <= SILENCE;
+									current_state <= IDLE;
 								end if;
 							else
 								sample_counter <= sample_counter + 1;
 							end if;
 						end if;
-
-					-- Fix 1: State SILENCE — audio diam selama 1 x SAMPLES_20MS (20ms @ 32kHz)
-					-- dtmf_tone_enable='0' selama silence: output audio kembali ke loopback Lin
-					when SILENCE =>
-						dtmf_tone_enable <= '0';
-						if Ldone = '1' then
-							if sample_counter = SAMPLES_20MS - 1 then
-								sample_counter <= 0;
-								current_state  <= IDLE;
-							else
-								sample_counter <= sample_counter + 1;
-							end if;
-						end if;
-
 				end case;
 			end if;
 		end if;
@@ -521,7 +529,7 @@ begin
 	-- =========================================================
 	-- TUGAS 3: MULTIPLEXING VISUALISASI SEVEN-SEGMENT
 	-- =========================================================
-	VISUALIZATION_MUX : process(sw0_stable, reconstructed_key_32bit)
+	VISUALIZATION_MUX : process (sw0_stable, reconstructed_key_32bit)
 		-- Fungsi internal konversi HEX ke Seven-Segment (Active-Low)
 		function hex_to_sevseg(hex_in : std_logic_vector(3 downto 0)) return std_logic_vector is
 		begin

@@ -17,13 +17,6 @@ use ieee_proposed.fixed_pkg.all;
 --   Setelah count_941 >= 5 DAN count_1477 >= 5 (masing-masing independen),
 --   onoff_mark di-assert '1' secara permanen untuk mengaktifkan modul marking.
 --
--- Fix 2 — Auto-Reset SR Latch (timeout-based):
---   Jika KEDUA frekuensi (941 Hz dan 1477 Hz) berada di bawah threshold
---   selama QUIET_THRESHOLD = 32 batch berturut-turut (≈41ms @ 32kHz),
---   semua SR latch (onoff_mark, detect_941, detect_1477) dan counter
---   direset, memungkinkan re-sinkronisasi preamble tanpa hardware reset.
---   Threshold 32 dipilih agar tidak terjadi false-reset di tengah preamble.
---
 -- Buffer:
 --   Circular buffer 33 slot (index 0..32) memberikan delay 32-batch lookback
 --   sesuai MATLAB: prev = batch_sums(slide_i - 32, freq).
@@ -43,7 +36,8 @@ entity flaggingv2 is
         out_valid  : out STD_LOGIC;
         in_941     : in  SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
         in_1477    : in  SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
-        onoff_mark : out STD_LOGIC   -- SR latch: '1' setelah "##" terdeteksi
+        onoff_mark : out STD_LOGIC;   -- SR latch: '1' setelah "##" terdeteksi
+        latch_reset : in  STD_LOGIC   -- Opsi C: reset eksternal dari session timeout
     );
 end flaggingv2;
 
@@ -73,11 +67,7 @@ architecture Behavioral of flaggingv2 is
     signal detect_941  : STD_LOGIC := '0';
     signal detect_1477 : STD_LOGIC := '0';
 
-    -- Fix 2: Quiet counter untuk auto-reset SR latch
-    -- Direset ke 0 setiap ada sinyal aktif; naik ketika kedua frekuensi diam.
-    -- Saat mencapai QUIET_THRESHOLD, semua latch di-reset.
-    signal quiet_count    : integer range 0 to 63 := 0;
-    constant QUIET_THRESHOLD : integer := 32; -- 32 batch ≈ 41ms @ 32kHz
+
 
     -- Register perantara (di-capture di IDLE, dipakai di COMPUTE)
     signal new941, new1477 : SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
@@ -116,7 +106,6 @@ begin
             new1477      <= (others => '0');
             old_941      <= (others => '0');
             old_1477     <= (others => '0');
-            quiet_count  <= 0;
 
         elsif rising_edge(clk) then
             case state is
@@ -192,31 +181,20 @@ begin
                         end if;
 
                         -- -------------------------------------------------------
-                        -- Fix 2: Auto-Reset SR Latch (timeout-based)
-                        -- Jika KEDUA frekuensi di bawah threshold secara bersamaan
-                        -- selama QUIET_THRESHOLD batch → reset semua latch.
-                        -- Syarat "keduanya diam" mencegah false-reset saat hanya
-                        -- salah satu frekuensi aktif (misalnya noise parsial).
+                        -- Opsi C: Reset SR latch via sinyal eksternal
+                        -- Dikendalikan oleh session timeout counter di top-level.
+                        -- Hanya me-reset saat tidak ada DTMF terdeteksi selama
+                        -- DTMF_QUIET_LIMIT siklus (~2 detik @ 18.432 MHz).
                         -- -------------------------------------------------------
-                        if new941 < old_941 and new1477 < old_1477 then
-                            -- Kedua frekuensi di bawah 3*prev: kondisi "diam"
-                            if quiet_count < QUIET_THRESHOLD then
-                                quiet_count <= quiet_count + 1;
-                            end if;
-                        else
-                            -- Ada sinyal aktif: reset quiet counter
-                            quiet_count <= 0;
-                        end if;
-
-                        if quiet_count >= QUIET_THRESHOLD then
-                            -- Periode diam terpenuhi: reset semua SR latch
+                        if latch_reset = '1' then
                             onoff_mark  <= '0';
                             detect_941  <= '0';
                             detect_1477 <= '0';
                             count_941   <= 0;
                             count_1477  <= 0;
-                            quiet_count <= 0;
                         end if;
+
+
 
                     end if; -- full = '1'
 

@@ -31,8 +31,8 @@ try:
     # Urutan byte: MSB dulu
     if KEY_MODE == 'hardcoded':
         key = 0x3A7C9B1D
-        # payload = bytes([0x3A, 0x7C, 0x9B, 0x1D, 0x0A])
-        payload = bytes([0x12, 0x34, 0x56, 0x78, 0x0A])
+        payload = bytes([0x3A, 0x7C, 0x9B, 0x1D, 0x0A])
+        # payload = bytes([0x12, 0x34, 0x56, 0x78, 0x0A])
         print(f"Mengirim kunci dinamis via CP2102 ke {COM_PORT} (Key: 0x{key:08X}, Mode: {KEY_MODE})...")
     else:
         key = 0
@@ -47,8 +47,8 @@ try:
     # terpotong di tengah window sehingga preamble ##3# tidak terdeteksi.
     # Solusi: Kirim ulang setelah satu transmisi penuh selesai (~240ms).
     # =========================================================
-    RETRANSMIT_COUNT = 10       # Jumlah pengiriman
-    RETRANSMIT_DELAY = 1       # Jeda antar pengiriman (> 240ms = 12 simbol × 20ms)
+    RETRANSMIT_COUNT = 20       # Jumlah pengiriman
+    RETRANSMIT_DELAY = 10       # Jeda antar pengiriman (> 240ms = 12 simbol × 20ms)
     
     for i in range(RETRANSMIT_COUNT):
         if KEY_MODE == 'random':

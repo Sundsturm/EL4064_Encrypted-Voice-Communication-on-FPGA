@@ -23,7 +23,8 @@ entity toplevel_iq is
         out_valid   : out STD_LOGIC;
         -- Bus Data
         dataA       : in std_logic_vector(15 downto 0);
-        enable      : out std_logic
+        enable      : out std_logic;
+        latch_reset : in  std_logic   -- Opsi C: session timeout reset untuk SR latch
     );
 end toplevel_iq;
 
@@ -117,7 +118,8 @@ architecture Behavioral of toplevel_iq is
             out_valid   : out STD_LOGIC;
             in_941      : in SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
             in_1477     : in SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
-            onoff_mark  : out std_logic
+            onoff_mark  : out std_logic;
+            latch_reset : in  std_logic
         );
     end component;
 
@@ -136,7 +138,8 @@ architecture Behavioral of toplevel_iq is
             in_697      : in SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
             in_941      : in SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);  -- guard condition
             in_1477     : in SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);  -- guard condition
-            enable      : out std_logic
+            enable      : out std_logic;
+            latch_reset : in  std_logic
         );
     end component;
     component slidingv5 is
@@ -296,7 +299,8 @@ begin
             out_valid   => flag_outvalid,
             in_941      => sum941,
             in_1477     => sum1477,
-            onoff_mark  => mark_onoff
+            onoff_mark  => mark_onoff,
+            latch_reset => latch_reset
         );
 
     mark_unit   : component markingv1
@@ -314,7 +318,8 @@ begin
             in_697      => sum697,
             in_941      => sum941,   -- guard: 697Hz harus dominan di atas 941Hz
             in_1477     => sum1477,  -- guard: 1477Hz harus dominan di atas 941Hz
-            enable      => markout
+            enable      => markout,
+            latch_reset => latch_reset
         );
     batch_unit : component slidingv5
         generic map(
