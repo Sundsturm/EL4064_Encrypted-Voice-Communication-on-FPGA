@@ -347,6 +347,9 @@ begin
 		);
 
 	DTMF_ENCODER_RX : entity work.top_dtmfencode
+		generic map (
+			SIM_MODE => true
+		)
 		port map(
 			clk => AUD_XCK,
 			rst => aud_rst,
@@ -366,7 +369,8 @@ begin
 			anode => anode,
 			encode_out => reconstructed_key_32bit,
 			dtmf_code_4bit => dtmf_code_4bit,
-			dtmf_code_valid => dtmf_code_valid
+			dtmf_code_valid => dtmf_code_valid,
+			enable => '1'
 		);
 
 	SHIFT_ADD_RX : entity work.shift_add

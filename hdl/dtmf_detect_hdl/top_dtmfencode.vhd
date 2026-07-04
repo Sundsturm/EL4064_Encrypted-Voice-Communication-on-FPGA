@@ -4,6 +4,9 @@ use IEEE.STD_LOGIC_ARITH.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity top_dtmfencode is
+    generic (
+        SIM_MODE : boolean := false
+    );
     Port (
         clk, rst        : in  STD_LOGIC;                    -- Reset signal
         in_valid        : in STD_LOGIC;
@@ -22,7 +25,8 @@ entity top_dtmfencode is
         anode           : out STD_LOGIC;
         encode_out      : out STD_LOGIC_VECTOR(31 downto 0);
         dtmf_code_4bit  : out STD_LOGIC_VECTOR(3 downto 0);
-        dtmf_code_valid : out STD_LOGIC
+        dtmf_code_valid : out STD_LOGIC;
+        enable          : in  STD_LOGIC := '1'
     );
 end top_dtmfencode;
 
@@ -40,6 +44,9 @@ architecture Behavioral of top_dtmfencode is
     signal payload_count                            : integer range 0 to 8 := 0;
     type frame_state_type is (WAIT_HASH, GOT_HASH, GOT_HASH_HASH, GOT_HASH_THREE, COLLECT_PAYLOAD);
     signal frame_state                              : frame_state_type := WAIT_HASH;
+    -- Robust FSM Timeout
+    signal frame_timeout                            : integer range 0 to 8388607 := 0;
+    constant FRAME_TIMEOUT_LIMIT                    : integer := 5529600; -- 300 ms @ 18.432 MHz
     -- Componen Declarations
     component lowcomparator is
         Port (
@@ -111,14 +118,17 @@ begin
         variable next_payload : STD_LOGIC_VECTOR(31 downto 0);
     begin
         if rst = '1' then
-            framed_key <= (others => '0');
+            framed_key    <= (others => '0');
             payload_shift <= (others => '0');
             payload_count <= 0;
-            frame_state <= WAIT_HASH;
-            frame_done <= '0';
+            frame_state   <= WAIT_HASH;
+            frame_done    <= '0';
+            frame_timeout <= 0;
         elsif rising_edge(clk) then
             frame_done <= '0';
+            
             if tone_valid = '1' then
+                frame_timeout <= 0; -- Reset timeout on any valid tone
                 case frame_state is
                     when WAIT_HASH =>
                         if code_dtmf = x"F" then
@@ -129,8 +139,6 @@ begin
                         if code_dtmf = x"F" then
                             frame_state <= GOT_HASH_HASH;
                         elsif code_dtmf = x"3" then
-                            -- Also accept the shortened #,3,# view if the first
-                            -- repeated # was consumed while the receiver was settling.
                             frame_state <= GOT_HASH_THREE;
                         else
                             frame_state <= WAIT_HASH;
@@ -158,14 +166,28 @@ begin
                         next_payload := payload_shift(27 downto 0) & code_dtmf;
                         payload_shift <= next_payload;
                         if payload_count = 7 then
-                            framed_key <= next_payload;
-                            frame_done <= '1';
+                            framed_key    <= next_payload;
+                            frame_done    <= '1';
                             payload_count <= 0;
-                            frame_state <= WAIT_HASH;
+                            frame_state   <= WAIT_HASH;
                         else
                             payload_count <= payload_count + 1;
                         end if;
+                    when others =>
+                        frame_state <= WAIT_HASH;
                 end case;
+            else
+                -- Increment timeout if FSM is active (not in WAIT_HASH)
+                if frame_state /= WAIT_HASH then
+                    if frame_timeout >= FRAME_TIMEOUT_LIMIT then
+                        frame_state   <= WAIT_HASH;
+                        payload_count <= 0;
+                        payload_shift <= (others => '0');
+                        frame_timeout <= 0;
+                    else
+                        frame_timeout <= frame_timeout + 1;
+                    end if;
+                end if;
             end if;
         end if;
     end process;
