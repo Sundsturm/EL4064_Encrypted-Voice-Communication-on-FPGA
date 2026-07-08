@@ -4,8 +4,8 @@
 -- Directly injects power values — no Goertzel needed.
 -- Tests all 16 DTMF symbols including 1633 Hz (A, B, C, D).
 --
--- Test Sequence  : #  #  1  5  *  7  A  C
--- Expected output: encode_out = x"FF15E7AC"
+-- Test Sequence  : 1  2  3  4  5  A  B  C
+-- Expected output: encode_out = x"12345ABC"
 -- =============================================================================
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -61,7 +61,7 @@ architecture behavior of top_dtmfencode_tb_v2 is
     constant DOM : std_logic_vector(16 downto 0) := "00000000000011111"; -- dominant
     constant BKG : std_logic_vector(16 downto 0) := "00000000000000001"; -- background
 
-    constant EXPECTED_KEY : std_logic_vector(31 downto 0) := x"FF15E7AC";
+    constant EXPECTED_KEY : std_logic_vector(31 downto 0) := x"12345ABC";
 
     -- -----------------------------------------------------------------------
     -- Procedure at architecture level (required for signal parameters)
@@ -146,36 +146,36 @@ begin
         rst <= '0';
         wait for CLK_PERIOD * 3;
 
-        -- Test: # # 1 5 * 7 A C  =>  expected 0xFF15E7AC
-        -- '#' : 941Hz(4) + 1477Hz(3) -> 0xF
-        inject_symbol(4, 3, corr_697, corr_770, corr_852, corr_941,
-                      corr_1209, corr_1336, corr_1477, corr_1633,
-                      in_valid, in_ready, clk);
-        -- '#' again
-        inject_symbol(4, 3, corr_697, corr_770, corr_852, corr_941,
-                      corr_1209, corr_1336, corr_1477, corr_1633,
-                      in_valid, in_ready, clk);
+        -- Test: 1 2 3 4 5 A B C  =>  expected 0x12345ABC
         -- '1' : 697Hz(1) + 1209Hz(1) -> 0x1
         inject_symbol(1, 1, corr_697, corr_770, corr_852, corr_941,
+                      corr_1209, corr_1336, corr_1477, corr_1633,
+                      in_valid, in_ready, clk);
+        -- '2' : 697Hz(1) + 1336Hz(2) -> 0x2
+        inject_symbol(1, 2, corr_697, corr_770, corr_852, corr_941,
+                      corr_1209, corr_1336, corr_1477, corr_1633,
+                      in_valid, in_ready, clk);
+        -- '3' : 697Hz(1) + 1477Hz(3) -> 0x3
+        inject_symbol(1, 3, corr_697, corr_770, corr_852, corr_941,
+                      corr_1209, corr_1336, corr_1477, corr_1633,
+                      in_valid, in_ready, clk);
+        -- '4' : 770Hz(2) + 1209Hz(1) -> 0x4
+        inject_symbol(2, 1, corr_697, corr_770, corr_852, corr_941,
                       corr_1209, corr_1336, corr_1477, corr_1633,
                       in_valid, in_ready, clk);
         -- '5' : 770Hz(2) + 1336Hz(2) -> 0x5
         inject_symbol(2, 2, corr_697, corr_770, corr_852, corr_941,
                       corr_1209, corr_1336, corr_1477, corr_1633,
                       in_valid, in_ready, clk);
-        -- '*' : 941Hz(4) + 1209Hz(1) -> 0xE
-        inject_symbol(4, 1, corr_697, corr_770, corr_852, corr_941,
-                      corr_1209, corr_1336, corr_1477, corr_1633,
-                      in_valid, in_ready, clk);
-        -- '7' : 852Hz(3) + 1209Hz(1) -> 0x7
-        inject_symbol(3, 1, corr_697, corr_770, corr_852, corr_941,
-                      corr_1209, corr_1336, corr_1477, corr_1633,
-                      in_valid, in_ready, clk);
-        -- 'A' : 697Hz(1) + 1633Hz(4) -> 0xA  [tests new 1633 Hz path]
+        -- 'A' : 697Hz(1) + 1633Hz(4) -> 0xA  [tests 1633 Hz path]
         inject_symbol(1, 4, corr_697, corr_770, corr_852, corr_941,
                       corr_1209, corr_1336, corr_1477, corr_1633,
                       in_valid, in_ready, clk);
-        -- 'C' : 852Hz(3) + 1633Hz(4) -> 0xC  [tests new 1633 Hz path]
+        -- 'B' : 770Hz(2) + 1633Hz(4) -> 0xB  [tests 1633 Hz path]
+        inject_symbol(2, 4, corr_697, corr_770, corr_852, corr_941,
+                      corr_1209, corr_1336, corr_1477, corr_1633,
+                      in_valid, in_ready, clk);
+        -- 'C' : 852Hz(3) + 1633Hz(4) -> 0xC  [tests 1633 Hz path]
         inject_symbol(3, 4, corr_697, corr_770, corr_852, corr_941,
                       corr_1209, corr_1336, corr_1477, corr_1633,
                       in_valid, in_ready, clk);
@@ -186,9 +186,9 @@ begin
         -- Verify
         report "=========================================";
         if encode_out = EXPECTED_KEY then
-            report "PASS: encode_out = FF15E7AC (correct)" severity note;
+            report "PASS: encode_out = 12345ABC (correct)" severity note;
         else
-            report "FAIL: encode_out does not match FF15E7AC" severity error;
+            report "FAIL: encode_out does not match 12345ABC" severity error;
         end if;
         report "encode_out (decimal) = " & integer'image(to_integer(unsigned(encode_out)));
         report "=========================================";

@@ -295,7 +295,8 @@ function reconstructed_key = receiver_pipeline(sinyal_input, ...
 %   reconstructed_key — uint32, kunci 24-bit hasil rekonstruksi
 
     N_SEGMENTS = 8;                     % Tepat 8 iterasi pemotongan
-    reconstructed_key = uint32(0);      % Inisialisasi Shift-Add Accumulator
+    reconstructed_key = uint32(0);      % Inisialisasi output
+    shift_state = struct();             % State shift_add (hardware-like)
 
     fprintf('  [RX] goertzel_enable AKTIF → mulai proses dari indeks %d\n', ...
         goertzel_enable_start_idx);
@@ -326,16 +327,19 @@ function reconstructed_key = receiver_pipeline(sinyal_input, ...
         %   dan High Group [1209,1336,1477] Hz
         [power_low, power_high] = goertzel_detector(chunk, Fs);
 
-        % ── 3. Comparator — Cari Frekuensi Dominan ───────────────────
-        [f_low_det, f_high_det] = comparator(power_low, power_high);
+        % ── 3. Comparator — Cari Code Dominan ────────────────────────
+        [code_low, code_high] = comparator(power_low, power_high);
 
-        % ── 4. Decision — Terjemahkan ke Nilai 3-bit ─────────────────
-        decode_val = decision(f_low_det, f_high_det);
+        % ── 4. Decision — Terjemahkan ke DTMF code (4-bit) ───────────
+        dtmf_code = decision(code_low, code_high);
 
         % ── 5. Shift-Add Accumulator ──────────────────────────────────
-        %   Geser kunci ke kiri 3-bit, tambahkan nilai 3-bit baru
-        reconstructed_key = shift_add(reconstructed_key, decode_val);
+        [output_key, shift_state, out_valid] = shift_add(shift_state, dtmf_code, true, true);
+        if out_valid
+            reconstructed_key = output_key;
+        end
 
+        fprintf('  [DTMF] Code=0x%X\n', dtmf_code);
         fprintf('  Akumulasi setelah segmen %d : 0x%s  (biner: %s)\n', ...
             seg, dec2hex(reconstructed_key, 6), ...
             dec2bin(reconstructed_key, min(seg*3, 24)));
