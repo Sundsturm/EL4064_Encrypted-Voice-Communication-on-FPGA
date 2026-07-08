@@ -120,6 +120,18 @@ architecture rtl of AcakCakap_Top is
 	signal aud_rst_reg : std_logic := '1';
 	signal aud_rst     : std_logic := '1';
 
+	-- =========================================================
+	-- Goertzel Symbol Boundary Alignment (Approach B)
+	-- Setelah 'enable' dari IQ correlator naik (saat simbol "3"
+	-- terdeteksi), tahan goertzel_enable selama 640 Ldone pulse
+	-- agar window pertama Goertzel tepat mulai di batas simbol
+	-- berikutnya (simbol "#" ke-4 pada preamble).
+	-- =========================================================
+	signal enable_d         : std_logic := '0'; -- 1-cycle delay untuk deteksi rising edge
+	signal align_armed      : std_logic := '0'; -- '1' setelah rising edge enable terdeteksi
+	signal align_counter    : integer range 0 to 639 := 0;
+	signal goertzel_aligned : std_logic := '0'; -- SR latch: '1' setelah 640 Ldone terhitung
+
 	signal LED : std_logic := '0';
 	-- State machine for button pressing 
 	type command_state is (WAIT_FOR_PRESS, WAIT_FOR_RELEASE, RELEASE_STATE);
@@ -131,9 +143,10 @@ begin
 	clk <= AUD_XCK;
 	rst <= not KEY(0);
 	start_transmission <= command OR uart_trigger; -- Dual-trigger mechanism
-	-- Gated by IQ correlator 'enable' for robust symbol boundary synchronization on hardware.
+	-- Gated by IQ correlator 'enable' DAN goertzel_aligned untuk
+	-- memastikan window Goertzel pertama mulai di batas simbol baru.
 	-- (For simulation bypass, set: goertzel_enable <= Ldone;)
-	goertzel_enable <= Ldone and enable;
+	goertzel_enable <= Ldone and enable and goertzel_aligned;
 	
 	-- Audio interface core instantiation
 	Audio_interface: entity work.Audio_interface
@@ -167,7 +180,50 @@ begin
 			aud_rst <= aud_rst_reg;
 		end if;
 	end process;
-	
+
+	-- =========================================================
+	-- GOERTZEL_ALIGN_FSM
+	-- Menunggu 640 Ldone pulse setelah 'enable' pertama kali naik
+	-- sebelum mengaktifkan goertzel_enable. Tujuannya agar window
+	-- analisis Goertzel pertama jatuh di batas simbol baru (simbol
+	-- "#" ke-4 pada preamble), bukan di tengah simbol "3".
+	-- =========================================================
+	GOERTZEL_ALIGN_FSM : process(AUD_XCK)
+	begin
+		if rising_edge(AUD_XCK) then
+			if aud_rst = '1' then
+				enable_d         <= '0';
+				align_armed      <= '0';
+				align_counter    <= 0;
+				goertzel_aligned <= '0';
+			else
+				-- Simpan nilai enable 1 cycle sebelumnya untuk deteksi rising edge
+				enable_d <= enable;
+
+				if goertzel_aligned = '0' then
+					if align_armed = '0' then
+						-- Deteksi rising edge 'enable' (0->1)
+						if enable = '1' and enable_d = '0' then
+							align_armed   <= '1';
+							align_counter <= 0;
+						end if;
+					else
+						-- Hitung 640 Ldone pulse (satu durasi simbol penuh)
+						if Ldone = '1' then
+							if align_counter = 639 then
+								-- 640 sample telah dilewati sejak enable naik:
+								-- Goertzel diizinkan mulai dari Ldone berikutnya
+								goertzel_aligned <= '1';
+							else
+								align_counter <= align_counter + 1;
+							end if;
+						end if;
+					end if;
+				end if;
+			end if;
+		end if;
+	end process;
+
 	-- DTMF Generator instance
 	DTMF_generator : entity work.generate_dtmf_signed(rtl)
 	generic map (
