@@ -10,12 +10,21 @@ Dokumen ini mendokumentasikan riwayat analisis masalah, evolusi arsitektur siste
 * **Masalah Awal**: Transmitter langsung mengirimkan simbol DTMF begitu tombol trigger ditekan tanpa memberikan jeda diam (*silence*). Hal ini menyebabkan receiver yang masih dalam proses pembersihan filter atau stabilisasi clock salah membaca derau awal sebagai simbol pertama.
 * **Analisis & Solusi**: Ditambahkan state `PRE_SILENCE` pada FSM pengirim (`FSM_DTMF_TRANSMITTER` di `AcakCakap_Top.vhd`). Sebelum memancarkan 12 simbol DTMF (4 preamble + 8 payload), pengirim melakukan *silence* selama 50 ms (1600 sampel pada clock audio). Jeda ini memberi waktu bagi filter penerima untuk mengosongkan akumulator energi (*clearing memory*) sebelum mendeteksi preamble sesungguhnya.
 
-### 2. Jeda *Lookback Buffer* & Efek *Circular Buffer*
-* **Masalah Awal**: Korelator IQ mendeteksi preamble melalui operasi *sliding correlation* berbasis buffer melingkar (*circular buffer*). Ketika pola korelasi puncak terdeteksi dan sinyal `enable` naik ke `'1'`, data audio yang memicu korelasi tersebut sebenarnya telah lewat beberapa ratus sampel di dalam buffer.
-* **Analisis & Solusi**: 
-  * Deteksi preamble selesai sepenuhnya setelah korelator mengamati simbol ketiga (`3`) dari pola `#,#,3,#` (simbol ke-4 `#` berfungsi sebagai pembatas sinkronisasi).
-  * Dengan laju sampel 32 kHz dan panjang simbol 20 ms (640 sampel/simbol), terdapat pergeseran indeks sampel yang pasti antara waktu deteksi `enable` dengan awal payload kunci sesungguhnya.
-  * Solusi yang diterapkan adalah menunda aktivasi blok analisis Goertzel (`goertzel_enable`) setelah `enable` naik. Penundaan dihitung dengan presisi menggunakan `align_counter` sebesar **`997`** (merepresentasikan delay 998 sampel audio) agar jendela integrasi Goertzel pertama tepat jatuh di awal sampel payload kunci pertama (Segmen 4).
+### 2. Kegunaan dan Evolusi Batas Penyelarasan `align_counter`
+* **Definisi & Kegunaan `align_counter`**:
+  `align_counter` adalah register pencacah penunda yang digunakan untuk menyelaraskan waktu mulai (*boundary alignment*) dari modul filter Goertzel (`Goertzel_top`). Ketika korelator IQ mendeteksi preamble dan menaikkan sinyal `enable` ke `'1'`, modul Goertzel tidak boleh langsung diaktifkan. Jika langsung diaktifkan, Goertzel akan memproses sisa sinyal preamble, sehingga jendela integrasi 640 sampel (20 ms) berikutnya akan bergeser dan tumpang tindih (*overlap*) di antara dua simbol payload. Hal ini akan menyebabkan kesalahan deteksi frekuensi (*spectral leakage*). `align_counter` menjamin bahwa Goertzel baru mulai membaca tepat pada sampel pertama dari simbol payload pertama.
+* **Evolusi Kronologis Nilai `align_counter`**:
+  * **Tahap Awal (Sistem FSM Lama)**: Pada arsitektur awal, penyelarasan dilakukan secara dinamis oleh FSM `FRAME_COLLECTOR` di dalam `top_dtmfencode.vhd` dengan mendeteksi kemunculan simbol pembatas `#`. Namun, metode ini sangat rentan terhadap derau dan sering kali mengalami *stuck* karena batas deteksi simbol yang tidak sinkron secara presisi terhadap laju clock sampel audio.
+  * **Tahap Transisi (Penghapusan FSM Redundan)**: Setelah FSM `FRAME_COLLECTOR` dihapus, deteksi preamble dikonsolidasikan pada korelator IQ tingkat atas (`AcakCakap_Top.vhd`). Penyelarasan jendela kini dihitung secara deterministik berbasis jumlah sampel audio (`Ldone`).
+  * **Analisis Perhitungan Sampel**:
+    * Preamble terdiri dari 4 simbol: `#` (Segmen 0), `#` (Segmen 1), `3` (Segmen 2), dan `#` (Segmen 3). Masing-masing berdurasi 640 sampel.
+    * Korelator IQ mendeteksi kecocokan pola dan menaikkan sinyal `enable` ke `'1'` pada sampel ke-**3162** (sesaat setelah simbol `3` di Segmen 2 selesai diproses dan buffer korelator mendeteksi kecocokan).
+    * Simbol payload kunci pertama (Segmen 4) baru benar-benar dimulai pada sampel ke-**4160**.
+    * Selisih sampel antara terdeteksinya `enable` dan dimulainya payload pertama adalah:
+      $$\text{Jeda Sampel} = 4160 - 3162 = 998 \text{ sampel}$$
+  * **Tahap Akhir (Nilai `997`)**:
+    Karena pencacah `align_counter` dimulai dari indeks `0` pada domain clock audio (`Ldone`), untuk menunda sebanyak 998 sampel audio secara akurat, batas pembanding harus diset ke $998 - 1 = 997$.
+    Begitu counter mencapai nilai **`997`**, FSM `GOERTZEL_ALIGN_FSM` akan menaikkan sinyal `goertzel_enable <= '1'` tepat pada awal sampel ke-4160. Hal ini menjamin tingkat akurasi transiver yang sangat tinggi dan mencegah terjadinya pembacaan digit kunci ganda atau terlewat.
 
 ### 3. Redundansi Deteksi Preamble (Dua Sistem Sinkronisasi Frame)
 * **Masalah Awal**: Terjadi tumpang tindih logika pemrosesan preamble. Modul dekoder `top_dtmfencode.vhd` memiliki FSM internal `FRAME_COLLECTOR` yang bertugas mencari simbol `#` dan `3`, sementara di tingkat top-level (`AcakCakap_Top.vhd`) korelator IQ (`toplevel_iq.vhd`) juga mendeteksi preamble yang sama secara asinkron.
