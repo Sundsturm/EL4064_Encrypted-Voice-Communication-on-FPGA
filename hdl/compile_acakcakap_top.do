@@ -61,8 +61,7 @@ vcom -2008 -work work dtmf_detect_hdl/highcomparator.vhd
 vcom -2008 -work work dtmf_detect_hdl/lowcomparator.vhd
 vcom -2008 -work work dtmf_detect_hdl/decision.vhd
 vcom -2008 -work work dtmf_detect_hdl/top_dtmfencode.vhd
-vcom -2008 -work work dtmf_detect_hdl/dtmf_system.vhd
-vcom -2008 -work work dtmf_detect_hdl/DecodeDTMF.vhd
+
 
 puts ""
 puts {=== [5/6] Compile scrambler/verilog blocks ===}

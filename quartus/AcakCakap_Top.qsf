@@ -216,8 +216,7 @@ set_global_assignment -name VHDL_FILE ../hdl/dtmf_detect_hdl/lowcomparator.vhd
 set_global_assignment -name VHDL_FILE ../hdl/dtmf_detect_hdl/highcomparator.vhd
 set_global_assignment -name VHDL_FILE ../hdl/dtmf_detect_hdl/Goertzel_top.vhd
 set_global_assignment -name VHDL_FILE ../hdl/dtmf_detect_hdl/Goertzel.vhd
-set_global_assignment -name VHDL_FILE ../hdl/dtmf_detect_hdl/dtmf_system.vhd
-set_global_assignment -name VHDL_FILE ../hdl/dtmf_detect_hdl/DecodeDTMF.vhd
+
 set_global_assignment -name VHDL_FILE ../hdl/dtmf_detect_hdl/decision.vhd
 # set_global_assignment -name VERILOG_FILE ../hdl/Twiddle.v
 # set_global_assignment -name VERILOG_FILE ../hdl/SdfUnit2.v

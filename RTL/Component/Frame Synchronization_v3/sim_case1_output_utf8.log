@@ -1,0 +1,235 @@
+Reading D:/intelFPGA_lite/18.1/modelsim_ase/tcl/vsim/pref.tcl
+
+# 10.5b
+
+# vsim -c -do "run -all; quit" topiq_tb_unified -gINPUT_FILE_NAME=test_1key_standard.txt 
+# Start time: 18:33:42 on Jul 09,2026
+# Loading std.standard
+# Loading std.textio(body)
+# Loading ieee.std_logic_1164(body)
+# Loading ieee.numeric_std(body)
+# Loading ieee.fixed_float_types
+# Loading ieee.math_real(body)
+# Loading ieee.fixed_generic_pkg(body)
+# Loading ieee.fixed_pkg
+# Loading work.topiq_tb_unified(tb)
+# Loading work.toplevelv1(behavioral)
+# Loading work.dec_control(behavioral)
+# Loading work.flaggingv2(behavioral)
+# Loading work.markingv1(behavioral)
+# Loading work.slidingv5(behavioral)
+# Loading work.powercalcv1(behavioral)
+# Loading work.framingv2(behavioral)
+# Loading work.multv6(behavioral)
+# Loading work.lutsin_block(behavioral)
+# Loading work.lutcos_block(behavioral)
+# run -all
+# ** Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+#    Time: 0 ps  Iteration: 0  Instance: /topiq_tb_unified/DUT/lutcos_unit
+# ** Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+#    Time: 0 ps  Iteration: 0  Instance: /topiq_tb_unified/DUT/lutcos_unit
+# ** Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+#    Time: 0 ps  Iteration: 0  Instance: /topiq_tb_unified/DUT/lutcos_unit
+# ** Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+#    Time: 0 ps  Iteration: 0  Instance: /topiq_tb_unified/DUT/lutsin_unit
+# ** Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+#    Time: 0 ps  Iteration: 0  Instance: /topiq_tb_unified/DUT/lutsin_unit
+# ** Warning: NUMERIC_STD.TO_INTEGER: metavalue detected, returning 0
+#    Time: 0 ps  Iteration: 0  Instance: /topiq_tb_unified/DUT/lutsin_unit
+# ** Note: =======================================================
+#    Time: 23 ns  Iteration: 0  Instance: /topiq_tb_unified
+# ** Note:   Frame Synchronization Unified Verification Testbench
+#    Time: 23 ns  Iteration: 0  Instance: /topiq_tb_unified
+# ** Note:   INPUT_FILE_NAME: test_1key_standard.txt
+#    Time: 23 ns  Iteration: 0  Instance: /topiq_tb_unified
+# ** Note: =======================================================
+#    Time: 23 ns  Iteration: 0  Instance: /topiq_tb_unified
+# [Batch #0] sum697= 4956.0000  sum941= 7368.5000  sum1477= 6808.5000  -> [941+1477 dominant = '#']
+# [Batch #1] sum697= 5228.0000  sum941= 7685.5000  sum1477= 7074.0000  -> [941+1477 dominant = '#']
+# [Batch #2] sum697= 5228.0000  sum941= 7685.5000  sum1477= 7074.0000  -> [941+1477 dominant = '#']
+# [Batch #3] sum697= 5228.0000  sum941= 7685.5000  sum1477= 7074.0000  -> [941+1477 dominant = '#']
+# [Batch #4] sum697= 5228.0000  sum941= 7685.5000  sum1477= 7074.0000  -> [941+1477 dominant = '#']
+# [Batch #5] sum697= 5228.0000  sum941= 7685.5000  sum1477= 7074.0000  -> [941+1477 dominant = '#']
+# [Batch #6] sum697= 5228.0000  sum941= 7685.5000  sum1477= 7074.0000  -> [941+1477 dominant = '#']
+# [Batch #7] sum697= 5228.0000  sum941= 7685.5000  sum1477= 7074.0000  -> [941+1477 dominant = '#']
+# [Batch #8] sum697= 5228.0000  sum941= 7685.5000  sum1477= 7074.0000  -> [941+1477 dominant = '#']
+# [Batch #9] sum697= 5228.0000  sum941= 7685.5000  sum1477= 7074.0000  -> [941+1477 dominant = '#']
+# [Batch #10] sum697= 5228.0000  sum941= 7685.5000  sum1477= 7074.0000  -> [941+1477 dominant = '#']
+# [Batch #11] sum697= 5228.0000  sum941= 7685.5000  sum1477= 7074.0000  -> [941+1477 dominant = '#']
+# [Batch #12] sum697= 5228.0000  sum941= 7685.5000  sum1477= 7074.0000  -> [941+1477 dominant = '#']
+# [Batch #13] sum697= 5228.0000  sum941= 7685.5000  sum1477= 7074.0000  -> [941+1477 dominant = '#']
+# [Batch #14] sum697= 5228.0000  sum941= 7685.5000  sum1477= 7074.0000  -> [941+1477 dominant = '#']
+# [Batch #15] sum697= 5228.0000  sum941= 7685.5000  sum1477= 7074.0000  -> [941+1477 dominant = '#']
+# [Batch #16] sum697= 5228.0000  sum941= 7685.5000  sum1477= 7074.0000  -> [941+1477 dominant = '#']
+# [Batch #17] sum697= 5228.0000  sum941= 7685.5000  sum1477= 7074.0000  -> [941+1477 dominant = '#']
+# [Batch #18] sum697= 5383.5000  sum941= 7464.0000  sum1477= 7205.5000  -> [941+1477 dominant = '#']
+# [Batch #19] sum697= 5234.0000  sum941= 6637.5000  sum1477= 6764.5000  -> [941+1477 dominant = '#']
+# [Batch #20] sum697= 5238.0000  sum941= 6470.0000  sum1477= 6875.0000  -> [941+1477 dominant = '#']
+# [Batch #21] sum697= 5461.0000  sum941= 6282.0000  sum1477= 7066.0000  -> [941+1477 dominant = '#']
+# [Batch #22] sum697= 5497.5000  sum941= 5514.0000  sum1477= 6668.0000  -> [941+1477 dominant = '#']
+# [Batch #23] sum697= 5416.5000  sum941= 5446.0000  sum1477= 6705.5000  -> [941+1477 dominant = '#']
+# [Batch #24] sum697= 5500.0000  sum941= 5365.0000  sum1477= 6895.5000  -> [697+1477 dominant = '3']
+# [Batch #25] sum697= 5681.0000  sum941= 4729.5000  sum1477= 6563.0000  -> [697+1477 dominant = '3']
+# [Batch #26] sum697= 5742.5000  sum941= 4768.5000  sum1477= 6572.0000  -> [697+1477 dominant = '3']
+# [Batch #27] sum697= 5716.0000  sum941= 4816.0000  sum1477= 6714.0000  -> [697+1477 dominant = '3']
+# [Batch #28] sum697= 5840.5000  sum941= 4371.5000  sum1477= 6412.5000  -> [697+1477 dominant = '3']
+# [Batch #29] sum697= 6059.5000  sum941= 4524.5000  sum1477= 6448.5000  -> [697+1477 dominant = '3']
+# [Batch #30] sum697= 6120.0000  sum941= 4680.5000  sum1477= 6548.0000  -> [697+1477 dominant = '3']
+# [Batch #31] sum697= 6161.0000  sum941= 4421.0000  sum1477= 6216.0000  -> [697+1477 dominant = '3']
+# [Batch #32] sum697= 6370.0000  sum941= 4685.0000  sum1477= 6292.0000  -> [697+1477 dominant = '3']
+# [Batch #33] sum697= 6562.0000  sum941= 4936.5000  sum1477= 6403.5000  -> [697+1477 dominant = '3']
+# [Batch #34] sum697= 6406.5000  sum941= 5158.0000  sum1477= 6272.0000  -> [697+1477 dominant = '3']
+# [Batch #35] sum697= 6556.0000  sum941= 5984.5000  sum1477= 6713.0000  -> [697+1477 dominant = '3']
+# [Batch #36] sum697= 6552.0000  sum941= 6152.0000  sum1477= 6602.5000  -> [697+1477 dominant = '3']
+# [Batch #37] sum697= 6329.0000  sum941= 6340.0000  sum1477= 6411.5000  -> [941+1477 dominant = '#']
+# [Batch #38] sum697= 6292.5000  sum941= 7108.0000  sum1477= 6809.5000  -> [941+1477 dominant = '#']
+# [Batch #39] sum697= 6373.5000  sum941= 7176.0000  sum1477= 6772.0000  -> [941+1477 dominant = '#']
+# [Batch #40] sum697= 6290.0000  sum941= 7257.0000  sum1477= 6582.0000  -> [941+1477 dominant = '#']
+# [Batch #41] sum697= 6109.0000  sum941= 7892.5000  sum1477= 6914.5000  -> [941+1477 dominant = '#']
+# [Batch #42] sum697= 6047.5000  sum941= 7853.5000  sum1477= 6905.5000  -> [941+1477 dominant = '#']
+# [Batch #43] sum697= 6074.0000  sum941= 7806.0000  sum1477= 6763.5000  -> [941+1477 dominant = '#']
+# [Batch #44] sum697= 5949.5000  sum941= 8250.5000  sum1477= 7065.0000  -> [941+1477 dominant = '#']
+# [Batch #45] sum697= 5730.5000  sum941= 8097.5000  sum1477= 7029.0000  -> [941+1477 dominant = '#']
+# [Batch #46] sum697= 5670.0000  sum941= 7941.5000  sum1477= 6929.5000  -> [941+1477 dominant = '#']
+# [Batch #47] sum697= 5629.0000  sum941= 8201.0000  sum1477= 7261.5000  -> [941+1477 dominant = '#']
+# [Batch #48] sum697= 5420.0000  sum941= 7937.0000  sum1477= 7185.5000  -> [941+1477 dominant = '#']
+# [Batch #49] sum697= 5228.0000  sum941= 7685.5000  sum1477= 7074.0000  -> [941+1477 dominant = '#']
+# [Batch #50] sum697= 5295.0000  sum941= 8032.0000  sum1477= 7141.0000  -> [941+1477 dominant = '#']
+# [Batch #51] sum697= 5188.0000  sum941= 7686.5000  sum1477= 6903.5000  -> [941+1477 dominant = '#']
+# [Batch #52] sum697= 5113.0000  sum941= 7904.5000  sum1477= 7085.0000  -> [941+1477 dominant = '#']
+# [Batch #53] sum697= 4993.0000  sum941= 7971.0000  sum1477= 7140.0000  -> [941+1477 dominant = '#']
+# [Batch #54] sum697= 4937.0000  sum941= 7786.0000  sum1477= 6995.0000  -> [941+1477 dominant = '#']
+# [Batch #55] sum697= 4952.5000  sum941= 7961.0000  sum1477= 6996.0000  -> [941+1477 dominant = '#']
+# [Batch #56] sum697= 5087.5000  sum941= 8485.0000  sum1477= 7133.5000  -> [941+1477 dominant = '#']
+# [Batch #57] sum697= 5006.5000  sum941= 8080.5000  sum1477= 6779.0000  -> [941+1477 dominant = '#']
+# [Batch #58] sum697= 5025.5000  sum941= 8438.0000  sum1477= 7008.5000  -> [941+1477 dominant = '#']
+# [Batch #59] sum697= 4889.0000  sum941= 8421.0000  sum1477= 7016.0000  -> [941+1477 dominant = '#']
+# [Batch #60] sum697= 4869.5000  sum941= 8328.5000  sum1477= 6898.0000  -> [941+1477 dominant = '#']
+# [Batch #61] sum697= 4855.5000  sum941= 8340.0000  sum1477= 6818.0000  -> [941+1477 dominant = '#']
+# [Batch #62] sum697= 5067.5000  sum941= 9027.0000  sum1477= 7061.0000  -> [941+1477 dominant = '#']
+# [Batch #63] sum697= 5038.5000  sum941= 8586.5000  sum1477= 6554.0000  -> [941+1477 dominant = '#']
+# [Batch #64] sum697= 5185.0000  sum941= 9093.0000  sum1477= 6784.0000  -> [941+1477 dominant = '#']
+# [Batch #65] sum697= 5074.0000  sum941= 9037.0000  sum1477= 6781.5000  -> [941+1477 dominant = '#']
+# [Batch #66] sum697= 5110.5000  sum941= 8758.5000  sum1477= 6593.0000  -> [941+1477 dominant = '#']
+# [Batch #67] sum697= 5655.0000  sum941= 9443.5000  sum1477= 6414.0000  -> [941+1477 dominant = '#']
+# [Batch #68] sum697= 5540.0000  sum941= 9032.5000  sum1477= 6093.5000  -> [941+1477 dominant = '#']
+# [Batch #69] sum697= 6009.0000  sum941= 9367.5000  sum1477= 5970.0000
+# [Batch #70] sum697= 6516.0000  sum941= 9678.0000  sum1477= 5654.5000
+# [Batch #71] sum697= 6215.0000  sum941= 9229.5000  sum1477= 5527.5000
+# [Batch #72] sum697= 6492.0000  sum941= 9415.5000  sum1477= 5374.0000
+# [Batch #73] sum697= 6891.5000  sum941= 9628.5000  sum1477= 5200.0000
+# [Batch #74] sum697= 6784.0000  sum941= 9075.0000  sum1477= 4899.5000
+# [Batch #75] sum697= 7368.0000  sum941= 9951.0000  sum1477= 4896.0000
+# [Batch #76] sum697= 7403.0000  sum941= 9567.5000  sum1477= 4441.5000
+# [Batch #77] sum697= 7566.0000  sum941= 9565.5000  sum1477= 4514.0000
+# [Batch #78] sum697= 7907.5000  sum941= 9685.0000  sum1477= 4266.0000
+# [Batch #79] sum697= 7741.0000  sum941= 9465.5000  sum1477= 4205.0000
+# [Batch #80] sum697= 7823.0000  sum941= 9226.5000  sum1477= 3992.5000
+# [Batch #81] sum697= 8498.0000  sum941= 9909.0000  sum1477= 3990.0000
+# [Batch #82] sum697= 8430.5000  sum941= 9670.5000  sum1477= 4107.5000
+# [Batch #83] sum697= 7974.0000  sum941= 9008.0000  sum1477= 4246.5000
+# [Batch #84] sum697= 8424.0000  sum941= 9853.0000  sum1477= 4470.0000
+# [Batch #85] sum697= 8267.5000  sum941= 9669.0000  sum1477= 4509.0000
+# [Batch #86] sum697= 7794.0000  sum941= 8708.5000  sum1477= 4735.5000
+# [Batch #87] sum697= 7900.0000  sum941= 8821.5000  sum1477= 4829.5000
+# [Batch #88] sum697= 7714.0000  sum941= 8498.5000  sum1477= 4938.5000
+# [Batch #89] sum697= 7639.0000  sum941= 8605.0000  sum1477= 5110.0000
+# [Batch #90] sum697= 7993.5000  sum941= 9127.5000  sum1477= 5274.5000
+# [Batch #91] sum697= 7357.0000  sum941= 7999.0000  sum1477= 5243.0000
+# [Batch #92] sum697= 7313.0000  sum941= 7771.0000  sum1477= 5510.0000
+# [Batch #93] sum697= 7487.0000  sum941= 8131.5000  sum1477= 5510.5000
+# [Batch #94] sum697= 7267.5000  sum941= 7903.5000  sum1477= 5592.5000
+# [Batch #95] sum697= 7496.5000  sum941= 8284.0000  sum1477= 5800.0000
+# [Batch #96] sum697= 7274.0000  sum941= 7789.5000  sum1477= 5726.0000
+# [Batch #97] sum697= 6908.5000  sum941= 7019.5000  sum1477= 5855.5000
+# [Batch #98] sum697= 7065.5000  sum941= 7436.0000  sum1477= 5755.0000
+# [Batch #99] sum697= 7427.5000  sum941= 7786.5000  sum1477= 5595.0000
+# [Batch #100] sum697= 7102.5000  sum941= 7050.0000  sum1477= 5363.0000
+# [Batch #101] sum697= 7420.5000  sum941= 7826.5000  sum1477= 5402.5000
+# [Batch #102] sum697= 7139.0000  sum941= 7762.0000  sum1477= 5051.0000
+# [Batch #103] sum697= 7852.0000  sum941= 9087.0000  sum1477= 5140.0000
+# [Batch #104] sum697= 7352.5000  sum941= 8413.5000  sum1477= 4872.0000
+# [Batch #105] sum697= 7526.5000  sum941= 8904.0000  sum1477= 4837.0000
+# [Batch #106] sum697= 7162.0000  sum941= 8539.0000  sum1477= 4623.0000
+# [Batch #107] sum697= 7688.5000  sum941= 9415.5000  sum1477= 4656.5000
+# [Batch #108] sum697= 7842.0000  sum941= 9805.0000  sum1477= 4423.5000
+# [Batch #109] sum697= 7715.0000  sum941= 9655.0000  sum1477= 4393.5000
+# [Batch #110] sum697= 7789.5000  sum941= 9610.5000  sum1477= 4322.5000
+# [Batch #111] sum697= 7750.0000  sum941= 9233.0000  sum1477= 4113.5000
+# [Batch #112] sum697= 8295.5000  sum941=10266.5000  sum1477= 4189.0000
+# [Batch #113] sum697= 7993.5000  sum941=10099.0000  sum1477= 4034.0000
+# [Batch #114] sum697= 7880.5000  sum941= 9789.0000  sum1477= 4104.5000
+# [Batch #115] sum697= 7682.5000  sum941= 9681.5000  sum1477= 4325.0000
+# [Batch #116] sum697= 7944.0000  sum941=10089.0000  sum1477= 4562.0000
+# [Batch #117] sum697= 7303.5000  sum941= 8823.0000  sum1477= 4463.5000
+# [Batch #118] sum697= 7619.5000  sum941= 9510.0000  sum1477= 4807.0000
+# [Batch #119] sum697= 7336.0000  sum941= 9062.0000  sum1477= 4907.5000
+# [Batch #120] sum697= 7418.0000  sum941= 9130.0000  sum1477= 5000.0000
+# [Batch #121] sum697= 6936.5000  sum941= 8233.5000  sum1477= 5083.5000
+# [Batch #122] sum697= 7346.5000  sum941= 9077.0000  sum1477= 5358.0000
+# [Batch #123] sum697= 6993.0000  sum941= 8485.5000  sum1477= 5330.0000
+# [Batch #124] sum697= 6857.5000  sum941= 8051.5000  sum1477= 5484.0000
+# [Batch #125] sum697= 6981.5000  sum941= 8384.0000  sum1477= 5596.0000
+# [Batch #126] sum697= 6804.0000  sum941= 8191.0000  sum1477= 5666.5000
+# [Batch #127] sum697= 6876.0000  sum941= 8096.5000  sum1477= 5809.0000
+# [Batch #128] sum697= 6499.5000  sum941= 7451.5000  sum1477= 5747.0000
+# [Batch #129] sum697= 6942.0000  sum941= 8398.0000  sum1477= 5957.0000
+# [Batch #130] sum697= 7018.0000  sum941= 8270.0000  sum1477= 6045.5000
+# [Batch #131] sum697= 6884.5000  sum941= 7675.5000  sum1477= 5845.5000
+# [Batch #132] sum697= 6696.0000  sum941= 7549.5000  sum1477= 5874.5000
+# [Batch #133] sum697= 6856.0000  sum941= 8194.5000  sum1477= 6177.0000
+# [Batch #134] sum697= 6877.5000  sum941= 8235.5000  sum1477= 6199.0000
+# [Batch #135] sum697= 6701.5000  sum941= 7890.0000  sum1477= 6254.5000
+# [Batch #136] sum697= 6871.5000  sum941= 8213.5000  sum1477= 6477.0000
+# [Batch #137] sum697= 6824.5000  sum941= 8022.5000  sum1477= 6311.0000
+# [Batch #138] sum697= 6512.5000  sum941= 7073.5000  sum1477= 6120.0000
+# [Batch #139] sum697= 6631.5000  sum941= 6930.5000  sum1477= 6254.0000
+# [Batch #140] sum697= 6787.5000  sum941= 7202.0000  sum1477= 6296.0000
+# [Batch #141] sum697= 6644.0000  sum941= 6927.0000  sum1477= 6330.5000
+# [Batch #142] sum697= 6530.0000  sum941= 6909.0000  sum1477= 6467.5000
+# [Batch #143] sum697= 6576.0000  sum941= 7481.0000  sum1477= 6562.0000
+# [Batch #144] sum697= 6618.0000  sum941= 7508.0000  sum1477= 6669.0000  -> [941+1477 dominant = '#']
+# [Batch #145] sum697= 6494.0000  sum941= 6849.5000  sum1477= 6660.0000  -> [941+1477 dominant = '#']
+# [Batch #146] sum697= 6580.0000  sum941= 7537.0000  sum1477= 6572.0000
+# [Batch #147] sum697= 6458.5000  sum941= 7568.0000  sum1477= 6436.5000
+# [Batch #148] sum697= 6917.0000  sum941= 8462.5000  sum1477= 6397.0000
+# [Batch #149] sum697= 6612.0000  sum941= 7820.0000  sum1477= 5962.5000
+# [Batch #150] sum697= 7060.0000  sum941= 8657.0000  sum1477= 5894.0000
+# [Batch #151] sum697= 6757.0000  sum941= 8047.0000  sum1477= 5480.5000
+# [Batch #152] sum697= 7215.5000  sum941= 8852.5000  sum1477= 5416.5000
+# [Batch #153] sum697= 7289.5000  sum941= 8957.5000  sum1477= 5319.5000
+# [Batch #154] sum697= 7492.0000  sum941= 9525.0000  sum1477= 5362.5000
+# [Batch #155] sum697= 7650.5000  sum941=10197.5000  sum1477= 5237.5000
+# [Batch #156] sum697= 7380.0000  sum941=10129.0000  sum1477= 5021.5000
+# [Batch #157] sum697= 7644.5000  sum941=10907.0000  sum1477= 5022.5000
+# [Batch #158] sum697= 7315.0000  sum941=10331.0000  sum1477= 4670.5000
+# [Batch #159] sum697= 7660.0000  sum941=11031.0000  sum1477= 4671.0000
+# [Batch #160] sum697= 7335.5000  sum941=10577.0000  sum1477= 4423.5000
+# [Batch #161] sum697= 7514.5000  sum941=11286.5000  sum1477= 4447.5000
+# [Batch #162] sum697= 7352.0000  sum941=10897.0000  sum1477= 4457.5000
+# [Batch #163] sum697= 7499.0000  sum941=11432.0000  sum1477= 4913.0000
+# [Batch #164] sum697= 6875.0000  sum941=10103.0000  sum1477= 4706.5000
+# [Batch #165] sum697= 7402.0000  sum941=11184.5000  sum1477= 5123.5000
+# [Batch #166] sum697= 6841.0000  sum941=10102.5000  sum1477= 5122.0000
+# [Batch #167] sum697= 6965.0000  sum941=10355.5000  sum1477= 5301.5000
+# [Batch #168] sum697= 6757.0000  sum941=10117.5000  sum1477= 5439.5000
+# [Batch #169] sum697= 6722.0000  sum941= 9847.5000  sum1477= 5540.5000
+# [Batch #170] sum697= 6723.0000  sum941= 9975.0000  sum1477= 5710.5000
+# [Batch #171] sum697= 6447.5000  sum941= 9527.5000  sum1477= 5763.5000
+# [Batch #172] sum697= 6513.5000  sum941= 9542.5000  sum1477= 5905.0000
+# [Batch #173] sum697= 6401.5000  sum941= 9427.5000  sum1477= 6025.0000
+# [Batch #174] sum697= 6473.5000  sum941= 9446.5000  sum1477= 6065.5000
+# [Batch #175] sum697= 6088.5000  sum941= 8868.5000  sum1477= 6148.0000  -> [941+1477 dominant = '#']
+# [Batch #176] sum697= 6427.5000  sum941= 9484.0000  sum1477= 6354.5000
+# [Batch #177] sum697= 6107.5000  sum941= 8671.5000  sum1477= 6139.5000  -> [941+1477 dominant = '#']
+# ** Note: =======================================================
+#    Time: 464823 ns  Iteration: 1  Instance: /topiq_tb_unified
+# ** Note:   Unified Testbench Summary for: test_1key_standard.txt
+#    Time: 464823 ns  Iteration: 1  Instance: /topiq_tb_unified
+# ** Error:   >>> RESULT: FAIL (Sync NOT detected) <<<
+#    Time: 464823 ns  Iteration: 1  Instance: /topiq_tb_unified
+# ** Note: =======================================================
+#    Time: 464823 ns  Iteration: 1  Instance: /topiq_tb_unified
+#  quit
+# End time: 18:33:44 on Jul 09,2026, Elapsed time: 0:00:02
+# Errors: 1, Warnings: 6

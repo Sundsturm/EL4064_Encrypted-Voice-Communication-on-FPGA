@@ -36,6 +36,7 @@ begin
             temp_sig <= (others => '0');
             counter <= 0;
             output32 <= (others => '0');
+            state <= IDLE;
         elsif rising_edge(clk) then
             state <= state;
             case state is
@@ -54,14 +55,12 @@ begin
                     state <= STORE;
 
                 when STORE =>
-                    -- If input3(3) = '0', do nothing, just wait
-                    out_valid <= '1';
-                    if counter < 8 then
-                        counter <= counter;
-                    else
-                        -- Output the temp_sig when counter is 8 or more
+                    if counter = 8 then
                         output32 <= temp_sig;
+                        out_valid <= '1';
                         counter <= 0;
+                    else
+                        out_valid <= '0';
                     end if;
                     if out_ready = '1' then
                         state <= IDLE;

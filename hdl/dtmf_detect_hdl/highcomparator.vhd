@@ -46,6 +46,7 @@ begin
             --out_temp <= (others => '0');
             code <= "000";
             code_temp <= "000";
+            state <= IDLE;
         elsif rising_edge(clk) then
             state <= state;
             case state is

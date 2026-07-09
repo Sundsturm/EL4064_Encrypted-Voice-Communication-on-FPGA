@@ -51,6 +51,7 @@ begin
             codelow <= "000";
             codehigh <= "000";
             sevseg  <= "0000000";
+            state <= IDLE;
         elsif rising_edge(clk) then
             state <= state;
             anode <= '0';

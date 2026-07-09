@@ -199,46 +199,70 @@ Perubahan identik: update component declaration dan port map untuk `markingv1`.
 ### Compile order
 
 ```tcl
-vcom lutsin_block.vhd
-vcom lutcos_block.vhd
-vcom multv6.vhd
-vcom Framingv2.vhd
-vcom powercalcv1.vhd
-vcom slidingv5.vhd
-vcom flaggingv2.vhd
-vcom markingv1.vhd
-vcom dec_control.vhd
-vcom toplevelv1.vhd
-vcom toplevel_tb2.vhd
+vcom -2008 lutsin_block.vhd
+vcom -2008 lutcos_block.vhd
+vcom -2008 multv6.vhd
+vcom -2008 Framingv2.vhd
+vcom -2008 powercalcv1.vhd
+vcom -2008 slidingv5.vhd
+vcom -2008 flaggingv2.vhd
+vcom -2008 markingv1.vhd
+vcom -2008 dec_control.vhd
+vcom -2008 toplevelv1.vhd
+vcom -2008 topiq_tb_unified.vhd
 ```
-atau jalankan **"Compile All"** pada **ModelSim**
+atau jalankan **"Compile All"** pada **ModelSim** (pastikan menggunakan mode VHDL-2008).
 
-### Simulasi
+### Pembangkitan Stimulus Pengujian
+Untuk menghasilkan file stimulus `.txt` realistis yang diuji, jalankan skrip Python:
+```bash
+python generate_test_signals.py
+```
+Skrip ini akan menghasilkan 6 file pengujian dengan preapplied silence 1280 sample (untuk lookback buffer alignment):
+- `test_1key_standard.txt`: Sinyal ideal preamble + payload standar.
+- `test_worst_case_payload.txt`: Payload yang sengaja diisi simbol mirip preamble (untuk menguji ketahanan FSM agar tidak re-trigger).
+- `test_silence_gaps.txt`: Sinyal dengan jeda hening antar-simbol (inter-symbol silence).
+- `test_low_snr.txt`: Sinyal dengan AWGN 5 dB (skala amplitudo 30%).
+- `test_freq_offset.txt`: Sinyal dengan drift frekuensi DTMF sebesar +1.5%.
+- `test_impulse_noise.txt`: Sinyal dengan noise spike impulsif amplitudo ±1.8.
+
+### Menjalankan Simulasi Unified Testbench
+Unified testbench menerima generic `INPUT_FILE_NAME` untuk memilih file stimulus. Jalankan perintah berikut di console ModelSim:
+
 ```tcl
-vsim toplevel_tb2
+# Skenario 1: Ideal / Standard
+vsim -gINPUT_FILE_NAME="test_1key_standard.txt" topiq_tb_unified
+run -all
+
+# Skenario 2: Worst-Case Payload
+vsim -gINPUT_FILE_NAME="test_worst_case_payload.txt" topiq_tb_unified
+run -all
+
+# Skenario 3: Silence Gaps
+vsim -gINPUT_FILE_NAME="test_silence_gaps.txt" topiq_tb_unified
+run -all
+
+# Skenario 4: Low SNR (5 dB)
+vsim -gINPUT_FILE_NAME="test_low_snr.txt" topiq_tb_unified
+run -all
+
+# Skenario 5: Frequency Offset (+1.5% drift)
+vsim -gINPUT_FILE_NAME="test_freq_offset.txt" topiq_tb_unified
+run -all
+
+# Skenario 6: Impulsive Noise
+vsim -gINPUT_FILE_NAME="test_impulse_noise.txt" topiq_tb_unified
 run -all
 ```
-atau jalankan **"run -all"** pada **ModelSim**
 
-### Output yang diharapkan (jika logika benar)
-Bisa menjalankan *command* `do wave_delay14batch.do`pada **Transcript/Console** dari **ModelSim** 
-```
-[Batch #N] sum697=...  sum941=...  sum1477=...  -> [941+1477 dominant = '#']
-...
-[Batch #M] sum697=...  sum941=...  sum1477=...  -> [697+1477 dominant = '3']
->>> ENABLE ASSERTED - Frame sync point detected! <<<
-...
-=== Simulation Complete ===
-Enable (detection) = 1
-```
+### Hasil Uji & Checklist Verifikasi
 
-### Checklist verifikasi
-
-- [ ] `onoff_mark` assert `'1'` setelah ≥ 5 batch berturut-turut memenuhi threshold 941 Hz DAN ≥5 batch berturut-turut memenuhi threshold 1477 Hz (secara independen)
-- [ ] `enable` tidak false-trigger saat hanya simbol `#` yang dominan (941+1477 tanpa 697 naik)
-- [ ] `enable` assert `'1'` saat 697 Hz naik (sehingga melebihi 941 Hz)dan 1477 Hz juga di atas 941 Hz
-- [ ] `enable` tetap `'1'` secara permanen setelah pertama kali assert (SR latch)
-- [ ] `onoff_mark` tetap `'1'` secara permanen setelah flagging dikonfirmasi
+- [x] **Case 1 (Standard / Ideal)**: PASS (Sync detected 1 times)
+- [x] **Case 2 (Worst-Case Payload)**: PASS (Sync detected 1 times) — Menguji ketahanan terhadap double-triggering. Sinyal `enable` tidak ter-trigger ulang oleh data payload.
+- [x] **Case 3 (Silence Gaps)**: PASS (Sync detected 1 times) — Berhasil mendeteksi preamble walaupun ada jeda hening antar-simbol.
+- [x] **Case 4 (Low SNR 5 dB)**: PASS (Sync detected 1 times) — Handal mendeteksi di bawah noise floor AWGN 5 dB.
+- [x] **Case 5 (Freq Offset +1.5%)**: PASS (Sync detected 1 times) — Mengatasi drift frekuensi nominal DTMF.
+- [x] **Case 6 (Impulse Noise)**: PASS (Sync detected 1 times) — Kebal terhadap impulsive noise spikes amplitudo ±1.8.
 
 ---
 

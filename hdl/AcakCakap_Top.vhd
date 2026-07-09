@@ -3,6 +3,10 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 entity AcakCakap_Top is
+generic
+(
+	DEBOUNCE_LIMIT : integer := 1000000
+);
 port
 (
 
@@ -77,11 +81,9 @@ architecture rtl of AcakCakap_Top is
 	signal power_1336 : std_logic_vector(16 downto 0);
 	signal power_1477 : std_logic_vector(16 downto 0);
 	signal power_1633 : std_logic_vector(16 downto 0);
-	signal dtmf_code_4bit : std_logic_vector(3 downto 0);
-	signal dtmf_code_valid : std_logic;
 	signal reconstructed_key_32bit : std_logic_vector(31 downto 0);
-	signal shift_add_in_ready : std_logic;
-	signal shift_add_out_valid : std_logic;
+	signal rx_timeout_cnt   : integer range 0 to 8000000 := 0;
+	signal rx_timeout_rst   : std_logic := '0';
 	
 	-- For interfacing with the Tone Detection Design 
 	signal in_ready  : std_logic; 
@@ -105,20 +107,36 @@ architecture rtl of AcakCakap_Top is
 	signal uart_trigger  : std_logic := '0';
 	
 	-- Phase 2 FSM sender control
-	type state_type is (IDLE, TRANSMIT);
+	type state_type is (IDLE, PRE_SILENCE, TRANSMIT);
 	signal current_state : state_type := IDLE;
-	signal sample_counter : integer range 0 to 640 := 0;
+	signal sample_counter : integer range 0 to 1600 := 0; -- Tingkatkan range counter ke 1600
 	signal start_transmission : std_logic := '0';
 	signal dtmf_tone_enable : std_logic := '0';
 	constant SAMPLES_20MS : integer := 640;
+	constant SAMPLES_PRE_SILENCE : integer := 1600; -- 50 ms silence (33 batches + margin)
 	
 	-- Local clock/reset alias for synchronous FSM process
 	signal clk : std_logic;
 	signal rst : std_logic;
 	
+	-- Receiver Local Reset & Display Register
+	signal rx_rst : std_logic := '1';
+	signal display_key : std_logic_vector(31 downto 0) := (others => '0');
+
+	-- Debounce signals
+	signal key0_debounced : std_logic := '1';
+	signal key1_debounced : std_logic := '1';
+	signal key0_cnt : integer range 0 to DEBOUNCE_LIMIT := 0;
+	signal key1_cnt : integer range 0 to DEBOUNCE_LIMIT := 0;
+
+
+
 	-- Synchronized reset for AUD_XCK domain
 	signal aud_rst_reg : std_logic := '1';
 	signal aud_rst     : std_logic := '1';
+
+	-- Synchronized transmit key (CDC synchronization to AUD_XCK)
+	signal key1_sync_reg : std_logic_vector(1 downto 0) := (others => '1');
 
 	-- =========================================================
 	-- Goertzel Symbol Boundary Alignment (Approach B)
@@ -129,7 +147,7 @@ architecture rtl of AcakCakap_Top is
 	-- =========================================================
 	signal enable_d         : std_logic := '0'; -- 1-cycle delay untuk deteksi rising edge
 	signal align_armed      : std_logic := '0'; -- '1' setelah rising edge enable terdeteksi
-	signal align_counter    : integer range 0 to 639 := 0;
+	signal align_counter    : integer range 0 to 1023 := 0;
 	signal goertzel_aligned : std_logic := '0'; -- SR latch: '1' setelah 640 Ldone terhitung
 
 	signal LED : std_logic := '0';
@@ -141,12 +159,88 @@ begin
 
 -- body --
 	clk <= AUD_XCK;
-	rst <= not KEY(0);
+	
+	-- Debouncer for KEY(0) and KEY(1) running on CLOCK_50
+	DEBOUNCE_PROC : process(CLOCK_50)
+	begin
+		if rising_edge(CLOCK_50) then
+			-- Debounce KEY(0) (Reset)
+			if KEY(0) = key0_debounced then
+				key0_cnt <= 0;
+			else
+				if key0_cnt = DEBOUNCE_LIMIT then
+					key0_debounced <= KEY(0);
+					key0_cnt <= 0;
+				else
+					key0_cnt <= key0_cnt + 1;
+				end if;
+			end if;
+			
+			-- Debounce KEY(1) (Transmit trigger)
+			if KEY(1) = key1_debounced then
+				key1_cnt <= 0;
+			else
+				if key1_cnt = DEBOUNCE_LIMIT then
+					key1_debounced <= KEY(1);
+					key1_cnt <= 0;
+				else
+					key1_cnt <= key1_cnt + 1;
+				end if;
+			end if;
+		end if;
+	end process;
+
+	rst <= not key0_debounced;
 	start_transmission <= command OR uart_trigger; -- Dual-trigger mechanism
 	-- Gated by IQ correlator 'enable' DAN goertzel_aligned untuk
 	-- memastikan window Goertzel pertama mulai di batas simbol baru.
 	-- (For simulation bypass, set: goertzel_enable <= Ldone;)
 	goertzel_enable <= Ldone and enable and goertzel_aligned;
+	
+	-- Receiver Local Reset Logic (Registered to break combinatorial glitches)
+	-- Receiver auto-rearms via out_valid after each successful decode or timeout.
+	process(AUD_XCK)
+	begin
+		if rising_edge(AUD_XCK) then
+			if aud_rst = '1' then
+				rx_rst <= '1';
+			else
+				rx_rst <= out_valid or rx_timeout_rst;
+			end if;
+		end if;
+	end process;
+
+	-- Watchdog timeout to prevent permanent lockup if enable is stuck
+	WATCHDOG_PROC : process(AUD_XCK)
+	begin
+		if rising_edge(AUD_XCK) then
+			if aud_rst = '1' or out_valid = '1' then
+				rx_timeout_cnt <= 0;
+				rx_timeout_rst <= '0';
+			elsif enable = '1' then
+				if rx_timeout_cnt = 7372800 then
+					rx_timeout_rst <= '1';
+				else
+					rx_timeout_cnt <= rx_timeout_cnt + 1;
+					rx_timeout_rst <= '0';
+				end if;
+			else
+				rx_timeout_cnt <= 0;
+				rx_timeout_rst <= '0';
+			end if;
+		end if;
+	end process;
+	
+	process(AUD_XCK)
+	begin
+		if rising_edge(AUD_XCK) then
+			if aud_rst = '1' then
+				display_key <= (others => '0');
+			elsif out_valid = '1' then
+				display_key <= reconstructed_key_32bit;
+			end if;
+		end if;
+	end process;
 	
 	-- Audio interface core instantiation
 	Audio_interface: entity work.Audio_interface
@@ -155,7 +249,7 @@ begin
 	)
 	port map (
 		clk => clock_50,
-		rst => not KEY(0),
+		rst => not key0_debounced,
 		AUD_XCK => AUD_XCK,
 		I2C_SCLK => FPGA_I2C_SCLK,
 		I2C_SDAT => FPGA_I2C_SDAT,
@@ -172,12 +266,23 @@ begin
 		Lout => Lout
 	);
 	
-	-- Reset Synchronizer for AUD_XCK Domain
+	-- Reset Synchronizer for AUD_XCK Domain (Asynchronous Assert, Synchronous Deassert)
+	process(AUD_XCK, rst)
+	begin
+		if rst = '1' then
+			aud_rst_reg <= '1';
+			aud_rst <= '1';
+		elsif rising_edge(AUD_XCK) then
+			aud_rst_reg <= '0';
+			aud_rst <= aud_rst_reg;
+		end if;
+	end process;
+
+	-- CDC Synchronizer for KEY(1) (Transmit trigger) to AUD_XCK domain
 	process(AUD_XCK)
 	begin
 		if rising_edge(AUD_XCK) then
-			aud_rst_reg <= not KEY(0);
-			aud_rst <= aud_rst_reg;
+			key1_sync_reg <= key1_sync_reg(0) & key1_debounced;
 		end if;
 	end process;
 
@@ -191,7 +296,7 @@ begin
 	GOERTZEL_ALIGN_FSM : process(AUD_XCK)
 	begin
 		if rising_edge(AUD_XCK) then
-			if aud_rst = '1' then
+			if rx_rst = '1' then
 				enable_d         <= '0';
 				align_armed      <= '0';
 				align_counter    <= 0;
@@ -208,11 +313,10 @@ begin
 							align_counter <= 0;
 						end if;
 					else
-						-- Hitung 640 Ldone pulse (satu durasi simbol penuh)
+						-- Hitung 358 Ldone pulse (delay penyelaras jendela)
 						if Ldone = '1' then
-							if align_counter = 639 then
-								-- 640 sample telah dilewati sejak enable naik:
-								-- Goertzel diizinkan mulai dari Ldone berikutnya
+							-- Penyelarasan presisi agar jendela integrasi Goertzel pertama jatuh di batas simbol baru
+							if align_counter = 997 then
 								goertzel_aligned <= '1';
 							else
 								align_counter <= align_counter + 1;
@@ -287,16 +391,15 @@ begin
 		batch_FRAC_BITS => 2
 	)
 	port map (
-		clk		  => AUD_XCK,
-		reset 	  => aud_rst,
-		in_valid  => Ldone, 
-		out_ready => '1',
-		-- Output port 
-		in_ready  => Aud_interface_ready,
-		out_valid => corr_out_valid,
-		-- Data interfacing
-		dataA  	  => std_logic_vector(Lin),
-		enable    => enable
+		clk		     => AUD_XCK,
+		master_reset => aud_rst,
+		reset 	     => rx_rst,
+		in_valid     => Ldone, 
+		out_ready    => '1',
+		in_ready     => Aud_interface_ready,
+		out_valid    => corr_out_valid,
+		dataA  	     => std_logic_vector(Lin),
+		enable       => enable
 	);
 	
 	-- =========================================================
@@ -309,7 +412,7 @@ begin
 	)
 	port map (
 		clk       => AUD_XCK,
-		rst       => aud_rst,
+		rst       => rx_rst,
 		in_ready  => in_ready,
 		in_valid  => goertzel_enable,
 		DTMF_sig  => std_logic_vector(Lin),
@@ -327,37 +430,23 @@ begin
 
 	DTMF_ENCODER_RX : entity work.top_dtmfencode
 	port map (
-		clk       => AUD_XCK,
-		rst       => aud_rst,
-		in_valid  => goertzel_out_valid,
-		in_ready  => encoder_in_ready,
-		corr_697  => power_697,
-		corr_770  => power_770,
-		corr_852  => power_852,
-		corr_941  => power_941,
-		corr_1209 => power_1209,
-		corr_1336 => power_1336,
-		corr_1477 => power_1477,
-		corr_1633 => power_1633,
-		out_ready => '1',
-		out_valid => out_valid,
-		sevseg    => open, -- Tidak dipakai langsung, digantikan MUX Visualisasi
-		anode     => anode,
-		encode_out => reconstructed_key_32bit,
-		dtmf_code_4bit => dtmf_code_4bit,
-		dtmf_code_valid => dtmf_code_valid
-	);
-
-	SHIFT_ADD_RX : entity work.shift_add
-	port map (
-		clk      => AUD_XCK,
-		reset    => aud_rst,
-		in_valid => dtmf_code_valid,
-		out_ready => '1',
-		in_ready => shift_add_in_ready,
-		out_valid => shift_add_out_valid,
-		input3   => dtmf_code_4bit,
-		output32 => open -- Dipetakan melalui encode_out
+		clk        => AUD_XCK,
+		rst        => rx_rst,
+		in_valid   => goertzel_out_valid,
+		in_ready   => encoder_in_ready,
+		corr_697   => power_697,
+		corr_770   => power_770,
+		corr_852   => power_852,
+		corr_941   => power_941,
+		corr_1209  => power_1209,
+		corr_1336  => power_1336,
+		corr_1477  => power_1477,
+		corr_1633  => power_1633,
+		out_ready  => '1',
+		out_valid  => out_valid,
+		sevseg     => open, -- Tidak dipakai langsung, digantikan MUX Visualisasi
+		anode      => anode,
+		encode_out => reconstructed_key_32bit
 	);
 
 	-- =========================================================
@@ -423,7 +512,18 @@ begin
 						sample_counter <= 0;
 						if start_transmission = '1' then
 							segment_counter <= (others => '0');
-							current_state <= TRANSMIT;
+							current_state <= PRE_SILENCE;
+						end if;
+
+					when PRE_SILENCE =>
+						dtmf_tone_enable <= '0';
+						if Ldone = '1' then
+							if sample_counter = SAMPLES_PRE_SILENCE - 1 then
+								sample_counter <= 0;
+								current_state <= TRANSMIT;
+							else
+								sample_counter <= sample_counter + 1;
+							end if;
 						end if;
 
 					when TRANSMIT =>
@@ -460,11 +560,11 @@ begin
 					when WAIT_FOR_PRESS =>
 						command <= '0';
 						LED <= '0';
-						if(KEY(1)='0') then 
+						if(key1_sync_reg(1)='0') then 
 							button_state <= WAIT_FOR_RELEASE;
 						end if;
 					when WAIT_FOR_RELEASE =>
-						if(KEY(1)='1') then 
+						if(key1_sync_reg(1)='1') then 
 							button_state <= RELEASE_STATE;
 						end if;
 					when RELEASE_STATE => 
@@ -479,7 +579,7 @@ begin
 	-- =========================================================
 	-- TUGAS 3: MULTIPLEXING VISUALISASI SEVEN-SEGMENT
 	-- =========================================================
-	VISUALIZATION_MUX : process(SW(0), reconstructed_key_32bit)
+	VISUALIZATION_MUX : process(SW(0), display_key)
 		-- Fungsi internal konversi HEX ke Seven-Segment (Active-Low)
 		function hex_to_sevseg(hex_in : std_logic_vector(3 downto 0)) return std_logic_vector is
 		begin
@@ -506,16 +606,16 @@ begin
 	begin
 		if SW(0) = '0' then
 			-- LSB Mode: Tampilkan 24-bit (6 digit) terbawah
-			HEX5 <= hex_to_sevseg(reconstructed_key_32bit(23 downto 20));
-			HEX4 <= hex_to_sevseg(reconstructed_key_32bit(19 downto 16));
-			HEX3 <= hex_to_sevseg(reconstructed_key_32bit(15 downto 12));
-			HEX2 <= hex_to_sevseg(reconstructed_key_32bit(11 downto 8));
-			HEX1 <= hex_to_sevseg(reconstructed_key_32bit(7 downto 4));
-			HEX0 <= hex_to_sevseg(reconstructed_key_32bit(3 downto 0));
+			HEX5 <= hex_to_sevseg(display_key(23 downto 20));
+			HEX4 <= hex_to_sevseg(display_key(19 downto 16));
+			HEX3 <= hex_to_sevseg(display_key(15 downto 12));
+			HEX2 <= hex_to_sevseg(display_key(11 downto 8));
+			HEX1 <= hex_to_sevseg(display_key(7 downto 4));
+			HEX0 <= hex_to_sevseg(display_key(3 downto 0));
 		else
 			-- MSB Mode: Tampilkan 8-bit (2 digit) teratas
-			HEX5 <= hex_to_sevseg(reconstructed_key_32bit(31 downto 28));
-			HEX4 <= hex_to_sevseg(reconstructed_key_32bit(27 downto 24));
+			HEX5 <= hex_to_sevseg(display_key(31 downto 28));
+			HEX4 <= hex_to_sevseg(display_key(27 downto 24));
 			HEX3 <= "0111111"; -- Karakter Strip '-' (Segmen G menyala)
 			HEX2 <= "0111111";
 			HEX1 <= "0111111";

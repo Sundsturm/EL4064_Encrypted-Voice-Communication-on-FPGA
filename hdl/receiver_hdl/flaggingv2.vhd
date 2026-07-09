@@ -29,15 +29,16 @@ entity flaggingv2 is
         in_FRAC_BITS : natural := 1
     );
     Port (
-        clk        : in  STD_LOGIC;
-        reset      : in  STD_LOGIC;
-        in_valid   : in  STD_LOGIC;
-        out_ready  : in  STD_LOGIC;
-        in_ready   : out STD_LOGIC;
-        out_valid  : out STD_LOGIC;
-        in_941     : in  SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
-        in_1477    : in  SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
-        onoff_mark : out STD_LOGIC   -- SR latch: '1' setelah "##" terdeteksi
+        clk          : in  STD_LOGIC;
+        master_reset : in  STD_LOGIC;
+        reset        : in  STD_LOGIC;
+        in_valid     : in  STD_LOGIC;
+        out_ready    : in  STD_LOGIC;
+        in_ready     : out STD_LOGIC;
+        out_valid    : out STD_LOGIC;
+        in_941       : in  SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
+        in_1477      : in  SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
+        onoff_mark   : out STD_LOGIC   -- SR latch: '1' setelah "##" terdeteksi
     );
 end flaggingv2;
 
@@ -87,9 +88,9 @@ begin
     -- -------------------------------------------------------------------------
     -- FSM Utama
     -- -------------------------------------------------------------------------
-    process(clk, reset)
+    process(clk, reset, master_reset)
     begin
-        if reset = '1' then
+        if master_reset = '1' then
             state        <= IDLE;
             cbuffer941   <= (others => (others => '0'));
             cbuffer1477  <= (others => (others => '0'));
@@ -105,6 +106,20 @@ begin
             new1477      <= (others => '0');
             old_941      <= (others => '0');
             old_1477     <= (others => '0');
+
+        elsif reset = '1' then
+            state        <= IDLE;
+            count_941    <= 0;
+            count_1477   <= 0;
+            detect_941   <= '0';
+            detect_1477  <= '0';
+            onoff_mark   <= '0';
+            out_valid    <= '0';
+            new941       <= (others => '0');
+            new1477      <= (others => '0');
+            old_941      <= (others => '0');
+            old_1477     <= (others => '0');
+            -- index, full, dan circular buffers TIDAK di-reset
 
         elsif rising_edge(clk) then
             case state is

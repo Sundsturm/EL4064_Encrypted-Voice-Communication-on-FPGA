@@ -13,6 +13,7 @@ entity slidingv5 is
     );
     Port (
         clk : in STD_LOGIC;
+        master_reset : in STD_LOGIC;
         reset : in STD_LOGIC;
         in_valid    : in STD_LOGIC;
         out_ready   : in STD_LOGIC;
@@ -52,9 +53,10 @@ begin
         end if;
     end process;
 
-    process(clk, reset)
+    process(clk, reset, master_reset)
     begin
-        if reset = '1' then
+        if master_reset = '1' then
+            state <= IDLE;
             cbuffer697 <= (others => (others => '0'));
             cbuffer941 <= (others => (others => '0'));
             cbuffer1477<= (others => (others => '0'));
@@ -63,6 +65,12 @@ begin
             sum697 <= (others => '0');
             sum941 <= (others => '0');
             sum1477<= (others => '0');
+        elsif reset = '1' then
+            state <= IDLE;
+            sum697 <= (others => '0');
+            sum941 <= (others => '0');
+            sum1477<= (others => '0');
+            -- index, fill_count, dan circular buffers TIDAK di-reset
         elsif rising_edge(clk) then
             state <= state;
             case state is

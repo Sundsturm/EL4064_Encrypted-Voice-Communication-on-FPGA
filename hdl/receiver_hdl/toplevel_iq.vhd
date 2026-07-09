@@ -16,7 +16,7 @@ entity toplevel_iq is
         batch_FRAC_BITS:    natural := 1
     );
     Port ( 
-        clk, reset  : in STD_LOGIC;
+        clk, master_reset, reset  : in STD_LOGIC;
         in_valid    : in STD_LOGIC;
         out_ready   : in STD_LOGIC;
         in_ready    : out STD_LOGIC;
@@ -109,15 +109,16 @@ architecture Behavioral of toplevel_iq is
             in_FRAC_BITS: natural       := 1
         );
         Port (
-            clk         : in STD_LOGIC;
-            reset       : in STD_LOGIC;
-            in_valid    : in STD_LOGIC;
-            out_ready   : in STD_LOGIC;
-            in_ready    : out STD_LOGIC;
-            out_valid   : out STD_LOGIC;
-            in_941      : in SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
-            in_1477     : in SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
-            onoff_mark  : out std_logic
+            clk          : in STD_LOGIC;
+            master_reset : in STD_LOGIC;
+            reset        : in STD_LOGIC;
+            in_valid     : in STD_LOGIC;
+            out_ready    : in STD_LOGIC;
+            in_ready     : out STD_LOGIC;
+            out_valid    : out STD_LOGIC;
+            in_941       : in SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
+            in_1477      : in SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
+            onoff_mark   : out std_logic
         );
     end component;
 
@@ -147,17 +148,19 @@ architecture Behavioral of toplevel_iq is
             out_FRAC_BITS:  natural := 1
         );
         Port (
-            clk, reset : in STD_LOGIC;
-            in_valid    : in STD_LOGIC;
-            out_ready   : in STD_LOGIC;
-            in_ready    : out STD_LOGIC;
-            out_valid   : out STD_LOGIC;
-            in_697      : in SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
-            in_941      : in SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
-            in_1477     : in SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
-            sum_697     : out SFIXED((out_INT_BITS-1) downto -out_FRAC_BITS);
-            sum_941     : out SFIXED((out_INT_BITS-1) downto -out_FRAC_BITS);
-            sum_1477    : out SFIXED((out_INT_BITS-1) downto -out_FRAC_BITS)
+            clk          : in STD_LOGIC;
+            master_reset : in STD_LOGIC;
+            reset        : in STD_LOGIC;
+            in_valid     : in STD_LOGIC;
+            out_ready    : in STD_LOGIC;
+            in_ready     : out STD_LOGIC;
+            out_valid    : out STD_LOGIC;
+            in_697       : in SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
+            in_941       : in SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
+            in_1477      : in SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
+            sum_697      : out SFIXED((out_INT_BITS-1) downto -out_FRAC_BITS);
+            sum_941      : out SFIXED((out_INT_BITS-1) downto -out_FRAC_BITS);
+            sum_1477     : out SFIXED((out_INT_BITS-1) downto -out_FRAC_BITS)
         );
     end component;
 
@@ -288,15 +291,16 @@ begin
             in_FRAC_BITS    => 1
         )
         port map(
-            clk         => clk,
-            reset       => reset,
-            in_valid    => flag_invalid, 
-            out_ready   => flag_outready,
-            in_ready    => flag_inready,
-            out_valid   => flag_outvalid,
-            in_941      => sum941,
-            in_1477     => sum1477,
-            onoff_mark  => mark_onoff
+            clk          => clk,
+            master_reset => master_reset,
+            reset        => reset,
+            in_valid     => flag_invalid, 
+            out_ready    => flag_outready,
+            in_ready     => flag_inready,
+            out_valid    => flag_outvalid,
+            in_941       => sum941,
+            in_1477      => sum1477,
+            onoff_mark   => mark_onoff
         );
 
     mark_unit   : component markingv1
@@ -324,18 +328,19 @@ begin
             out_FRAC_BITS   => 1
         )
         port map(
-            clk         => clk,
-            reset       => reset,
-            in_valid    => v2v3,
-            out_ready   => r2r4,
-            in_ready    => r2r3,
-            out_valid   => v2v4,
-            in_697      => power_697,
-            in_941      => power_941,
-            in_1477     => power_1477,
-            sum_697     => sum697,
-            sum_941     => sum941,
-            sum_1477    => sum1477
+            clk          => clk,
+            master_reset => master_reset,
+            reset        => reset,
+            in_valid     => v2v3,
+            out_ready    => r2r4,
+            in_ready     => r2r3,
+            out_valid    => v2v4,
+            in_697       => power_697,
+            in_941       => power_941,
+            in_1477      => power_1477,
+            sum_697      => sum697,
+            sum_941      => sum941,
+            sum_1477     => sum1477
         );
 
     powercalc : component powercalcv1
