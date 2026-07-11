@@ -38,15 +38,6 @@ architecture Behavioral of top_dtmfencode is
     signal codelow, codehigh                        : STD_LOGIC_VECTOR(2 downto 0);    
     signal code_dtmf                                : STD_LOGIC_VECTOR(3 downto 0);  
     signal tone_valid                               : STD_LOGIC;
-    signal framed_key                               : STD_LOGIC_VECTOR(31 downto 0) := (others => '0');
-    signal payload_shift                            : STD_LOGIC_VECTOR(31 downto 0) := (others => '0');
-    signal frame_done                               : STD_LOGIC := '0';
-    signal payload_count                            : integer range 0 to 8 := 0;
-    type frame_state_type is (WAIT_HASH, GOT_HASH, GOT_HASH_HASH, GOT_HASH_THREE, COLLECT_PAYLOAD);
-    signal frame_state                              : frame_state_type := WAIT_HASH;
-    -- Robust FSM Timeout
-    signal frame_timeout                            : integer range 0 to 8388607 := 0;
-    constant FRAME_TIMEOUT_LIMIT                    : integer := 5529600; -- 300 ms @ 18.432 MHz
     -- Componen Declarations
     component lowcomparator is
         Port (
@@ -110,87 +101,20 @@ begin
     dtmf_code_4bit <= code_dtmf;
     tone_valid <= '1' when (v2v3 = '1' and codelow /= "000" and codehigh /= "000") else '0';
     dtmf_code_valid <= tone_valid;
-    encode_out <= framed_key;
-    out_valid <= frame_done;
     r2r1 <= '1';
 
-    FRAME_COLLECTOR : process(clk, rst)
-        variable next_payload : STD_LOGIC_VECTOR(31 downto 0);
-    begin
-        if rst = '1' then
-            framed_key    <= (others => '0');
-            payload_shift <= (others => '0');
-            payload_count <= 0;
-            frame_state   <= WAIT_HASH;
-            frame_done    <= '0';
-            frame_timeout <= 0;
-        elsif rising_edge(clk) then
-            frame_done <= '0';
-            
-            if tone_valid = '1' then
-                frame_timeout <= 0; -- Reset timeout on any valid tone
-                case frame_state is
-                    when WAIT_HASH =>
-                        if code_dtmf = x"F" then
-                            frame_state <= GOT_HASH;
-                        end if;
-
-                    when GOT_HASH =>
-                        if code_dtmf = x"F" then
-                            frame_state <= GOT_HASH_HASH;
-                        elsif code_dtmf = x"3" then
-                            frame_state <= GOT_HASH_THREE;
-                        else
-                            frame_state <= WAIT_HASH;
-                        end if;
-
-                    when GOT_HASH_HASH =>
-                        if code_dtmf = x"3" then
-                            frame_state <= GOT_HASH_THREE;
-                        elsif code_dtmf = x"F" then
-                            frame_state <= GOT_HASH_HASH;
-                        else
-                            frame_state <= WAIT_HASH;
-                        end if;
-
-                    when GOT_HASH_THREE =>
-                        if code_dtmf = x"F" then
-                            payload_shift <= (others => '0');
-                            payload_count <= 0;
-                            frame_state <= COLLECT_PAYLOAD;
-                        else
-                            frame_state <= WAIT_HASH;
-                        end if;
-
-                    when COLLECT_PAYLOAD =>
-                        next_payload := payload_shift(27 downto 0) & code_dtmf;
-                        payload_shift <= next_payload;
-                        if payload_count = 7 then
-                            framed_key    <= next_payload;
-                            frame_done    <= '1';
-                            payload_count <= 0;
-                            frame_state   <= WAIT_HASH;
-                        else
-                            payload_count <= payload_count + 1;
-                        end if;
-                    when others =>
-                        frame_state <= WAIT_HASH;
-                end case;
-            else
-                -- Increment timeout if FSM is active (not in WAIT_HASH)
-                if frame_state /= WAIT_HASH then
-                    if frame_timeout >= FRAME_TIMEOUT_LIMIT then
-                        frame_state   <= WAIT_HASH;
-                        payload_count <= 0;
-                        payload_shift <= (others => '0');
-                        frame_timeout <= 0;
-                    else
-                        frame_timeout <= frame_timeout + 1;
-                    end if;
-                end if;
-            end if;
-        end if;
-    end process;
+    -- Direct instantiation of shift_add gated by enable
+    shift_add_rx_inst : component shift_add
+        port map(
+            clk       => clk,
+            reset     => rst or (not enable),
+            in_valid  => tone_valid and enable,
+            out_ready => '1',
+            in_ready  => open,
+            out_valid => out_valid,
+            input3    => code_dtmf,
+            output32  => encode_out
+        );
     -- Instance of comparator for frequency 697 and 770 Hz
     comp_low : component lowcomparator
         port map(

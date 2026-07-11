@@ -15,6 +15,7 @@ entity Goertzel is
     port (
         clk : in std_logic;
         rst : in std_logic;
+        sync_reset : in std_logic := '0';
 
         -- Input bus signals
         in_ready : buffer std_logic;
@@ -163,8 +164,25 @@ begin
             x_min_Q2 <= (others => '0');
 
         elsif rising_edge(clk) then 
-            case state is
-                WHEN IDLE => 
+            if sync_reset = '1' then
+                in_ready <= '0';
+                out_valid <= '0';
+                state <= IDLE;
+                counter <= 0;
+                Q0_reg <= (others => '0');
+                Q1_reg <= (others => '0');
+                Q2_reg <= (others => '0');
+                Q1_squared  <= (others => '0');
+                Q2_squared  <= (others => '0');
+                coeff_Q1_Q2 <= (others => '0'); 
+                Q1_squared_plus_Q2_squared <= (others => '0');
+                power_fix   <= (others => '0');
+                DTMF_sampled <= (others => '0');
+                coeff_Q1 <= (others => '0');
+                x_min_Q2 <= (others => '0');
+            else
+                case state is
+                    WHEN IDLE => 
                     in_ready <= '1';
                     if in_ready = '1' and in_valid = '1' then 
                         state <= COMPUTE_FILTER_1;
@@ -249,6 +267,7 @@ begin
                         x_min_Q2 <= (others => '0');
                     end if;
             end case;
+        end if;
         end if;  
     end process;
 

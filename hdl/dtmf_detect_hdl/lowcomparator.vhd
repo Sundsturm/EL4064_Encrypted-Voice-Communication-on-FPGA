@@ -25,8 +25,7 @@ architecture Behavioral of lowcomparator is
     
     -- Ambang batas daya (Power Threshold)
     -- Jika nilai daya tertinggi masih di bawah nilai ini, ia akan dianggap sebagai NOISE / SILENCE.
-    -- Nilai x"01000" ini mungkin perlu Anda 'tuning' (besarkan/kecilkan) tergantung gain dari Goertzel.
-    constant THRESHOLD : STD_LOGIC_VECTOR(16 downto 0) := "00000100100000000"; -- x"003E8"
+    constant THRESHOLD : STD_LOGIC_VECTOR(16 downto 0) := "00000011001000000"; -- 800
 
 begin
     process(state)

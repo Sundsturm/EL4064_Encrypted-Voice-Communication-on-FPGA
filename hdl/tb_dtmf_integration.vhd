@@ -287,4 +287,68 @@ begin
         std.env.finish;
     end process;
 
+    -- =========================================================================
+    -- 5) Real-Time receiver monitoring process
+    -- =========================================================================
+    MONITOR_PROC : process
+        function dtmf_to_char(code : std_logic_vector(3 downto 0)) return character is
+        begin
+            case code is
+                when x"0" => return '0';
+                when x"1" => return '1';
+                when x"2" => return '2';
+                when x"3" => return '3';
+                when x"4" => return '4';
+                when x"5" => return '5';
+                when x"6" => return '6';
+                when x"7" => return '7';
+                when x"8" => return '8';
+                when x"9" => return '9';
+                when x"A" => return 'A';
+                when x"B" => return 'B';
+                when x"C" => return 'C';
+                when x"D" => return 'D';
+                when x"E" => return '*';
+                when x"F" => return '#';
+                when others => return '?';
+            end case;
+        end function;
+
+        -- Probes
+        alias mon_enable_raw : std_logic is << signal DUT.enable_raw : std_logic >>;
+        alias mon_enable     : std_logic is << signal DUT.enable : std_logic >>;
+        alias mon_sync_reset : std_logic is << signal DUT.sync_reset : std_logic >>;
+        alias mon_code_valid : std_logic is << signal DUT.dtmf_code_valid : std_logic >>;
+        alias mon_code_4bit  : std_logic_vector(3 downto 0) is << signal DUT.dtmf_code_4bit : std_logic_vector(3 downto 0) >>;
+        alias mon_key_32bit  : std_logic_vector(31 downto 0) is << signal DUT.DTMF_ENCODER_RX.shift_add_rx_inst.temp_sig : std_logic_vector(31 downto 0) >>;
+        
+        variable prev_enable_raw : std_logic := '0';
+    begin
+        report "[MONITOR] Receiver monitoring initialized." severity note;
+        loop
+            wait on mon_enable_raw, mon_sync_reset, mon_code_valid;
+            
+            -- Detect and report enable_raw transition
+            if mon_enable_raw /= prev_enable_raw then
+                if mon_enable_raw = '1' then
+                    report "[MONITOR] IQ Correlator: Preamble detected! enable_raw -> '1'" severity note;
+                else
+                    report "[MONITOR] IQ Correlator: Session reset (timeout)! enable_raw -> '0'" severity note;
+                end if;
+                prev_enable_raw := mon_enable_raw;
+            end if;
+            
+            -- Detect sync_reset pulse
+            if rising_edge(mon_sync_reset) then
+                report "[MONITOR] Phase-Alignment: Goertzel block boundaries reset synchronized!" severity note;
+            end if;
+            
+            -- Detect valid tone decode
+            if rising_edge(mon_code_valid) then
+                report "[MONITOR] Decoded Digit: '" & dtmf_to_char(mon_code_4bit) & 
+                       "' (0x" & to_hstring(mon_code_4bit) & ") | Current Key: 0x" & to_hstring(mon_key_32bit) severity note;
+            end if;
+        end loop;
+    end process;
+
 end architecture;

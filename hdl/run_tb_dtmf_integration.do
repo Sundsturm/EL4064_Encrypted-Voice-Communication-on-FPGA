@@ -71,8 +71,7 @@ if {[catch {vsim -quiet -voptargs="+acc" -t 1ps -lib work work.tb_dtmf_integrati
 # --- Setup Waveform Window ---
 view wave
 
-add wave -noupdate -divider "System Clock & Reset"
-add wave -noupdate -color Yellow sim:/tb_dtmf_integration/CLOCK_50
+add wave -noupdate -divider "Control Signals"
 add wave -noupdate -color Orange sim:/tb_dtmf_integration/KEY
 add wave -noupdate -color Violet sim:/tb_dtmf_integration/UART_RXD
 
@@ -83,26 +82,16 @@ add wave -noupdate -color Cyan sim:/tb_dtmf_integration/DUT/segment_counter
 
 add wave -noupdate -divider "DTMF Transmitter Audio Path"
 add wave -noupdate -color Red   -format analog-step -radix decimal -height 60 -max 32767 -min -32768 sim:/tb_dtmf_integration/DUT/dtmf_lout
-add wave -noupdate -color Red   sim:/tb_dtmf_integration/AUD_DACDAT
-add wave -noupdate -color Blue  sim:/tb_dtmf_integration/AUD_ADCDAT
 add wave -noupdate -color Green -format analog-step -radix decimal -height 60 -max 32767 -min -32768 sim:/tb_dtmf_integration/DUT/Lin
 
 add wave -noupdate -divider "Receiver Outputs"
 add wave -noupdate -radix binary sim:/tb_dtmf_integration/DUT/dtmf_code_4bit
 add wave -noupdate                sim:/tb_dtmf_integration/DUT/dtmf_code_valid
-add wave -noupdate                sim:/tb_dtmf_integration/DUT/DTMF_ENCODER_RX/tone_valid
-add wave -noupdate                sim:/tb_dtmf_integration/DUT/DTMF_ENCODER_RX/frame_state
-add wave -noupdate                sim:/tb_dtmf_integration/DUT/DTMF_ENCODER_RX/frame_done
+add wave -noupdate                sim:/tb_dtmf_integration/DUT/enable
+add wave -noupdate                sim:/tb_dtmf_integration/DUT/sync_reset
+add wave -noupdate -radix decimal sim:/tb_dtmf_integration/DUT/DTMF_ENCODER_RX/shift_add_rx_inst/counter
+add wave -noupdate -color Cyan -radix hex sim:/tb_dtmf_integration/DUT/DTMF_ENCODER_RX/shift_add_rx_inst/temp_sig
 add wave -noupdate -radix hex     sim:/tb_dtmf_integration/DUT/reconstructed_key_32bit
-add wave -noupdate -radix hex     sim:/tb_dtmf_integration/probe_key
-
-add wave -noupdate -divider "HEX Display Outputs"
-add wave -noupdate -radix hex sim:/tb_dtmf_integration/HEX5
-add wave -noupdate -radix hex sim:/tb_dtmf_integration/HEX4
-add wave -noupdate -radix hex sim:/tb_dtmf_integration/HEX3
-add wave -noupdate -radix hex sim:/tb_dtmf_integration/HEX2
-add wave -noupdate -radix hex sim:/tb_dtmf_integration/HEX1
-add wave -noupdate -radix hex sim:/tb_dtmf_integration/HEX0
 
 # Testbench owns the bounded wait and calls std.env.finish.
 run -all

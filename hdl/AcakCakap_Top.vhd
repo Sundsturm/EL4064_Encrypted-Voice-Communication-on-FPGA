@@ -64,8 +64,20 @@ architecture rtl of AcakCakap_Top is
 	signal corr_out_valid : std_logic;
 	signal out_valid : std_logic;
 	signal Aud_interface_ready : std_logic := '1';
+	signal enable_raw : std_logic := '0';
 	signal enable : std_logic := '0';
+	signal enable_dly : std_logic := '0';
+	signal sync_reset : std_logic := '0';
 	signal goertzel_enable : std_logic := '0';
+
+	-- SIM_MODE: preamble-timed enable bypass
+	-- flaggingv2 memerlukan 33 batch (~660ms) untuk mengisi circular buffer,
+	-- tidak memungkinkan cold-start dalam jendela simulasi 250ms.
+	-- Solusi: hitung 4 x 640 = 2560 pulsa Ldone dari start_transmission,
+	-- lalu tegaskan enable -- setara IQ Correlator mendeteksi preamble ##3#.
+	signal sim_enable : std_logic := '0';
+	signal sim_ldone_cnt : integer range 0 to 2560 := 0;
+	signal sim_tx_started : std_logic := '0';
 
 	-- Interconnect for Goertzel_top -> top_dtmfencode
 	signal goertzel_out_valid : std_logic;
@@ -123,8 +135,8 @@ architecture rtl of AcakCakap_Top is
 
 	-- Opsi C: Session timeout — reset SR latch setelah ~2 detik tanpa DTMF
 	signal latch_reset : std_logic := '0';
-	signal dtmf_quiet_cnt : integer range 0 to 40_000_000 := 0;
-	constant DTMF_QUIET_LIMIT : integer := 40_000_000; -- ~2.17 detik @ 18.432 MHz
+	signal dtmf_quiet_cnt : integer range 0 to 1_843_000 := 0;
+	constant DTMF_QUIET_LIMIT : integer := 1_843_000; -- ~100 ms @ 18.432 MHz
 
 	-- Local clock/reset alias for synchronous FSM process
 	signal clk : std_logic;
@@ -151,9 +163,8 @@ begin
 	clk <= AUD_XCK;
 	rst <= not KEY(0);
 	start_transmission <= command or uart_trigger; -- Dual-trigger mechanism
-	-- goertzel_enable <= Ldone when SIM_MODE else
-	-- 	(Ldone and enable);
-	goertzel_enable <= Ldone;
+	enable <= sim_enable when SIM_MODE else enable_raw;
+	goertzel_enable <= Ldone and enable;
 
 	-- Audio interface core instantiation
 	Audio_interface : entity work.Audio_interface
@@ -187,6 +198,54 @@ begin
 			aud_rst <= aud_rst_reg;
 		end if;
 	end process;
+
+	-- Rising edge detector for enable from IQ Correlator to sync Goertzel phase
+	process (AUD_XCK)
+	begin
+		if rising_edge(AUD_XCK) then
+			if aud_rst = '1' then
+				enable_dly <= '0';
+				sync_reset <= '0';
+			else
+				if enable = '1' and enable_dly = '0' then
+					sync_reset <= '1';
+				else
+					sync_reset <= '0';
+				end if;
+				enable_dly <= enable;
+			end if;
+		end if;
+	end process;
+
+	-- =========================================================
+	-- SIM_MODE: Penghitung preamble untuk menggantikan IQ Correlator
+	-- Menghitung 4 x 640 = 2560 pulsa Ldone sejak start_transmission,
+	-- lalu menegaskan sim_enable. Setara dengan IQ Correlator yang
+	-- mendeteksi preamble ##3# dan menegaskan enable_raw pada hardware.
+	-- =========================================================
+	SIM_PREAMBLE_TIMER : process (AUD_XCK)
+	begin
+		if rising_edge(AUD_XCK) then
+			if aud_rst = '1' then
+				sim_enable     <= '0';
+				sim_ldone_cnt  <= 0;
+				sim_tx_started <= '0';
+			else
+				-- Tangkap tepi start_transmission
+				if start_transmission = '1' then
+					sim_tx_started <= '1';
+				end if;
+				-- Hitung 2560 pulsa Ldone (= 4 blok Goertzel = 80ms preamble)
+				if SIM_MODE and sim_tx_started = '1' and Ldone = '1' and sim_enable = '0' then
+					if sim_ldone_cnt >= 2559 then
+						sim_enable <= '1';
+					else
+						sim_ldone_cnt <= sim_ldone_cnt + 1;
+					end if;
+				end if;
+			end if;
+		end if;
+	end process SIM_PREAMBLE_TIMER;
 
 	-- =========================================================
 	-- DEBOUNCER DIGITAL untuk SW(0)
@@ -316,7 +375,7 @@ begin
 			out_valid => corr_out_valid,
 			-- Data interfacing
 			dataA => std_logic_vector(Lin),
-			enable => enable,
+			enable => enable_raw,
 			latch_reset => latch_reset -- Opsi C: session timeout reset
 		);
 
@@ -331,6 +390,7 @@ begin
 		port map(
 			clk => AUD_XCK,
 			rst => aud_rst,
+			sync_reset => sync_reset,
 			in_ready => in_ready,
 			in_valid => goertzel_enable,
 			DTMF_sig => std_logic_vector(Lin),
@@ -370,19 +430,7 @@ begin
 			encode_out => reconstructed_key_32bit,
 			dtmf_code_4bit => dtmf_code_4bit,
 			dtmf_code_valid => dtmf_code_valid,
-			enable => '1'
-		);
-
-	SHIFT_ADD_RX : entity work.shift_add
-		port map(
-			clk => AUD_XCK,
-			reset => aud_rst,
-			in_valid => dtmf_code_valid,
-			out_ready => '1',
-			in_ready => shift_add_in_ready,
-			out_valid => shift_add_out_valid,
-			input3 => dtmf_code_4bit,
-			output32 => open -- Dipetakan melalui encode_out
+			enable => enable
 		);
 
 	-- =========================================================

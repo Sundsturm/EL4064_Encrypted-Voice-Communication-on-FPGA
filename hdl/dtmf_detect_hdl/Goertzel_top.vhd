@@ -14,6 +14,7 @@ entity Goertzel_top is
     port (
         clk : in std_logic;
         rst : in std_logic;
+        sync_reset : in std_logic := '0';
         
         -- Input bus signals
         in_ready : out std_logic;  -- This is an output because we tell upstream when we're ready
@@ -69,6 +70,7 @@ begin
     port map (
         clk => clk,
         rst => rst,
+        sync_reset => sync_reset,
         in_valid => in_valid,
         DTMF_sig => DTMF_sig,
         out_ready => out_ready,
@@ -86,6 +88,7 @@ begin
     port map (
         clk => clk,
         rst => rst,
+        sync_reset => sync_reset,
         in_valid => in_valid,
         DTMF_sig => DTMF_sig,
         out_ready => out_ready,
@@ -103,6 +106,7 @@ begin
     port map (
         clk => clk,
         rst => rst,
+        sync_reset => sync_reset,
         in_valid => in_valid,
         DTMF_sig => DTMF_sig,
         out_ready => out_ready,
@@ -120,6 +124,7 @@ begin
     port map (
         clk => clk,
         rst => rst,
+        sync_reset => sync_reset,
         in_valid => in_valid,
         DTMF_sig => DTMF_sig,
         out_ready => out_ready,
@@ -137,6 +142,7 @@ begin
     port map (
         clk => clk,
         rst => rst,
+        sync_reset => sync_reset,
         in_valid => in_valid,
         DTMF_sig => DTMF_sig,
         out_ready => out_ready,
@@ -154,6 +160,7 @@ begin
     port map (
         clk => clk,
         rst => rst,
+        sync_reset => sync_reset,
         in_valid => in_valid,
         DTMF_sig => DTMF_sig,
         out_ready => out_ready,
@@ -171,6 +178,7 @@ begin
     port map (
         clk => clk,
         rst => rst,
+        sync_reset => sync_reset,
         in_valid => in_valid,
         DTMF_sig => DTMF_sig,
         out_ready => out_ready,
@@ -188,6 +196,7 @@ begin
     port map (
         clk => clk,
         rst => rst,
+        sync_reset => sync_reset,
         in_valid => in_valid,
         DTMF_sig => DTMF_sig,
         out_ready => out_ready,
