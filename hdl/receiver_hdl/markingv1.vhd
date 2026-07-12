@@ -95,52 +95,38 @@ begin
             curr_1477     <= (others => '0');
 
         elsif rising_edge(clk) then
-            case state is
+            if latch_reset = '1' then
+                enable_i <= '0';
+                state    <= IDLE;
+            else
+                case state is
 
-                -- ===========================================================
-                -- IDLE: Tunggu data baru dari dec_control (hanya aktif setelah
-                --       flagging mengaktifkan marking via mark_enable='1')
-                -- ===========================================================
-                when IDLE =>
-                    out_valid <= '0';
-                    if in_valid = '1' then
-                        -- Capture nilai batch saat ini untuk diproses di COMPUTE
-                        curr_697  <= in_697;
-                        curr_941  <= in_941;
-                        curr_1477 <= in_1477;
-                        state <= COMPUTE;
-                    end if;
-
-                -- ===========================================================
-                -- COMPUTE: Terapkan dua kondisi sekuensial (ref MATLAB marking.m)
-                --
-                -- Jika enable_i sudah '1' (sudah pernah deteksi), skip logika
-                -- agar tidak ada false re-trigger.
-                -- ===========================================================
-                when COMPUTE =>
-                    if enable_i = '0' then
-
-                        -- KONDISI 1: Apakah 697 Hz sedang naik?
-                        if curr_697 > prev_697 then
-
-                            -- KONDISI 2 (guard): Apakah 697 Hz dominan di atas
-                            -- 941 Hz, DAN 1477 Hz juga di atas 941 Hz?
-                            -- (Memastikan ini benar-benar DTMF "3", bukan noise)
-                            if curr_697 > curr_941 and curr_1477 > curr_941 then
-                                enable_i <= '1';  -- SR latch: aktif
-                            end if;
-
+                    -- ===========================================================
+                    -- IDLE: Tunggu data baru dari dec_control (hanya aktif setelah
+                    --       flagging mengaktifkan marking via mark_enable='1')
+                    -- ===========================================================
+                    when IDLE =>
+                        out_valid <= '0';
+                        if in_valid = '1' then
+                            -- Capture nilai batch saat ini untuk diproses di COMPUTE
+                            curr_697  <= in_697;
+                            curr_941  <= in_941;
+                            curr_1477 <= in_1477;
+                            state <= COMPUTE;
                         end if;
-                    end if;
 
-                    -- -----------------------------------------------------------
-                    -- Opsi C: Reset enable_i via sinyal eksternal
-                    -- Dikendalikan oleh session timeout counter di top-level.
-                    -- -----------------------------------------------------------
-                    if latch_reset = '1' then
-                        enable_i <= '0';
-                    end if;
-
+                    -- ===========================================================
+                    -- COMPUTE: Deteksi aktif langsung (bypass dua kondisi nada '3')
+                    --
+                    -- Karena penyaringan preamble kini dilakukan secara digital oleh
+                    -- FSM Preamble Filter di AcakCakap_Top, modul ini cukup bertindak
+                    -- sebagai fast-trigger: begitu flaggingv2 menegaskan mark_enable,
+                    -- enable langsung diaktifkan tanpa perlu analisis rasio daya nada.
+                    -- ===========================================================
+                    when COMPUTE =>
+                        if enable_i = '0' then
+                            enable_i <= '1';  -- Fast-trigger: aktif segera
+                        end if;
 
 
                     -- Update prev_697 untuk perbandingan batch berikutnya
@@ -161,6 +147,7 @@ begin
 
             end case;
         end if;
+    end if;
     end process;
 
 end Behavioral;

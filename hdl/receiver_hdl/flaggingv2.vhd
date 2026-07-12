@@ -14,7 +14,7 @@ use ieee_proposed.fixed_pkg.all;
 --   jika curr >= 3 * prev_32_batch_lalu. Jika salah satu gagal, hanya counter
 --   yang gagal yang di-reset (tidak keduanya).
 --
---   Setelah count_941 >= 5 DAN count_1477 >= 5 (masing-masing independen),
+--   Setelah count_941 >= 2 DAN count_1477 >= 2 (masing-masing independen),
 --   onoff_mark di-assert '1' secara permanen untuk mengaktifkan modul marking.
 --
 -- Buffer:
@@ -108,7 +108,15 @@ begin
             old_1477     <= (others => '0');
 
         elsif rising_edge(clk) then
-            case state is
+            if latch_reset = '1' then
+                onoff_mark  <= '0';
+                detect_941  <= '0';
+                detect_1477 <= '0';
+                count_941   <= 0;
+                count_1477  <= 0;
+                state       <= IDLE;
+            else
+                case state is
 
                 -- ===========================================================
                 -- IDLE: Tunggu data baru, ambil nilai sekarang dan nilai
@@ -135,9 +143,8 @@ begin
                 -- berikutnya. Oleh karena itu:
                 --   - count naik dari 0 ke 1 pada siklus ini
                 --   - pada siklus berikutnya count = 1, dsb.
-                --   - Threshold detect: count >= 4 (setara MATLAB count >= 5
-                --     setelah increment, karena RTL memeriksa nilai SEBELUM
-                --     increment efektif)
+                --   - Threshold detect: count >= 2 (diturunkan dari 4 untuk
+                --     deteksi cepat pada sinyal hardware lemah / gain rendah)
                 -- ===========================================================
                 when COMPUTE =>
                     out_valid <= '0';
@@ -166,12 +173,12 @@ begin
                         end if;
 
                         -- --- SR latch per frekuensi ---
-                        -- Threshold >= 4 di RTL setara >= 5 di MATLAB
-                        -- (kompensasi 1-cycle delay clocked logic)
-                        if count_941 >= 4 then
+                        -- Threshold diturunkan ke >= 2 (dari >= 4) untuk
+                        -- deteksi cepat pada sinyal hardware dengan gain rendah
+                        if count_941 >= 2 then
                             detect_941 <= '1';
                         end if;
-                        if count_1477 >= 4 then
+                        if count_1477 >= 2 then
                             detect_1477 <= '1';
                         end if;
 
@@ -180,19 +187,6 @@ begin
                             onoff_mark <= '1';
                         end if;
 
-                        -- -------------------------------------------------------
-                        -- Opsi C: Reset SR latch via sinyal eksternal
-                        -- Dikendalikan oleh session timeout counter di top-level.
-                        -- Hanya me-reset saat tidak ada DTMF terdeteksi selama
-                        -- DTMF_QUIET_LIMIT siklus (~2 detik @ 18.432 MHz).
-                        -- -------------------------------------------------------
-                        if latch_reset = '1' then
-                            onoff_mark  <= '0';
-                            detect_941  <= '0';
-                            detect_1477 <= '0';
-                            count_941   <= 0;
-                            count_1477  <= 0;
-                        end if;
 
 
 
@@ -228,6 +222,7 @@ begin
 
             end case;
         end if;
+    end if;
     end process;
 
 end Behavioral;

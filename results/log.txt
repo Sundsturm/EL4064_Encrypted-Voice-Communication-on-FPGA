@@ -6,30 +6,40 @@ Membaca file RX: D:\Users\Rafi Ananta Alden\Documents\Kuliah\Semester 8\EL4064\E
 
 No.  | TX Key     | RX Key     | Key Match  | Sym Errors | Bit Errors | Frame Loss
 ----------------------------------------------------------------------------------
-1    | 2A593EDA   | FF3F2A53   | MISMATCH   | 8          | 14         | -         
-2    | D262428F   | EDAF3F22   | MISMATCH   | 8          | 22         | -         
-3    | 98F7DF29   | 428FF3F9   | MISMATCH   | 7          | 15         | -         
-4    | A3DCE107   | 87D93FAD   | MISMATCH   | 7          | 14         | -         
-5    | E444511E   | CE107F3F   | MISMATCH   | 8          | 12         | -         
-6    | F07C613C   | E4451FFF   | MISMATCH   | 8          | 16         | -         
-7    | 2D6D31C9   | 0761FF3F   | MISMATCH   | 7          | 16         | -         
-8    | DB309B5A   | 2D6319F3   | MISMATCH   | 8          | 16         | -         
-9    | 3DE6BA71   | B09B5AF3   | MISMATCH   | 7          | 15         | -         
-10   | FA990260   | FE6AFF3F   | MISMATCH   | 7          | 20         | -         
+1    | 9CDE363B   | F9DEE63B   | MISMATCH   | 3          | 7          | -         
+2    | 9C60BD2F   | 9C60BD2F   | OK         | 0          | 0          | -         
+3    | E689AC94   | E689AC94   | OK         | 0          | 0          | -         
+4    | CB23CCF3   | FCB23CF3   | MISMATCH   | 5          | 12         | -         
+5    | 0E43F588   | 0E43F588   | OK         | 0          | 0          | -         
+6    | 8128753C   | F112743A   | MISMATCH   | 5          | 10         | -         
+7    | 98B19A18   | 98B19A18   | OK         | 0          | 0          | -         
+8    | 73846347   | 73846347   | OK         | 0          | 0          | -         
+9    | FC03C41F   | 3FFC0341   | MISMATCH   | 8          | 22         | -         
+10   | 601683B9   | 621683B9   | MISMATCH   | 1          | 1          | -         
+11   | 61E6F899   | 64146899   | MISMATCH   | 4          | 9          | -         
+12   | E0B6AC34   | F0B6AC34   | MISMATCH   | 1          | 1          | -         
+13   | 5013F4ED   | 5013F4ED   | OK         | 0          | 0          | -         
+14   | EA1C9C37   | EA1C9C37   | OK         | 0          | 0          | -         
+15   | 3889501E   | 3888521E   | MISMATCH   | 2          | 2          | -         
+16   | A4672E53   | A4641243   | MISMATCH   | 4          | 7          | -         
+17   | 614C9D01   | 614C9D01   | OK         | 0          | 0          | -         
+18   | 85CCC033   | F85CC033   | MISMATCH   | 3          | 8          | -         
+19   | D7BD8D3B   | FD7B8D3B   | MISMATCH   | 4          | 7          | -         
+20   | 04777EC0   | 0477EEC0   | MISMATCH   | 1          | 2          | -         
 ----------------------------------------------------------------------------------
 
 ================== RINGKASAN METRIK PERFORMA ==================
-Total Kunci/Word yang Diuji : 10
-Kunci Salah (Word Errors)   : 10 paket
-Word Error Rate (WER)       : 100.00 %
+Total Kunci/Word yang Diuji : 20
+Kunci Salah (Word Errors)   : 12 paket
+Word Error Rate (WER)       : 60.00 %
 -----------------------------------------------
-Total Simbol/Digit Diuji    : 80 digit
-Simbol Salah (Sym Errors)   : 75 digit
-Symbol Error Rate (SER)     : 93.75 %
+Total Simbol/Digit Diuji    : 160 digit
+Simbol Salah (Sym Errors)   : 41 digit
+Symbol Error Rate (SER)     : 25.62 %
 -----------------------------------------------
-Total Bit Data Diuji        : 320 bit
-Bit Salah (Bit Errors)      : 160 bit
-Bit Error Rate (BER)        : 50.00 %
+Total Bit Data Diuji        : 640 bit
+Bit Salah (Bit Errors)      : 88 bit
+Bit Error Rate (BER)        : 13.75 %
 -----------------------------------------------
 Total Frame Loss (Hold-over): 0 paket
 Frame Loss Rate             : 0.00 %

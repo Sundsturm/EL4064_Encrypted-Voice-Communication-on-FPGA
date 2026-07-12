@@ -35,7 +35,7 @@ begin
             -- Reset all signals
             temp_sig <= (others => '0');
             counter <= 0;
-            output32 <= (others => '0');
+            -- output32 dipertahankan (tidak di-reset) agar tampilan persisten
         elsif rising_edge(clk) then
             state <= state;
             case state is
@@ -54,13 +54,13 @@ begin
                     state <= STORE;
 
                 when STORE =>
-                    -- If input3(3) = '0', do nothing, just wait
                     out_valid <= '1';
+                    -- Perbarui output32 setiap kali ada digit baru yang digeser
+                    output32 <= temp_sig;
+                    
                     if counter < 8 then
                         counter <= counter;
                     else
-                        -- Output the temp_sig when counter is 8 or more
-                        output32 <= temp_sig;
                         counter <= 0;
                     end if;
                     if out_ready = '1' then

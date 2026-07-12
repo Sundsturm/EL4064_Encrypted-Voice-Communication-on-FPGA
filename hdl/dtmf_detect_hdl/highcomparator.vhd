@@ -24,7 +24,7 @@ architecture Behavioral of highcomparator is
     
     -- Ambang batas daya (Power Threshold)
     -- Jika nilai daya tertinggi masih di bawah nilai ini, ia akan dianggap sebagai NOISE / SILENCE.
-    constant THRESHOLD : STD_LOGIC_VECTOR(16 downto 0) := "00000011001000000"; -- 800
+    constant THRESHOLD : STD_LOGIC_VECTOR(16 downto 0) := "00000000110010000"; -- 200
 
 begin
     process(state)
