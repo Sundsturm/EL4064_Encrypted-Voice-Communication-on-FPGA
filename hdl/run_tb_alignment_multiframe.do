@@ -48,7 +48,7 @@ vcom -2008 -work work receiver_hdl/markingv1.vhd
 vcom -2008 -work work receiver_hdl/Framingv2.vhd
 vcom -2008 -work work receiver_hdl/flaggingv2.vhd
 vcom -2008 -work work receiver_hdl/dec_control.vhd
-vcom -2008 -work work receiver_hdl/toplevel_iq.vhd
+vcom -2008 -work work receiver_hdl/toplevel_iq_fpga.vhd
 
 vcom -2008 -work work dtmf_detect_hdl/shift_add.vhd
 vcom -2008 -work work dtmf_detect_hdl/Goertzel.vhd
@@ -84,11 +84,8 @@ add wave -noupdate -color Red    sim:/tb_alignment_multiframe/DUT/goertzel_enabl
 
 # --- Frame Synchronization & DTMF decode ---
 add wave -noupdate -divider "=== Frame Collector (DTMF Decoder) ==="
-add wave -noupdate sim:/tb_alignment_multiframe/DUT/DTMF_ENCODER_RX/frame_state
 add wave -noupdate sim:/tb_alignment_multiframe/DUT/DTMF_ENCODER_RX/tone_valid
 add wave -noupdate -radix hex sim:/tb_alignment_multiframe/DUT/DTMF_ENCODER_RX/code_dtmf
-add wave -noupdate -radix unsigned sim:/tb_alignment_multiframe/DUT/DTMF_ENCODER_RX/payload_count
-add wave -noupdate sim:/tb_alignment_multiframe/DUT/DTMF_ENCODER_RX/frame_done
 add wave -noupdate -radix hex sim:/tb_alignment_multiframe/DUT/reconstructed_key_32bit
 add wave -noupdate -radix hex sim:/tb_alignment_multiframe/DUT/display_key
 

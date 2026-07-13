@@ -1,7 +1,11 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
 
 entity highcomparator is
+    Generic (
+        THRESHOLD_VAL : integer := 800
+    );
     Port (
         clk, rst            : in STD_LOGIC;
         in_valid    : in STD_LOGIC;
@@ -25,7 +29,7 @@ architecture Behavioral of highcomparator is
     
     -- Ambang batas daya (Power Threshold)
     -- Jika nilai daya tertinggi masih di bawah nilai ini, ia akan dianggap sebagai NOISE / SILENCE.
-    constant THRESHOLD : STD_LOGIC_VECTOR(16 downto 0) := "00000100100000000"; -- x"003E8"
+    constant THRESHOLD : STD_LOGIC_VECTOR(16 downto 0) := std_logic_vector(to_unsigned(THRESHOLD_VAL, 17));
 
 begin
     process(state)

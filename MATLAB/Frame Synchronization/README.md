@@ -11,3 +11,6 @@
 - Folder **exp 1.7 fixed point v4**: Kode versi fixed-point dengan pengecekan konfigurasi fixed-point, nilai minimum, dan nilai maksimum per modul, fixed-point: Q3.13 untuk sinyal _input_ dan _multiplier_, Q8.8 untuk _accumulator_, Q12.4 untuk _power calcultion_, dan Q15.1 untuk _batch summation_, dan kombinasi batch-frame 40-16
 - Folder **exp 1.7 fixed point v5**: Kode seperti v4, tetapi ditambahkan sinyal *output* berupa *goertzel_enable* setelah simbol DTMF "3" terdeteksi
 - Folder **exp 1.7 fixed point v6**: Kode seperti v5, tetapi top-level frame synchronization dijadikan sebagai fungsi *frame_syn* dengan *output* berupa *goertzel_enable* dan *input* berupa sinyal sinusoidal yang berisi *sync point* "##3#" dan *payload*
+- Folder **exp 1.7 fixed point v7**: Kode seperti v6, tetapi menggunakan logika marking *Normalized Power Difference* pada total daya ($P_{697} \ge 0.55 \times (P_{697} + P_{941})$) yang diimplementasikan dengan perkalian silang (tanpa pembagian) untuk ketahanan terhadap redaman saluran dan derau asimetris
+    - Memanfaatkan *guard floor* untuk memastikan ketidakadaan noise dalam mendeteksi simbol "#" atau "3" dan nilai batasannya adalah 32.0 sesuai dengan VHDL
+    - Amplitudo puncak sinyal input disesuaikan menjadi 1.0 (skala 0.5) agar selaras dengan Q2.14 hardware

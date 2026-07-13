@@ -9,13 +9,13 @@ function [detect_enable_941, detect_enable_1477, precision_enable, flag_start_id
     count_1477 = 0;
 
     % Mulai dari 33 karena -32
-    for slide_i = 33:size(batch_sums, 1)
+    for slide_i = 17:size(batch_sums, 1)
 
         % 941 Hz Detection
-        prev_941 = batch_sums(slide_i - 32, 2);
+        prev_941 = batch_sums(slide_i - , 2);
         curr_941 = batch_sums(slide_i, 2);
 
-        if curr_941 >= 3 * prev_941
+        if curr_941 >= 5 * prev_941
             count_941 = count_941 + 1;
         else
             count_941 = 0;

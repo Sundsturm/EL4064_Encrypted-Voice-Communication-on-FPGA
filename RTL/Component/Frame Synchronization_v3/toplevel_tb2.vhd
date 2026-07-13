@@ -12,8 +12,8 @@ architecture tb of toplevel_tb2 is
     constant clk_hz : integer := 50e6;
     constant clk_period : time := 1 sec / clk_hz;
 
-    -- Component declaration matching toplevelv1 entity
-    component toplevelv1
+    -- Component declaration matching toplevel_iq_text entity
+    component toplevel_iq_text
         generic(
             dataA_INT_BITS:     natural := 3;
             dataA_FRAC_BITS:    natural := 13;
@@ -59,7 +59,7 @@ architecture tb of toplevel_tb2 is
     signal sim_done     : boolean := false;
 
 begin
-    DUT: component toplevelv1
+    DUT: component toplevel_iq_text
         port map(
             clk             => clk,
             reset           => reset,

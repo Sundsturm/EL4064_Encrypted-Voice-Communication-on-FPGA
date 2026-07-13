@@ -66,11 +66,13 @@ begin
             sum941 <= (others => '0');
             sum1477<= (others => '0');
         elsif reset = '1' then
-            state <= IDLE;
-            sum697 <= (others => '0');
-            sum941 <= (others => '0');
-            sum1477<= (others => '0');
-            -- index, fill_count, dan circular buffers TIDAK di-reset
+            -- Soft reset: hanya FSM state dan akumulator sementara yang direset.
+            -- Buffer historis (cbuffer*), index, dan fill_count DIPERTAHANKAN
+            -- agar korelator tidak perlu mengisi ulang ~320 ms setelah re-arm.
+            state   <= IDLE;
+            sum697  <= (others => '0');
+            sum941  <= (others => '0');
+            sum1477 <= (others => '0');
         elsif rising_edge(clk) then
             state <= state;
             case state is

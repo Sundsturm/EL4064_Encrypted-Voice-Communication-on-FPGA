@@ -4,6 +4,9 @@ use IEEE.STD_LOGIC_ARITH.ALL;
 use IEEE.STD_LOGIC_UNSIGNED.ALL;
 
 entity top_dtmfencode is
+    Generic (
+        THRESHOLD_VAL : integer := 1000
+    );
     Port (
         clk, rst        : in  STD_LOGIC;                    -- Reset signal
         in_valid        : in STD_LOGIC;
@@ -23,7 +26,7 @@ entity top_dtmfencode is
         encode_out      : out STD_LOGIC_VECTOR(31 downto 0)
     );
 end top_dtmfencode;
-
+    
 architecture Behavioral of top_dtmfencode is
     signal r2r1, v2vh, v2vl                         : STD_LOGIC;
     signal r2r2, v2v2, v2v3                         : STD_LOGIC;
@@ -34,6 +37,9 @@ architecture Behavioral of top_dtmfencode is
     signal tone_valid                               : STD_LOGIC;
     -- Componen Declarations
     component lowcomparator is
+        Generic (
+            THRESHOLD_VAL : integer := 800
+        );
         Port (
             clk, rst            : in STD_LOGIC;
             in_valid    : in STD_LOGIC;
@@ -49,6 +55,9 @@ architecture Behavioral of top_dtmfencode is
     end component;
 
     component highcomparator is
+        Generic (
+            THRESHOLD_VAL : integer := 800
+        );
         Port (
             clk, rst            : in STD_LOGIC;
             in_valid    : in STD_LOGIC;
@@ -110,6 +119,9 @@ begin
 
     -- Instance of comparator for frequency 697 and 770 Hz
     comp_low : component lowcomparator
+        generic map (
+            THRESHOLD_VAL => THRESHOLD_VAL
+        )
         port map(
             clk     => clk ,
             rst     => rst ,
@@ -125,11 +137,14 @@ begin
         );
     
     comp_high : component highcomparator
+        generic map (
+            THRESHOLD_VAL => THRESHOLD_VAL
+        )
         port map(
             clk         => clk,
             rst         => rst,
             in_valid => in_valid,
-            out_ready => out_ready,
+            out_ready => r2r2,
             in_ready => highready,
             out_valid => v2vh,
             input1209 => corr_1209,
@@ -155,4 +170,3 @@ begin
         );
     
 end Behavioral;
-

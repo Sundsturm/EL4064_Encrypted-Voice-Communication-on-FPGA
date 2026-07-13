@@ -28,7 +28,7 @@ architecture behavior of tb_receiver_isolated is
     -- Transmitter FSM
     type tx_state_type is (IDLE, PRE_SILENCE, TRANSMIT);
     signal tx_state         : tx_state_type := IDLE;
-    signal tx_sample_cnt    : integer range 0 to 1600 := 0;
+    signal tx_sample_cnt    : integer range 0 to 2047 := 0;
     signal tx_segment_cnt   : unsigned(3 downto 0) := (others => '0');
     signal current_key      : std_logic_vector(31 downto 0) := x"3A7C9B1D";
     signal tx_digit_to_send : std_logic_vector(3 downto 0) := (others => '0');
@@ -61,7 +61,7 @@ architecture behavior of tb_receiver_isolated is
     -- Alignment FSM signals (duplicated from top-level)
     signal enable_d         : std_logic := '0';
     signal align_armed      : std_logic := '0';
-    signal align_counter    : integer range 0 to 1023 := 0;
+    signal align_counter    : integer range 0 to 2047 := 0;
     signal goertzel_aligned : std_logic := '0';
 
 begin
@@ -231,7 +231,7 @@ begin
     -- =========================================================================
     -- RECEIVER INSTANCES
     -- =========================================================================
-    DTMF_corr: entity work.toplevel_iq
+    DTMF_corr: entity work.toplevel_iq_fpga
     generic map (
         mult_INT_BITS   => 2,
         mult_FRAC_BITS  => 14,
@@ -240,7 +240,8 @@ begin
         power_INT_BITS  => 10,
         power_FRAC_BITS => 6,
         batch_INT_BITS  => 14,
-        batch_FRAC_BITS => 2
+        batch_FRAC_BITS => 2,
+        GUARD_FLOOR     => 100.0
     )
     port map (
         clk          => clk,
@@ -274,10 +275,10 @@ begin
                     else
                         if Ldone = '1' then
                             -- Fine-tuned delay to align Goertzel window perfectly with symbol boundaries.
-                            -- Preamble detection (enable) goes high at sample 3162.
+                            -- Preamble detection (enable) goes high at sample 3397.
                             -- Segment 4 starts at sample 4160.
-                            -- Delay = 4160 - 3162 = 998 samples.
-                            if align_counter = 997 then
+                            -- Delay = 4160 - 3397 = 763 samples.
+                            if align_counter = 857 then
                                 goertzel_aligned <= '1';
                             else
                                 align_counter <= align_counter + 1;
@@ -315,6 +316,9 @@ begin
     
     -- DTMF Decoder
     DTMF_ENCODER_RX : entity work.top_dtmfencode
+    generic map (
+        THRESHOLD_VAL => 1000
+    )
     port map (
         clk        => clk,
         rst        => rx_rst,

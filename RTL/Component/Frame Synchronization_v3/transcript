@@ -1,5 +1,5 @@
 # vsim -c -do "run -all; quit" topiq_tb_unified -gINPUT_FILE_NAME=test_impulse_noise.txt 
-# Start time: 18:38:46 on Jul 09,2026
+# Start time: 15:01:12 on Jul 10,2026
 # Loading std.standard
 # Loading std.textio(body)
 # Loading ieee.std_logic_1164(body)
@@ -9,7 +9,7 @@
 # Loading ieee.fixed_generic_pkg(body)
 # Loading ieee.fixed_pkg
 # Loading work.topiq_tb_unified(tb)
-# Loading work.toplevelv1(behavioral)
+# Loading work.toplevel_iq_text(behavioral)
 # Loading work.dec_control(behavioral)
 # Loading work.flaggingv2(behavioral)
 # Loading work.markingv1(behavioral)
@@ -79,6 +79,8 @@
 # [Batch #36] sum697= 5262.0000  sum941= 7728.5000  sum1477= 7111.5000  -> [941+1477 dominant = '#']
 # [Batch #37] sum697= 5262.0000  sum941= 7728.5000  sum1477= 7111.5000  -> [941+1477 dominant = '#']
 # [Batch #38] sum697= 5289.5000  sum941= 7646.5000  sum1477= 6918.5000  -> [941+1477 dominant = '#']
+# ** Note: >>> ENABLE RISING - Frame sync point detected at time 127480000 ps <<<
+#    Time: 127480 ns  Iteration: 0  Instance: /topiq_tb_unified
 # [Batch #39] sum697= 5289.5000  sum941= 7646.5000  sum1477= 6918.5000  -> [941+1477 dominant = '#']
 # [Batch #40] sum697= 5289.5000  sum941= 7646.5000  sum1477= 6918.5000  -> [941+1477 dominant = '#']
 # [Batch #41] sum697= 5289.5000  sum941= 7646.5000  sum1477= 6918.5000  -> [941+1477 dominant = '#']
@@ -95,8 +97,6 @@
 # [Batch #52] sum697= 5201.0000  sum941= 6302.0000  sum1477= 6669.5000  -> [941+1477 dominant = '#']
 # [Batch #53] sum697= 5424.0000  sum941= 6114.0000  sum1477= 6860.5000  -> [941+1477 dominant = '#']
 # [Batch #54] sum697= 5434.0000  sum941= 5409.0000  sum1477= 6621.5000  -> [697+1477 dominant = '3']
-# ** Note: >>> ENABLE RISING - Frame sync point detected at time 165880000 ps <<<
-#    Time: 165880 ns  Iteration: 0  Instance: /topiq_tb_unified
 # [Batch #55] sum697= 5353.0000  sum941= 5341.0000  sum1477= 6659.0000  -> [697+1477 dominant = '3']
 # [Batch #56] sum697= 5436.5000  sum941= 5260.0000  sum1477= 6849.0000  -> [697+1477 dominant = '3']
 # [Batch #57] sum697= 5617.5000  sum941= 4624.5000  sum1477= 6516.5000  -> [697+1477 dominant = '3']
@@ -293,5 +293,5 @@
 # ** Note: =======================================================
 #    Time: 618423 ns  Iteration: 1  Instance: /topiq_tb_unified
 #  quit
-# End time: 18:38:48 on Jul 09,2026, Elapsed time: 0:00:02
+# End time: 15:01:14 on Jul 10,2026, Elapsed time: 0:00:02
 # Errors: 0, Warnings: 6

@@ -46,7 +46,7 @@ vcom -2008 -work work receiver_hdl/markingv1.vhd
 vcom -2008 -work work receiver_hdl/Framingv2.vhd
 vcom -2008 -work work receiver_hdl/flaggingv2.vhd
 vcom -2008 -work work receiver_hdl/dec_control.vhd
-vcom -2008 -work work receiver_hdl/toplevel_iq.vhd
+vcom -2008 -work work receiver_hdl/toplevel_iq_fpga.vhd
 
 vcom -2008 -work work dtmf_detect_hdl/shift_add.vhd
 vcom -2008 -work work dtmf_detect_hdl/Goertzel.vhd
@@ -88,11 +88,7 @@ add wave -noupdate -color Blue  sim:/tb_dtmf_integration/AUD_ADCDAT
 add wave -noupdate -color Green -format analog-step -radix decimal -height 60 -max 32767 -min -32768 sim:/tb_dtmf_integration/DUT/Lin
 
 add wave -noupdate -divider "Receiver Outputs"
-add wave -noupdate -radix binary sim:/tb_dtmf_integration/DUT/dtmf_code_4bit
-add wave -noupdate                sim:/tb_dtmf_integration/DUT/dtmf_code_valid
 add wave -noupdate                sim:/tb_dtmf_integration/DUT/DTMF_ENCODER_RX/tone_valid
-add wave -noupdate                sim:/tb_dtmf_integration/DUT/DTMF_ENCODER_RX/frame_state
-add wave -noupdate                sim:/tb_dtmf_integration/DUT/DTMF_ENCODER_RX/frame_done
 add wave -noupdate -radix hex     sim:/tb_dtmf_integration/DUT/reconstructed_key_32bit
 add wave -noupdate -radix hex     sim:/tb_dtmf_integration/probe_key
 

@@ -4,10 +4,8 @@ use IEEE.NUMERIC_STD.ALL;
 library ieee_proposed;
 use ieee_proposed.fixed_pkg.all;
 
-entity toplevelv1 is
+entity toplevel_iq_fpga is
     generic(
-        dataA_INT_BITS:     natural := 3;
-        dataA_FRAC_BITS:    natural := 13;
         mult_INT_BITS:      natural := 3;
         mult_FRAC_BITS:     natural := 13;
         acc_INT_BITS:       natural := 8;
@@ -15,28 +13,23 @@ entity toplevelv1 is
         power_INT_BITS:     natural := 12;
         power_FRAC_BITS:    natural := 4;
         batch_INT_BITS:     natural := 15;
-        batch_FRAC_BITS:    natural := 1
+        batch_FRAC_BITS:    natural := 1;
+        GUARD_FLOOR:        real := 32.0
     );
     Port ( 
-        clk, reset  : in STD_LOGIC;
+        clk, master_reset, reset  : in STD_LOGIC;
         in_valid    : in STD_LOGIC;
         out_ready   : in STD_LOGIC;
         in_ready    : out STD_LOGIC;
         out_valid   : out STD_LOGIC;
         -- Bus Data
-        dataA       : in SFIXED((dataA_INT_BITS-1) downto -dataA_FRAC_BITS);
-        enable      : out std_logic;
-        -- Debug Ports
-        dbg_sum697      : out SFIXED((batch_INT_BITS-1) downto -batch_FRAC_BITS);
-        dbg_sum941      : out SFIXED((batch_INT_BITS-1) downto -batch_FRAC_BITS);
-        dbg_sum1477     : out SFIXED((batch_INT_BITS-1) downto -batch_FRAC_BITS);
-        dbg_batch_valid : out STD_LOGIC
+        dataA       : in std_logic_vector(15 downto 0);
+        enable      : out std_logic
     );
-end toplevelv1;
+end toplevel_iq_fpga;
 
-architecture Behavioral of toplevelv1 is
-    signal address_signal : std_logic_vector(9 downto 0) := (others => '0');
-    signal dataA_slv      : std_logic_vector(15 downto 0);
+architecture Behavioral of toplevel_iq_fpga is
+    signal address_signal : std_logic_vector(9 downto 0);
     -- I/O signal
     signal r2r1           : STD_LOGIC;
     signal v2v1           : STD_LOGIC;
@@ -113,26 +106,32 @@ architecture Behavioral of toplevelv1 is
 
     component flaggingv2 is
         generic(
-            in_INT_BITS: natural        := 15;
-            in_FRAC_BITS: natural       := 1
+            in_INT_BITS     : natural := 15;
+            in_FRAC_BITS    : natural := 1;
+            LOOKBACK_DEPTH  : natural := 16;
+            THRESHOLD_COEFF : integer := 3;
+            GUARD_FLOOR     : real := 32.0
         );
         Port (
-            clk         : in STD_LOGIC;
-            reset       : in STD_LOGIC;
-            in_valid    : in STD_LOGIC;
-            out_ready   : in STD_LOGIC;
-            in_ready    : out STD_LOGIC;
-            out_valid   : out STD_LOGIC;
-            in_941      : in SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
-            in_1477     : in SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
-            onoff_mark  : out std_logic
+            clk          : in  STD_LOGIC;
+            master_reset : in  STD_LOGIC := '0';
+            reset        : in  STD_LOGIC := '0';
+            in_valid     : in  STD_LOGIC;
+            out_ready    : in  STD_LOGIC;
+            in_ready     : out STD_LOGIC;
+            out_valid    : out STD_LOGIC;
+            in_941       : in  SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
+            in_1477      : in  SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
+            onoff_mark   : out STD_LOGIC
         );
     end component;
 
     component markingv1 is
         generic(
-            in_INT_BITS: natural        := 15;
-            in_FRAC_BITS: natural       := 1
+            in_INT_BITS          : natural := 15;
+            in_FRAC_BITS         : natural := 1;
+            THRESHOLD_COEFF      : real := 0.53;
+            GUARD_FLOOR          : real := 32.0
         );
         Port (
             clk         : in STD_LOGIC;
@@ -143,10 +142,10 @@ architecture Behavioral of toplevelv1 is
             out_valid   : out STD_LOGIC;
             in_697      : in SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
             in_941      : in SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);  -- guard condition
-            in_1477     : in SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);  -- guard condition
             enable      : out std_logic
         );
     end component;
+    
     component slidingv5 is
         generic(
             in_INT_BITS:    natural := 12;
@@ -155,17 +154,19 @@ architecture Behavioral of toplevelv1 is
             out_FRAC_BITS:  natural := 1
         );
         Port (
-            clk, reset : in STD_LOGIC;
-            in_valid    : in STD_LOGIC;
-            out_ready   : in STD_LOGIC;
-            in_ready    : out STD_LOGIC;
-            out_valid   : out STD_LOGIC;
-            in_697      : in SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
-            in_941      : in SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
-            in_1477     : in SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
-            sum_697     : out SFIXED((out_INT_BITS-1) downto -out_FRAC_BITS);
-            sum_941     : out SFIXED((out_INT_BITS-1) downto -out_FRAC_BITS);
-            sum_1477    : out SFIXED((out_INT_BITS-1) downto -out_FRAC_BITS)
+            clk          : in STD_LOGIC;
+            master_reset : in STD_LOGIC;
+            reset        : in STD_LOGIC;
+            in_valid     : in STD_LOGIC;
+            out_ready    : in STD_LOGIC;
+            in_ready     : out STD_LOGIC;
+            out_valid    : out STD_LOGIC;
+            in_697       : in SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
+            in_941       : in SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
+            in_1477      : in SFIXED((in_INT_BITS-1) downto -in_FRAC_BITS);
+            sum_697      : out SFIXED((out_INT_BITS-1) downto -out_FRAC_BITS);
+            sum_941      : out SFIXED((out_INT_BITS-1) downto -out_FRAC_BITS);
+            sum_1477     : out SFIXED((out_INT_BITS-1) downto -out_FRAC_BITS)
         );
     end component;
 
@@ -195,6 +196,7 @@ architecture Behavioral of toplevelv1 is
             out_1477    : out SFIXED((out_INT_BITS-1) downto -out_FRAC_BITS)
         );
     end component;
+    
     component Framingv2 is
         generic(
             data_INT_BITS: natural := 3;
@@ -270,12 +272,6 @@ architecture Behavioral of toplevelv1 is
     end component;
 
 begin
-    dataA_slv <= to_slv(dataA);
-    -- Debug assignments
-    dbg_sum697      <= sum697;
-    dbg_sum941      <= sum941;
-    dbg_sum1477     <= sum1477;
-    dbg_batch_valid <= v2v4;
     cntrl_unit  : component dec_control
         port map(
             clk         => clk,
@@ -296,27 +292,34 @@ begin
             mark_in         => markout,
             mark_out        => enable
         );
+        
     flag_unit   : component flaggingv2
         generic map(
             in_INT_BITS     => 15,
-            in_FRAC_BITS    => 1
+            in_FRAC_BITS    => 1,
+            LOOKBACK_DEPTH  => 16,
+            THRESHOLD_COEFF => 5,
+            GUARD_FLOOR     => GUARD_FLOOR
         )
         port map(
-            clk         => clk,
-            reset       => reset,
-            in_valid    => flag_invalid, 
-            out_ready   => flag_outready,
-            in_ready    => flag_inready,
-            out_valid   => flag_outvalid,
-            in_941      => sum941,
-            in_1477     => sum1477,
-            onoff_mark  => mark_onoff
+            clk          => clk,
+            master_reset => master_reset,
+            reset        => reset,
+            in_valid     => flag_invalid, 
+            out_ready    => flag_outready,
+            in_ready     => flag_inready,
+            out_valid    => flag_outvalid,
+            in_941       => sum941,
+            in_1477      => sum1477,
+            onoff_mark   => mark_onoff
         );
 
     mark_unit   : component markingv1
         generic map(
-            in_INT_BITS     => 15,
-            in_FRAC_BITS    => 1
+            in_INT_BITS          => 15,
+            in_FRAC_BITS         => 1,
+            THRESHOLD_COEFF      => 0.53,
+            GUARD_FLOOR          => GUARD_FLOOR
         )
         port map(
             clk         => clk,
@@ -326,10 +329,10 @@ begin
             in_ready    => mark_inready,
             out_valid   => mark_outvalid,
             in_697      => sum697,
-            in_941      => sum941,   -- guard: 697Hz harus dominan di atas 941Hz
-            in_1477     => sum1477,  -- guard: 1477Hz harus dominan di atas 941Hz
+            in_941      => sum941,   -- guard: 941Hz sedang turun
             enable      => markout
         );
+        
     batch_unit : component slidingv5
         generic map(
             in_INT_BITS     => 12,
@@ -338,18 +341,19 @@ begin
             out_FRAC_BITS   => 1
         )
         port map(
-            clk         => clk,
-            reset       => reset,
-            in_valid    => v2v3,
-            out_ready   => r2r4,
-            in_ready    => r2r3,
-            out_valid   => v2v4,
-            in_697      => power_697,
-            in_941      => power_941,
-            in_1477     => power_1477,
-            sum_697     => sum697,
-            sum_941     => sum941,
-            sum_1477    => sum1477
+            clk          => clk,
+            master_reset => master_reset,
+            reset        => reset,
+            in_valid     => v2v3,
+            out_ready    => r2r4,
+            in_ready     => r2r3,
+            out_valid    => v2v4,
+            in_697       => power_697,
+            in_941       => power_941,
+            in_1477      => power_1477,
+            sum_697      => sum697,
+            sum_941      => sum941,
+            sum_1477     => sum1477
         );
 
     powercalc : component powercalcv1
@@ -378,6 +382,7 @@ begin
             out_941     => power_941,
             out_1477    => power_1477
         );
+        
     framing   : component Framingv2
         generic map(
             data_INT_BITS => 3,
@@ -405,6 +410,7 @@ begin
             acc_cos941  => accout_cos941,
             acc_cos1477 => accout_cos1477
         );
+        
     mult_unit : component multv6
         generic map (
             mult_INT_BITS   => 3,
@@ -417,7 +423,7 @@ begin
             out_ready       => r2r1,
             in_ready        => in_ready,
             out_valid       => v2v1,
-            dataA           => dataA_slv,
+            dataA           => dataA,
             sin697          => sine_697,
             sin941          => sine_941,
             sin1477         => sine_1477,
@@ -432,6 +438,7 @@ begin
             multcos_1477    => multout_cos1477,
             address         => address_signal
         );
+        
     lutsin_unit: component lutsin_block
         port map (
             address      => address_signal,
@@ -439,6 +446,7 @@ begin
             sine_941     => sine_941,
             sine_1477    => sine_1477
         );
+
     lutcos_unit: component lutcos_block
         port map (
             address      => address_signal,
@@ -446,4 +454,5 @@ begin
             cosine_941   => cosine_941,
             cosine_1477  => cosine_1477
         );
+
 end Behavioral;

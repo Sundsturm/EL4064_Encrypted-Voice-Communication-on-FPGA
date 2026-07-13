@@ -109,11 +109,11 @@ architecture rtl of AcakCakap_Top is
 	-- Phase 2 FSM sender control
 	type state_type is (IDLE, PRE_SILENCE, TRANSMIT);
 	signal current_state : state_type := IDLE;
-	signal sample_counter : integer range 0 to 1600 := 0; -- Tingkatkan range counter ke 1600
+	signal sample_counter : integer range 0 to 2047 := 0; -- Tingkatkan range counter ke 2047
 	signal start_transmission : std_logic := '0';
 	signal dtmf_tone_enable : std_logic := '0';
 	constant SAMPLES_20MS : integer := 640;
-	constant SAMPLES_PRE_SILENCE : integer := 1600; -- 50 ms silence (33 batches + margin)
+	constant SAMPLES_PRE_SILENCE : integer := 1600; -- 50 ms silence (1280 samples)
 	
 	-- Local clock/reset alias for synchronous FSM process
 	signal clk : std_logic;
@@ -121,6 +121,8 @@ architecture rtl of AcakCakap_Top is
 	
 	-- Receiver Local Reset & Display Register
 	signal rx_rst : std_logic := '1';
+	signal rx_cooldown_cnt : integer range 0 to 2047 := 0;
+	signal rx_cooldown_active : std_logic := '0';
 	signal display_key : std_logic_vector(31 downto 0) := (others => '0');
 
 	-- Debounce signals
@@ -147,7 +149,7 @@ architecture rtl of AcakCakap_Top is
 	-- =========================================================
 	signal enable_d         : std_logic := '0'; -- 1-cycle delay untuk deteksi rising edge
 	signal align_armed      : std_logic := '0'; -- '1' setelah rising edge enable terdeteksi
-	signal align_counter    : integer range 0 to 1023 := 0;
+	signal align_counter    : integer range 0 to 2047 := 0;
 	signal goertzel_aligned : std_logic := '0'; -- SR latch: '1' setelah 640 Ldone terhitung
 
 	signal LED : std_logic := '0';
@@ -197,6 +199,30 @@ begin
 	-- (For simulation bypass, set: goertzel_enable <= Ldone;)
 	goertzel_enable <= Ldone and enable and goertzel_aligned;
 	
+	-- Cooldown timer process to hold receiver in reset after successful decode
+	process(clk)
+	begin
+		if rising_edge(clk) then
+			if aud_rst = '1' then
+				rx_cooldown_active <= '0';
+				rx_cooldown_cnt <= 0;
+			else
+				if out_valid = '1' or rx_timeout_rst = '1' then
+					rx_cooldown_active <= '1';
+					rx_cooldown_cnt <= 1600; -- 40 ms cooldown (Currently)
+				elsif rx_cooldown_active = '1' then
+					if Ldone = '1' then
+						if rx_cooldown_cnt = 0 then
+							rx_cooldown_active <= '0';
+						else
+							rx_cooldown_cnt <= rx_cooldown_cnt - 1;
+						end if;
+					end if;
+				end if;
+			end if;
+		end if;
+	end process;
+
 	-- Receiver Local Reset Logic (Registered to break combinatorial glitches)
 	-- Receiver auto-rearms via out_valid after each successful decode or timeout.
 	process(AUD_XCK)
@@ -205,7 +231,7 @@ begin
 			if aud_rst = '1' then
 				rx_rst <= '1';
 			else
-				rx_rst <= out_valid or rx_timeout_rst;
+				rx_rst <= out_valid or rx_timeout_rst or rx_cooldown_active;
 			end if;
 		end if;
 	end process;
@@ -218,7 +244,7 @@ begin
 				rx_timeout_cnt <= 0;
 				rx_timeout_rst <= '0';
 			elsif enable = '1' then
-				if rx_timeout_cnt = 7372800 then
+				if rx_timeout_cnt = 5529600 then -- 300 ms (at 18.432 MHz)
 					rx_timeout_rst <= '1';
 				else
 					rx_timeout_cnt <= rx_timeout_cnt + 1;
@@ -316,7 +342,7 @@ begin
 						-- Hitung 358 Ldone pulse (delay penyelaras jendela)
 						if Ldone = '1' then
 							-- Penyelarasan presisi agar jendela integrasi Goertzel pertama jatuh di batas simbol baru
-							if align_counter = 997 then
+							if align_counter = 857 then
 								goertzel_aligned <= '1';
 							else
 								align_counter <= align_counter + 1;
@@ -379,7 +405,7 @@ begin
 	end process;
 	
 	-- DTMF Correlator instantiation
-	DTMF_corr: entity work.toplevel_iq
+	DTMF_corr: entity work.toplevel_iq_fpga
 	generic map (
 		mult_INT_BITS   => 2,
 		mult_FRAC_BITS  => 14,
@@ -388,7 +414,8 @@ begin
 		power_INT_BITS  => 10,
 		power_FRAC_BITS => 6,
 		batch_INT_BITS  => 14,
-		batch_FRAC_BITS => 2
+		batch_FRAC_BITS => 2,
+		GUARD_FLOOR     => 32.0
 	)
 	port map (
 		clk		     => AUD_XCK,
@@ -429,6 +456,9 @@ begin
 	);
 
 	DTMF_ENCODER_RX : entity work.top_dtmfencode
+	generic map (
+		THRESHOLD_VAL => 800
+	)
 	port map (
 		clk        => AUD_XCK,
 		rst        => rx_rst,

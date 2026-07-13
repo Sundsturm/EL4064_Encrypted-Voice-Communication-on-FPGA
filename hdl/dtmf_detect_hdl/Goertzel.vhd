@@ -5,6 +5,8 @@ use ieee.math_real.all;
 
 library ieee_proposed;
 use ieee_proposed.fixed_pkg.all;
+library floatfixlib;
+use floatfixlib.fixed_float_types.all;
 
 entity Goertzel is
     generic (
@@ -57,7 +59,7 @@ architecture rtl of Goertzel is
     signal Q2_squared  : ufixed(22 downto 0);
     signal coeff_Q1_Q2    : sfixed(23 downto 0);
     signal Q1_squared_plus_Q2_squared : ufixed(23 downto 0);
-    signal power_fix : sfixed(17 downto 0) := (others => '0');
+    signal power_fix : sfixed(23 downto 0) := (others => '0');
     -- Input sample register
     signal DTMF_sampled : sfixed(X_INT_BITS - 1 downto -X_FRAC_BITS); -- Format: Signed Q2.14
     -- Delay register
@@ -203,27 +205,30 @@ begin
                         state <= IDLE;
                     end if;
                 -- Computing power state
-                WHEN COMPUTE_POWER_1 => -- Square Q1 and multiply coeff_Q1 with Q2
+                WHEN COMPUTE_POWER_1 => -- Square Q1 and multiply coeff with Q1
                     state <= COMPUTE_POWER_2;
                     square_in <= Q1_reg;
-                    mult_coeff_q1 <= coeff_Q1;
-                    mult_q2 <= Q2_reg;
-                WHEN COMPUTE_POWER_2 => -- Store square of Q1 to temp, square Q2, and store coeff_Q1_Q2 to temporary register 
+                    mult_a <= coeff_sfixed;
+                    mult_b <= Q1_reg;
+                WHEN COMPUTE_POWER_2 => -- Store square of Q1, store coeff_Q1, and square Q2
                     state <= COMPUTE_POWER_3; 
                     Q1_squared <= resize(square_out, 22, 0);
-                    coeff_Q1_Q2 <= resize(mult_out_2, 23, 0);
+                    coeff_Q1 <= resize(mult_out, COEFF_Q1_INT_BITS-1, -COEFF_Q1_FRAC_BITS);
                     square_in <= Q2_reg;
-                WHEN COMPUTE_POWER_3 => -- Store Q2 to Q2 squared 
+                WHEN COMPUTE_POWER_3 => -- Store square of Q2, load second multiplier for coeff_Q1 * Q2
                     state <= COMPUTE_POWER_4;
                     Q2_squared <= resize(square_out, 22, 0);
+                    mult_coeff_q1 <= coeff_Q1;
+                    mult_q2 <= Q2_reg;
                 WHEN COMPUTE_POWER_4 => -- Subtract the sum of square value by coeff_q1_q2 and store the result into power_fix reg
                     state <= COMPUTE_POWER_5;
                     Q1_squared_plus_Q2_squared <= Q2_squared + Q1_squared;
+                    coeff_Q1_Q2 <= resize(mult_out_2, 23, 0);
                 WHEN COMPUTE_POWER_5 => 
                     state <= OUTPUT;
-                    power_fix <= resize(abs(sfixed(Q1_squared_plus_Q2_squared) - coeff_Q1_Q2), 17, 0);
+                    power_fix <= resize(abs(sfixed(Q1_squared_plus_Q2_squared) - coeff_Q1_Q2), 23, 0);
                 WHEN OUTPUT =>
-                    power_v := to_std_logic_vector(power_fix);
+                    power_v := to_std_logic_vector(resize(power_fix, 17, 0, fixed_saturate, fixed_round));
                     power   <= power_v(16 downto 0);
                     out_valid <= '1';
                     if out_valid = '1' and out_ready = '1' then

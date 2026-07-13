@@ -17,7 +17,7 @@ architecture tb of toplevel_tb1 is
     constant sample_clk_period : time := 1 sec / sample_clk_hz; -- Sample Clock
 
     -- Instance of the design under test
-    component toplevelv1
+    component toplevel_iq_text
         generic(
             dataA_INT_BITS:     natural := 3;
             dataA_FRAC_BITS:    natural := 13;
@@ -57,7 +57,7 @@ architecture tb of toplevel_tb1 is
     
 begin
     -- Instance of the design under test
-    DUT: component toplevelv1
+    DUT: component toplevel_iq_text
         port map(
             clk         => clk,
             reset       => reset,

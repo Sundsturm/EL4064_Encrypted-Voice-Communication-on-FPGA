@@ -48,7 +48,7 @@ vcom -2008 -work work ../../receiver_hdl/markingv1.vhd
 vcom -2008 -work work ../../receiver_hdl/Framingv2.vhd
 vcom -2008 -work work ../../receiver_hdl/flaggingv2.vhd
 vcom -2008 -work work ../../receiver_hdl/dec_control.vhd
-vcom -2008 -work work ../../receiver_hdl/toplevel_iq.vhd
+vcom -2008 -work work ../../receiver_hdl/toplevel_iq_fpga.vhd
 
 vcom -2008 -work work ../../dtmf_detect_hdl/shift_add.vhd
 vcom -2008 -work work ../../dtmf_detect_hdl/Goertzel.vhd

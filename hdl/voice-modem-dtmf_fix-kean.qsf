@@ -55,7 +55,7 @@ set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_
 set_global_assignment -name VHDL_FILE ../quartus/fixed_pkg_c.vhd
 set_global_assignment -name VHDL_FILE ../quartus/fixed_float_types_c.vhd
 set_global_assignment -name VHDL_FILE ../quartus/AudioPLL.vhd
-set_global_assignment -name VHDL_FILE receiver_hdl/toplevel_iq.vhd
+set_global_assignment -name VHDL_FILE receiver_hdl/toplevel_iq_fpga.vhd
 set_global_assignment -name VHDL_FILE util/uart_rx.vhd
 set_global_assignment -name VHDL_FILE sender_hdl/sine_gen_signed.vhd
 set_global_assignment -name VHDL_FILE sender_hdl/generate_dtmf_signed.vhd

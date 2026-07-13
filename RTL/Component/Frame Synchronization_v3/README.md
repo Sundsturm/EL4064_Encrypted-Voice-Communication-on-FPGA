@@ -275,3 +275,19 @@ run -all
   - `sliding.m` — referensi untuk `slidingv5.vhd`
 - Parameter simulasi: Fs = 32 kHz, frame_size = 40, batch_size = 16
 - Format fixed-point utama: Q3.13 (input) → Q15.1 (batch sum output)
+
+## Perbaikan/Revisi
+### Revisi 1: Perbaikan Flagging dan Marking - Perubahan logika deteksi yang lebih sadar terhadap kondisi kanal yang bisa saja meredam frekuensi tertentu
+Saya ingin modifikasi modul frame synchronization pada kedua modul ini.
+- `flaggingv2.vhd`
+Logic untuk pendeteksian ini kan memerlukan circular buffer untuk menampung batch sebelumnya. Namun, ternyata jumlah batch atau ukuran circular buffer ini harus disesuaikan dengan kombinasi sampel per frame dan frame per batch yang dipilih, yaitu 40 sampel per frame dan 16 frame per batch
+  - 1 simbol itu adalah 640 sampel sehingga 1 simbol adalah 1 batch
+
+**Pertanyaan**: Apakah logic pendeteksian yang sekarang ini sudah robust atau bisa diimprove lebih baik lagi?
+> Catatan penting dari flagging adalah hal ini akan memengaruhi keseluruhan sistem komunikasi DTMF yang diimplementasikan di `../../../hdl` terutama pada pengaturan `align_fsm` dan ukuran dari circular buffer.
+- `markingv1.vhd`:
+Logic pendeteksian yang sekarang diimplementasikan ini belum memerhatikan keterbatasan kanal audio di sisi hardware sepenuhnya karena masih ada implementasi kondisi *guard* yang membandingkan *current batches*, terutama pada kondisi *guard* ke-2.
+  - Harapannya adalah kondisi *guard* ini bisa dihilangkan dan diganti dengan kondisi yang *robust* dalam mendeteksi simbol "3" dengan cara membandingkan batch sekarang terhadap batch sebelumnya pada frekuensi tertentu
+    - Salah satu kondisi guard yang bisa dibandingkan dengan kondisi sebelumnya adalah memastikan frekuensi 941 Hz yang bergerak menurun atau batch sekarang nilainya lebih kecil daripada batch sebelumnya dengan kata lain
+
+**Pertanyaan**: Apakah harapan modifikasi ini robust dalam mendeteksi simbol "3" yang merupakan kombinasi dari frekuensi 697 Hz dan 1477 Hz?

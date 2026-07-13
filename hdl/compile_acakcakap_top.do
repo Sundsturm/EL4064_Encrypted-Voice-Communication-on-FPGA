@@ -30,6 +30,7 @@ puts {=== [2/6] Compile PLL / audio base ===}
 vcom -2008 -work audiopll ../quartus/AudioPLL_sim/AudioPLL.vho
 vcom -2008 -work work i2c.vhd
 vcom -2008 -work work Audio_interface.vhd
+vcom -2008 -work work util/uart_rx.vhd
 
 puts ""
 puts {=== [3/6] Compile DTMF sender ===}
@@ -52,7 +53,7 @@ vcom -2008 -work work receiver_hdl/markingv1.vhd
 vcom -2008 -work work receiver_hdl/Framingv2.vhd
 vcom -2008 -work work receiver_hdl/flaggingv2.vhd
 vcom -2008 -work work receiver_hdl/dec_control.vhd
-vcom -2008 -work work receiver_hdl/toplevel_iq.vhd
+vcom -2008 -work work receiver_hdl/toplevel_iq_fpga.vhd
 
 vcom -2008 -work work dtmf_detect_hdl/shift_add.vhd
 vcom -2008 -work work dtmf_detect_hdl/Goertzel.vhd
@@ -65,18 +66,18 @@ vcom -2008 -work work dtmf_detect_hdl/top_dtmfencode.vhd
 
 puts ""
 puts {=== [5/6] Compile scrambler/verilog blocks ===}
-vlog -work work Butterfly.v
-vlog -work work DelayBuffer.v
-vlog -work work FFT.v
-vlog -work work GenPermutationKey.v
-vlog -work work Mult128.v
-vlog -work work Multiply.v
-vlog -work work ReorderXk.v
-vlog -work work ReverseBitOrder.v
-vlog -work work SdfUnit.v
-vlog -work work SdfUnit2.v
-vlog -work work Twiddle.v
-vlog -work work Scrambler_TOP.v
+vlog -work work ../RTL/Component/Scrambler/Butterfly.v
+vlog -work work ../RTL/Component/Scrambler/DelayBuffer.v
+vlog -work work ../RTL/Component/Scrambler/FFT.v
+vlog -work work ../RTL/Component/Scrambler/GenPermutationKey.v
+vlog -work work ../RTL/Component/Scrambler/Mult128.v
+vlog -work work ../RTL/Component/Scrambler/Multiply.v
+vlog -work work ../RTL/Component/Scrambler/ReorderXk.v
+vlog -work work ../RTL/Component/Scrambler/ReverseBitOrder.v
+vlog -work work ../RTL/Component/Scrambler/SdfUnit.v
+vlog -work work ../RTL/Component/Scrambler/SdfUnit2.v
+vlog -work work ../RTL/Component/Scrambler/Twiddle.v
+vlog -work work ../RTL/Component/Scrambler/Scrambler_TOP.v
 
 puts ""
 puts {=== [6/6] Compile and elaborate top-level ===}

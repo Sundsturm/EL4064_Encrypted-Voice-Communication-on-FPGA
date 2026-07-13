@@ -34,7 +34,7 @@ vcom -2008 -work work receiver_hdl/markingv1.vhd
 vcom -2008 -work work receiver_hdl/Framingv2.vhd
 vcom -2008 -work work receiver_hdl/flaggingv2.vhd
 vcom -2008 -work work receiver_hdl/dec_control.vhd
-vcom -2008 -work work receiver_hdl/toplevel_iq.vhd
+vcom -2008 -work work receiver_hdl/toplevel_iq_fpga.vhd
 
 vcom -2008 -work work dtmf_detect_hdl/shift_add.vhd
 vcom -2008 -work work dtmf_detect_hdl/Goertzel.vhd
@@ -68,7 +68,7 @@ add wave -noupdate sim:/tb_receiver_isolated/rx_rst
 add wave -noupdate sim:/tb_receiver_isolated/Ldone
 add wave -noupdate -format analog-step -radix decimal -height 50 sim:/tb_receiver_isolated/Lin
 
-add wave -noupdate -divider "=== Frame Sync (toplevel_iq) ==="
+add wave -noupdate -divider "=== Frame Sync (toplevel_iq_fpga) ==="
 add wave -noupdate sim:/tb_receiver_isolated/enable
 add wave -noupdate sim:/tb_receiver_isolated/DTMF_corr/flag_unit/full
 
