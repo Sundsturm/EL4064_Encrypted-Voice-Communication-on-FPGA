@@ -342,7 +342,7 @@ begin
 						-- Hitung 358 Ldone pulse (delay penyelaras jendela)
 						if Ldone = '1' then
 							-- Penyelarasan presisi agar jendela integrasi Goertzel pertama jatuh di batas simbol baru
-							if align_counter = 857 then
+							if align_counter = 817 then
 								goertzel_aligned <= '1';
 							else
 								align_counter <= align_counter + 1;

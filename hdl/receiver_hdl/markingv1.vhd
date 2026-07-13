@@ -7,23 +7,19 @@ use ieee_proposed.fixed_pkg.all;
 -- ============================================================================
 -- markingv1: Deteksi simbol DTMF "3" (697 Hz) setelah flag "##" dikonfirmasi
 --
--- Referensi MATLAB: marking.m (exp 1.7 fixed point v6)
+-- Referensi MATLAB: marking.m (exp 1.7 fixed point v7)
 --
--- Logika dua kondisi SEKUENSIAL:
+-- Logika:
+--   Menggunakan Normalized Power Difference (NPD) pada daya 697 Hz dan 941 Hz:
+--     P697 >= THRESHOLD_VAL * (P697 + P941)
 --
---   KONDISI 1: curr_697 > prev_697
---              (nilai 697 Hz batch ini lebih besar dari batch sebelumnya)
---
---   KONDISI 2 (guard): curr_941 < prev_941
---              (nilai 941 Hz batch ini lebih kecil dari batch sebelumnya,
---               menandakan tone 941 Hz sedang turun/transisi dari '#' ke '3')
---
---   Jika KONDISI 1 DAN KONDISI 2 terpenuhi → enable di-assert '1' (permanen).
+--   Untuk mencegah false trigger dari noise transient, ditambahkan debounce
+--   2-batch: kondisi harus terpenuhi selama 2 batch berurutan sebelum
+--   enable di-assert '1' secara permanen.
 --
 -- Timing:
 --   Modul ini hanya aktif setelah dec_control menyalakan jalur marking
---   (via in_valid dari mark_enable='1'). Nilai prev_697 dan prev_941 di-update
---   setiap batch yang diterima.
+--   (via in_valid dari mark_enable='1').
 -- ============================================================================
 entity markingv1 is
     generic(
@@ -59,6 +55,9 @@ architecture Behavioral of markingv1 is
     -- SR latch internal: mencegah enable di-toggle setelah pertama kali assert
     signal enable_i  : STD_LOGIC := '0';
 
+    -- Debounce counter untuk memverifikasi 2 batch berurutan
+    signal consec_cnt : integer range 0 to 2 := 0;
+
 begin
 
     -- enable output mengikuti internal SR latch
@@ -85,6 +84,7 @@ begin
             out_valid    <= '0';
             curr_697     <= (others => '0');
             curr_941     <= (others => '0');
+            consec_cnt   <= 0;
 
         elsif rising_edge(clk) then
             case state is
@@ -104,6 +104,7 @@ begin
 
                 -- ===========================================================
                 -- COMPUTE: Bandingkan curr vs THRESHOLD_VAL * (curr_697 + curr_941)
+                --          dengan verifikasi debounce 2-batch berurutan
                 -- ===========================================================
                 when COMPUTE =>
                     if enable_i = '0' then
@@ -111,7 +112,14 @@ begin
                         -- P697 >= 0.55 * (P697 + P941)
                         if (curr_697 >= resize(THRESHOLD_VAL * (curr_697 + curr_941), curr_697)) and 
                            (curr_697 > to_sfixed(GUARD_FLOOR, curr_697)) then
-                            enable_i <= '1';  -- SR latch: permanen
+                            if consec_cnt = 1 then
+                                enable_i   <= '1';  -- SR latch: permanen setelah 2 batch valid berurutan
+                                consec_cnt <= 0;
+                            else
+                                consec_cnt <= consec_cnt + 1;
+                            end if;
+                        else
+                            consec_cnt <= 0;
                         end if;
                     end if;
                     state <= STORE;
