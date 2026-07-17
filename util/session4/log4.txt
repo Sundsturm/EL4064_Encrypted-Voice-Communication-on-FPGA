@@ -1,0 +1,47 @@
+======================================================================
+  KALKULATOR PERFORMA MODEM DTMF (WER, SER, BER, FRAME LOSS)
+======================================================================
+Membaca file TX: C:\Users\OSOTNAS\Documents\Kean\Kuliah\S1\SEMESTER_8\EL4064\EL4064_Encrypted-Voice-Communication-on-FPGA\util\TX.txt
+Membaca file RX: C:\Users\OSOTNAS\Documents\Kean\Kuliah\S1\SEMESTER_8\EL4064\EL4064_Encrypted-Voice-Communication-on-FPGA\util\RX.txt
+
+No.  | TX Key     | RX Key     | Key Match  | Sym Errors | Bit Errors | Frame Loss
+----------------------------------------------------------------------------------
+1    | EA23D835   | EA23D835   | OK         | 0          | 0          | -         
+2    | 442ECF6A   | 442ECF6A   | OK         | 0          | 0          | -         
+3    | 9B31CCBE   | 9B31CCBE   | OK         | 0          | 0          | -         
+4    | BBAD47E5   | 9B31CCBE   | MISMATCH   | 7          | 14         | LOSS      
+5    | 16ED4547   | 9B31CCBE   | MISMATCH   | 8          | 18         | LOSS      
+6    | 77AAAF3C   | 77AAAF3C   | OK         | 0          | 0          | -         
+7    | 714D814E   | 714D814E   | OK         | 0          | 0          | -         
+8    | B6E8F07F   | B6E8F07F   | OK         | 0          | 0          | -         
+9    | 43192BA4   | B6E8F07F   | MISMATCH   | 8          | 23         | LOSS      
+10   | 7300E1DE   | B6E8F07F   | MISMATCH   | 8          | 13         | LOSS      
+11   | 275F0FF3   | 275F0FF3   | OK         | 0          | 0          | -         
+12   | DD3D1678   | 275F0FF3   | MISMATCH   | 8          | 16         | LOSS      
+13   | 9CFC2B84   | 9CFC2B84   | OK         | 0          | 0          | -         
+14   | 86207AB9   | 9CFC2B84   | MISMATCH   | 8          | 16         | LOSS      
+15   | 58C7C757   | 58C7C757   | OK         | 0          | 0          | -         
+16   | 228692F0   | 228692F0   | OK         | 0          | 0          | -         
+17   | EC63B495   | EC63B495   | OK         | 0          | 0          | -         
+18   | 0088B1AA   | EC63B495   | MISMATCH   | 7          | 19         | LOSS      
+19   | 280449ED   | 280449ED   | OK         | 0          | 0          | -         
+20   | 429F565A   | 429F565A   | OK         | 0          | 0          | -         
+----------------------------------------------------------------------------------
+
+================== RINGKASAN METRIK PERFORMA ==================
+Total Kunci/Word yang Diuji : 20
+Kunci Salah (Word Errors)   : 7 paket
+Word Error Rate (WER)       : 35.00 %
+-----------------------------------------------
+Total Simbol/Digit Diuji    : 160 digit
+Simbol Salah (Sym Errors)   : 54 digit
+Symbol Error Rate (SER)     : 33.75 %
+-----------------------------------------------
+Total Bit Data Diuji        : 640 bit
+Bit Salah (Bit Errors)      : 119 bit
+Bit Error Rate (BER)        : 18.59 %
+-----------------------------------------------
+Total Frame Loss (Hold-over): 7 paket
+Frame Loss Rate             : 36.84 %
+===============================================================
+

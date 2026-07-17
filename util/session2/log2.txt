@@ -1,0 +1,47 @@
+======================================================================
+  KALKULATOR PERFORMA MODEM DTMF (WER, SER, BER, FRAME LOSS)
+======================================================================
+Membaca file TX: C:\Users\OSOTNAS\Documents\Kean\Kuliah\S1\SEMESTER_8\EL4064\EL4064_Encrypted-Voice-Communication-on-FPGA\util\TX.txt
+Membaca file RX: C:\Users\OSOTNAS\Documents\Kean\Kuliah\S1\SEMESTER_8\EL4064\EL4064_Encrypted-Voice-Communication-on-FPGA\util\RX.txt
+
+No.  | TX Key     | RX Key     | Key Match  | Sym Errors | Bit Errors | Frame Loss
+----------------------------------------------------------------------------------
+1    | 16A9C587   | 00000000   | MISMATCH   | 8          | 15         | -         
+2    | 281F8DC5   | 281F8DC5   | OK         | 0          | 0          | -         
+3    | 07764D31   | 07764D31   | OK         | 0          | 0          | -         
+4    | FCCA8855   | 07764D31   | MISMATCH   | 8          | 19         | LOSS      
+5    | 8F21C3AD   | 8F21C3AD   | OK         | 0          | 0          | -         
+6    | 0233D689   | 0233D689   | OK         | 0          | 0          | -         
+7    | 60A0DD8D   | 60A0DD8D   | OK         | 0          | 0          | -         
+8    | AF4D9719   | 60A0DD8D   | MISMATCH   | 8          | 18         | LOSS      
+9    | A5553847   | A5553847   | OK         | 0          | 0          | -         
+10   | 9E76B188   | 9E76B188   | OK         | 0          | 0          | -         
+11   | C9606667   | C9606667   | OK         | 0          | 0          | -         
+12   | 16709E83   | 16709E83   | OK         | 0          | 0          | -         
+13   | B363F768   | B363F768   | OK         | 0          | 0          | -         
+14   | 6C6D114A   | 6C6D114A   | OK         | 0          | 0          | -         
+15   | 67C8280F   | 67C8280F   | OK         | 0          | 0          | -         
+16   | 3513B898   | 3513B898   | OK         | 0          | 0          | -         
+17   | 307F44F0   | 307F44F0   | OK         | 0          | 0          | -         
+18   | 9FCEC6E7   | 307F44F0   | MISMATCH   | 8          | 16         | LOSS      
+19   | 46668E4E   | 46668E4E   | OK         | 0          | 0          | -         
+20   | 918CE620   | 918CE620   | OK         | 0          | 0          | -         
+----------------------------------------------------------------------------------
+
+================== RINGKASAN METRIK PERFORMA ==================
+Total Kunci/Word yang Diuji : 20
+Kunci Salah (Word Errors)   : 4 paket
+Word Error Rate (WER)       : 20.00 %
+-----------------------------------------------
+Total Simbol/Digit Diuji    : 160 digit
+Simbol Salah (Sym Errors)   : 32 digit
+Symbol Error Rate (SER)     : 20.00 %
+-----------------------------------------------
+Total Bit Data Diuji        : 640 bit
+Bit Salah (Bit Errors)      : 68 bit
+Bit Error Rate (BER)        : 10.62 %
+-----------------------------------------------
+Total Frame Loss (Hold-over): 3 paket
+Frame Loss Rate             : 15.79 %
+===============================================================
+

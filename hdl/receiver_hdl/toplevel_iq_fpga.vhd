@@ -14,7 +14,7 @@ entity toplevel_iq_fpga is
         power_FRAC_BITS:    natural := 4;
         batch_INT_BITS:     natural := 15;
         batch_FRAC_BITS:    natural := 1;
-        GUARD_FLOOR:        real := 32.0
+        GUARD_FLOOR:        real := 8.0
     );
     Port ( 
         clk, master_reset, reset  : in STD_LOGIC;
@@ -109,8 +109,8 @@ architecture Behavioral of toplevel_iq_fpga is
             in_INT_BITS     : natural := 15;
             in_FRAC_BITS    : natural := 1;
             LOOKBACK_DEPTH  : natural := 16;
-            THRESHOLD_COEFF : integer := 3;
-            GUARD_FLOOR     : real := 32.0
+            THRESHOLD_COEFF : integer := 2;
+            GUARD_FLOOR     : real := 16.0
         );
         Port (
             clk          : in  STD_LOGIC;
@@ -130,8 +130,8 @@ architecture Behavioral of toplevel_iq_fpga is
         generic(
             in_INT_BITS          : natural := 15;
             in_FRAC_BITS         : natural := 1;
-            THRESHOLD_COEFF      : real := 0.53;
-            GUARD_FLOOR          : real := 32.0
+            THRESHOLD_COEFF      : real := 0.5;
+            GUARD_FLOOR          : real := 16.0
         );
         Port (
             clk         : in STD_LOGIC;
@@ -298,7 +298,7 @@ begin
             in_INT_BITS     => 15,
             in_FRAC_BITS    => 1,
             LOOKBACK_DEPTH  => 16,
-            THRESHOLD_COEFF => 5,
+            THRESHOLD_COEFF => 3,
             GUARD_FLOOR     => GUARD_FLOOR
         )
         port map(
@@ -318,7 +318,7 @@ begin
         generic map(
             in_INT_BITS          => 15,
             in_FRAC_BITS         => 1,
-            THRESHOLD_COEFF      => 0.53,
+            THRESHOLD_COEFF      => 0.5,  -- RELAKSASI 17 Jul: NPD ratio diatur
             GUARD_FLOOR          => GUARD_FLOOR
         )
         port map(

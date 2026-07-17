@@ -1,0 +1,47 @@
+======================================================================
+  KALKULATOR PERFORMA MODEM DTMF (WER, SER, BER, FRAME LOSS)
+======================================================================
+Membaca file TX: C:\Users\OSOTNAS\Documents\Kean\Kuliah\S1\SEMESTER_8\EL4064\EL4064_Encrypted-Voice-Communication-on-FPGA\util\TX.txt
+Membaca file RX: C:\Users\OSOTNAS\Documents\Kean\Kuliah\S1\SEMESTER_8\EL4064\EL4064_Encrypted-Voice-Communication-on-FPGA\util\RX.txt
+
+No.  | TX Key     | RX Key     | Key Match  | Sym Errors | Bit Errors | Frame Loss
+----------------------------------------------------------------------------------
+1    | 6B88631C   | 00000000   | MISMATCH   | 8          | 14         | -         
+2    | F9DB1399   | F9DB1399   | OK         | 0          | 0          | -         
+3    | 5C9F992B   | 5C9F992B   | OK         | 0          | 0          | -         
+4    | C13EAB1B   | 5C9F992B   | MISMATCH   | 7          | 13         | LOSS      
+5    | 7DE4628D   | 7DE4628D7  | MISMATCH   | 1          | 4          | -         
+6    | D6ACF532   | D6ACF532   | OK         | 0          | 0          | -         
+7    | 19F100F2   | 19F100F2   | OK         | 0          | 0          | -         
+8    | 9EA64C59   | 9EA64C59   | OK         | 0          | 0          | -         
+9    | 4C4D0532   | 9EA64C59   | MISMATCH   | 8          | 18         | LOSS      
+10   | 3D0EF24B   | 3D0EF24B   | OK         | 0          | 0          | -         
+11   | D3EC3C37   | D3EC3C37   | OK         | 0          | 0          | -         
+12   | F828EABA   | F828EABA   | OK         | 0          | 0          | -         
+13   | 95533A34   | F828EABA   | MISMATCH   | 7          | 18         | LOSS      
+14   | 8F9FBF1C   | 8F9FBF1C   | OK         | 0          | 0          | -         
+15   | 1FBB0231   | 1FBB0231   | OK         | 0          | 0          | -         
+16   | 24934A41   | 24934A41   | OK         | 0          | 0          | -         
+17   | E8B6F966   | 24934A41   | MISMATCH   | 8          | 16         | LOSS      
+18   | EE1EBF97   | 24934A41   | MISMATCH   | 8          | 19         | LOSS      
+19   | 9912E89C   | 9912E89C   | OK         | 0          | 0          | -         
+20   | 361FBDB0   | 361FBDB0   | OK         | 0          | 0          | -         
+----------------------------------------------------------------------------------
+
+================== RINGKASAN METRIK PERFORMA ==================
+Total Kunci/Word yang Diuji : 20
+Kunci Salah (Word Errors)   : 7 paket
+Word Error Rate (WER)       : 35.00 %
+-----------------------------------------------
+Total Simbol/Digit Diuji    : 161 digit
+Simbol Salah (Sym Errors)   : 47 digit
+Symbol Error Rate (SER)     : 29.19 %
+-----------------------------------------------
+Total Bit Data Diuji        : 644 bit
+Bit Salah (Bit Errors)      : 102 bit
+Bit Error Rate (BER)        : 15.84 %
+-----------------------------------------------
+Total Frame Loss (Hold-over): 5 paket
+Frame Loss Rate             : 26.32 %
+===============================================================
+

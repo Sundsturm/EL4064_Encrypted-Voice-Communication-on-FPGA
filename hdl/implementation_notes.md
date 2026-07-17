@@ -405,3 +405,103 @@ Untuk mengeliminasi kesalahan deteksi preamble sebagai payload akibat transisi p
   * Nilai gain dinaikkan dari **+7.5 dB (`0x1C`) menjadi +9.0 dB (`0x1D`)** di `i2c.vhd` (array `Audio_init`).
   * Kenaikan gain +1.5 dB amplitudo menghasilkan kenaikan daya digital sebesar **+3.0 dB ($2\times$ lipat daya sinyal digital)** secara linier. Hal ini memastikan daya nada preamble `curr_697` dan nilai integrasi Goertzel melampaui ambang batas pendeteksian secara mantap dan stabil.
 
+---
+
+## Detail Perubahan Kode & Implementasi (Revisi Kesepuluh 13 Juli 2026 - Penghapusan Debounce Consec_cnt di Marking)
+
+Untuk mempercepat waktu respon pemicuan sinkronisasi dan menghilangkan penundaan buatan akibat mekanisme debounce 2-batch berurutan:
+
+### 1. Penghapusan `consec_cnt` pada Modul Marking (`markingv1.vhd`)
+* **Analisis & Masalah**: Penggunaan register pencacah `consec_cnt` memaksa kondisi Normalized Power Difference (NPD) untuk terpenuhi selama 2 batch berturut-turut sebelum `enable_i` (SR Latch) di-assert. Hal ini menambah penundaan deteksi transisi dan memicu risiko hilangnya frame jika salah satu batch mengalami fluktuasi/drop daya sesaat akibat derau.
+* **Solusi**:
+  * Menghapus deklarasi signal `consec_cnt`.
+  * Menghapus baris inisialisasi reset `consec_cnt <= 0;`.
+  * Menyederhanakan logika pada state `COMPUTE` sehingga ketika kondisi $P_{697} \ge 0.55 \times (P_{697} + P_{941})$ terpenuhi dan berada di atas `GUARD_FLOOR`, sinyal `enable_i` langsung di-assert ke `'1'` secara permanen secara instan.
+
+---
+
+## Detail Perubahan Kode & Implementasi (Revisi 17 Juli 2026 - Relaksasi Threshold Deteksi Preamble / Tier 1)
+
+Berdasarkan analisis frame loss yang masih terasa pada `send_key.py` (memerlukan `RETRANSMIT_COUNT = 5` dan jeda `RETRANSMIT_DELAY = 12` detik), dilakukan relaksasi parameter threshold deteksi preamble secara terukur. Environment pengujian menggunakan kabel audio fisik (relatif rendah noise), sehingga parameter dapat diturunkan tanpa risiko false trigger signifikan.
+
+### Latar Belakang & Analisis Akar Masalah
+
+Identifikasi 4 parameter yang terlalu ketat:
+1. **`THRESHOLD_COEFF = 5`** di `flaggingv2` — mengharuskan energi batch saat ini ≥ 5× energi 1 simbol lalu. Di hardware dengan redaman kabel atau gain codec tidak optimal, kenaikan energi bisa lebih gradual.
+2. **Count detect threshold `>= 4` (RTL)** di `flaggingv2` — membutuhkan 5 batch (200 sampel) berturut-turut terpenuhi dalam satu simbol 640 sampel. Margin hanya 440 sampel, dan 1 batch drop karena noise akan mereset counter ke 0.
+3. **NPD ratio `THRESHOLD_COEFF = 0.53`** di `markingv1` — P697 harus ≥ 53% total (P697+P941). Terlalu ketat jika ada crosstalk atau sisa energi 941 Hz dari simbol `#` sebelumnya.
+4. **`GUARD_FLOOR = 32.0`** — terlalu tinggi untuk sinyal dengan redaman kabel.
+
+### Perubahan yang Diterapkan
+
+1. **`receiver_hdl/flaggingv2.vhd` — Count Detect Threshold**:
+   * Count threshold detect diturunkan dari `count >= 4` (RTL) menjadi `count >= 3` (RTL).
+   * Setara penurunan dari 5 batch MATLAB menjadi 4 batch MATLAB.
+   * Waktu minimum deteksi `##` berkurang dari 200 sampel (5 batch × 40 sampel) menjadi 160 sampel (4 batch × 40 sampel).
+   * "Landing zone" naik dari 440 sampel menjadi 480 sampel dalam satu simbol 640-sampel.
+   * Komentar kode diperbarui: `-- Threshold >= 3 di RTL setara >= 4 di MATLAB`.
+
+2. **`receiver_hdl/toplevel_iq_fpga.vhd` — Dua Parameter Instansiasi**:
+   * `THRESHOLD_COEFF` pada `flag_unit` (flaggingv2): **5 → 4** (mengharuskan kenaikan daya 4× bukan 5× dari referensi lookback).
+   * `THRESHOLD_COEFF` pada `mark_unit` (markingv1): **0.53 → 0.47** (NPD ratio lebih longgar untuk deteksi simbol '3').
+
+3. **`receiver_hdl/toplevel_iq_text.vhd` — Sinkronisasi Testbench**:
+   * `THRESHOLD_COEFF` pada `flag_unit`: **2 → 4** (disinkronkan dengan hardware; sebelumnya lebih longgar karena untuk simulasi).
+   * `THRESHOLD_COEFF` pada `mark_unit`: **0.55 → 0.47** (disinkronkan dari nilai MATLAB v7).
+   * Sinkronisasi penting agar hasil simulasi `tb_receiver_isolated` mencerminkan perilaku hardware riil.
+
+4. **`AcakCakap_Top.vhd` — GUARD_FLOOR**:
+   * `GUARD_FLOOR` pada instansiasi `DTMF_corr`: **32.0 → 20.0**.
+   * Nilai 20.0 masih 1.25× di atas nilai lama sebelum Revisi 12 Juli (16.0), sehingga lebih noise-immune dari kondisi yang pernah menyebabkan false trigger.
+
+### Ringkasan Parameter Sebelum & Sesudah
+
+| Parameter | Nilai Lama | Nilai Baru | Lokasi |
+|-----------|-----------|------------|--------|
+| `THRESHOLD_COEFF` flagging | `5` | **`4`** | `toplevel_iq_fpga.vhd` & `toplevel_iq_text.vhd` |
+| Count detect threshold | `>= 4` RTL (5 MATLAB) | **`>= 3` RTL (4 MATLAB)** | `flaggingv2.vhd` COMPUTE |
+| `THRESHOLD_COEFF` marking NPD | `0.53` | **`0.47`** | `toplevel_iq_fpga.vhd` & `toplevel_iq_text.vhd` |
+| `GUARD_FLOOR` korelator | `32.0` | **`20.0`** | `AcakCakap_Top.vhd` |
+
+### Catatan
+
+* Nilai `align_counter = 817` **tidak berubah** — perubahan threshold hanya meningkatkan probabilitas deteksi, bukan menggeser posisi timing trigger `enable`.
+* Jika setelah pengujian hardware frame loss masih tinggi, pertimbangkan Tier 2: kurangi cooldown (`1600 → 800` Ldone) dan/atau naikkan gain WM8731 ke `0x1E` (+10.5 dB).
+* Jika justru terjadi false trigger baru, naikkan kembali `THRESHOLD_COEFF` flagging ke 5 dan/atau `GUARD_FLOOR` ke 28.0.
+
+---
+
+## Detail Perubahan Kode & Implementasi (Tuning Final 17 Juli 2026 - Sensitivitas Maksimum & Optimalisasi Gain)
+
+Setelah melakukan pengujian di atas hardware fisik, parameter deteksi preamble dikonfigurasi ke tingkat sensitivitas maksimum (optimal) untuk meminimalkan *frame loss* pada environment yang relatif rendah noise (koneksi kabel).
+
+### 1. Peningkatan Gain Analog Input Codec (`hdl/i2c.vhd`)
+* **Perubahan**: Penguatan ADC Left Line In dan Right Line In dinaikkan dari `0x1C` (+7.5 dB) menjadi `0x1D` (+9.0 dB).
+* **Rasional**: Kenaikan gain +1.5 dB amplitudo memberikan penguatan daya digital sebesar 2× lipat, membantu sinyal lemah melampaui batas *guard floor* correlator dengan lebih mantap.
+
+### 2. Penghapusan Debounce Temporal Preamble (`hdl/receiver_hdl/flaggingv2.vhd`)
+* **Perubahan**:
+  * Batas penghitung akumulasi `count_941` dan `count_1477` dibatasi maksimal **1** (`count_* < 1`).
+  * Batas deteksi diturunkan menjadi `count_941 >= 1` dan `count_1477 >= 1`.
+* **Rasional**: Detektor preamble tidak lagi membutuhkan batch berturut-turut untuk menyatakan nada "#" hadir. Hanya dengan **1 batch** (40 sampel ≈ 1.25 ms) yang memenuhi kriteria daya, status deteksi langsung aktif. Ini menghilangkan hambatan waktu deteksi, memaksimalkan sensitivitas terhadap transisi preamble yang sangat cepat.
+
+### 3. Penurunan Threshold Kenaikan Daya & NPD
+* **Perubahan**:
+  * `THRESHOLD_COEFF` korelator (flaggingv2) diturunkan dari 4 menjadi **3** (energi batch saat ini cukup ≥ 3× dari lookback 20 ms lalu).
+  * NPD ratio (`THRESHOLD_COEFF` markingv1) diatur ke **0.5** (simbol '3' terdeteksi jika energi 697 Hz mencapai minimal 50% dari total daya 697 Hz + 941 Hz).
+
+### 4. Penurunan Radikal Guard Floor (Batas Derau Absolut)
+* **Perubahan**:
+  * `GUARD_FLOOR` pada instansiasi top-level `DTMF_corr` (`AcakCakap_Top.vhd`) diturunkan ke **16.0**.
+  * `GUARD_FLOOR` generic default `toplevel_iq_fpga.vhd` diturunkan ke **8.0**, sementara sub-komponen `flaggingv2` dan `markingv1` diatur ke **16.0**.
+* **Rasional**: Memungkinkan penerimaan sinyal audio berdaya rendah/teredam agar tetap dapat memicu FSM sinkronisasi frame penerima secara andal.
+
+### Ringkasan Parameter Akhir (Tuning Terakhir)
+
+| Parameter | Nilai Awal | Nilai Baru (Final) | File Utama |
+|-----------|------------|--------------------|------------|
+| Codec Input Gain | `0x1C` (+7.5 dB) | **`0x1D` (+9.0 dB)** | `hdl/i2c.vhd` |
+| flagging `THRESHOLD_COEFF` | `5` | **`3`** | `hdl/receiver_hdl/toplevel_iq_fpga.vhd` |
+| count threshold flagging | `>= 4` (RTL) | **`>= 1` (RTL)** | `hdl/receiver_hdl/flaggingv2.vhd` |
+| marking `THRESHOLD_COEFF` (NPD) | `0.53` | **`0.5`** | `hdl/receiver_hdl/toplevel_iq_fpga.vhd` |
+| `GUARD_FLOOR` Top-Level | `32.0` | **`16.0`** | `hdl/AcakCakap_Top.vhd` |

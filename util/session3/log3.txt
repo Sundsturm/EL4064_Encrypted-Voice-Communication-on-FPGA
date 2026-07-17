@@ -1,0 +1,47 @@
+======================================================================
+  KALKULATOR PERFORMA MODEM DTMF (WER, SER, BER, FRAME LOSS)
+======================================================================
+Membaca file TX: C:\Users\OSOTNAS\Documents\Kean\Kuliah\S1\SEMESTER_8\EL4064\EL4064_Encrypted-Voice-Communication-on-FPGA\util\TX.txt
+Membaca file RX: C:\Users\OSOTNAS\Documents\Kean\Kuliah\S1\SEMESTER_8\EL4064\EL4064_Encrypted-Voice-Communication-on-FPGA\util\RX.txt
+
+No.  | TX Key     | RX Key     | Key Match  | Sym Errors | Bit Errors | Frame Loss
+----------------------------------------------------------------------------------
+1    | 3E45924E   | 00000000   | MISMATCH   | 8          | 15         | -         
+2    | C26A01C3   | C26A01C3   | OK         | 0          | 0          | -         
+3    | 1EB61A1D   | 1EB61A1D   | OK         | 0          | 0          | -         
+4    | 12692B7D   | 12692B7D   | OK         | 0          | 0          | -         
+5    | 7C3D9CE7   | 7C3D9CE7   | OK         | 0          | 0          | -         
+6    | 43C1B285   | 7C3D9CE7   | MISMATCH   | 8          | 19         | LOSS      
+7    | C30F0CF1   | C30F0CF1   | OK         | 0          | 0          | -         
+8    | E047E7FD   | E047E7FD   | OK         | 0          | 0          | -         
+9    | 4CD9EA1F   | 4CD9EA1F   | OK         | 0          | 0          | -         
+10   | F4587D6B   | F4587D6B   | OK         | 0          | 0          | -         
+11   | 28B20B2F   | F4587D6B   | MISMATCH   | 8          | 17         | LOSS      
+12   | 7C1C9E01   | 7C1C9E01   | OK         | 0          | 0          | -         
+13   | 049AC19B   | 049AC19B   | OK         | 0          | 0          | -         
+14   | 1D4DF67A   | 049AC19B   | MISMATCH   | 8          | 18         | LOSS      
+15   | FE45E4E6   | FE45E4E6   | OK         | 0          | 0          | -         
+16   | 56747427   | FE45E4E6   | MISMATCH   | 7          | 11         | LOSS      
+17   | 06AC6633   | 06AC6633   | OK         | 0          | 0          | -         
+18   | 2A8E8C8E   | 06AC6633   | MISMATCH   | 8          | 16         | LOSS      
+19   | 4EB3C889   | 06AC6633   | MISMATCH   | 8          | 17         | LOSS      
+20   | C3C56D56   | C3C56D56   | OK         | 0          | 0          | -         
+----------------------------------------------------------------------------------
+
+================== RINGKASAN METRIK PERFORMA ==================
+Total Kunci/Word yang Diuji : 20
+Kunci Salah (Word Errors)   : 7 paket
+Word Error Rate (WER)       : 35.00 %
+-----------------------------------------------
+Total Simbol/Digit Diuji    : 160 digit
+Simbol Salah (Sym Errors)   : 55 digit
+Symbol Error Rate (SER)     : 34.38 %
+-----------------------------------------------
+Total Bit Data Diuji        : 640 bit
+Bit Salah (Bit Errors)      : 113 bit
+Bit Error Rate (BER)        : 17.66 %
+-----------------------------------------------
+Total Frame Loss (Hold-over): 6 paket
+Frame Loss Rate             : 31.58 %
+===============================================================
+

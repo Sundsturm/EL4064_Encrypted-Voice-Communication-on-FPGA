@@ -25,8 +25,8 @@ entity markingv1 is
     generic(
         in_INT_BITS          : natural := 15;
         in_FRAC_BITS         : natural := 1;
-        THRESHOLD_COEFF      : real := 0.53;  -- Koefisien rasio Normalized Power Difference
-        GUARD_FLOOR          : real := 32.0   -- Batas daya minimum 697 Hz
+        THRESHOLD_COEFF      : real := 0.5;  -- Koefisien rasio Normalized Power Difference (Default: 0.53)
+        GUARD_FLOOR          : real := 16.0   -- Batas daya minimum 697 Hz
     );
     Port (
         clk       : in  STD_LOGIC;
@@ -55,9 +55,6 @@ architecture Behavioral of markingv1 is
     -- SR latch internal: mencegah enable di-toggle setelah pertama kali assert
     signal enable_i  : STD_LOGIC := '0';
 
-    -- Debounce counter untuk memverifikasi 2 batch berurutan
-    signal consec_cnt : integer range 0 to 2 := 0;
-
 begin
 
     -- enable output mengikuti internal SR latch
@@ -84,7 +81,6 @@ begin
             out_valid    <= '0';
             curr_697     <= (others => '0');
             curr_941     <= (others => '0');
-            consec_cnt   <= 0;
 
         elsif rising_edge(clk) then
             case state is
@@ -109,17 +105,10 @@ begin
                 when COMPUTE =>
                     if enable_i = '0' then
                         -- Logika marking Normalized Power Difference (MATLAB v7)
-                        -- P697 >= 0.55 * (P697 + P941)
+                        -- P697 >= COEFF_THRESHOLD * (P697 + P941)
                         if (curr_697 >= resize(THRESHOLD_VAL * (curr_697 + curr_941), curr_697)) and 
                            (curr_697 > to_sfixed(GUARD_FLOOR, curr_697)) then
-                            if consec_cnt = 1 then
-                                enable_i   <= '1';  -- SR latch: permanen setelah 2 batch valid berurutan
-                                consec_cnt <= 0;
-                            else
-                                consec_cnt <= consec_cnt + 1;
-                            end if;
-                        else
-                            consec_cnt <= 0;
+                            enable_i   <= '1';  -- SR latch: permanen setelah valid
                         end if;
                     end if;
                     state <= STORE;

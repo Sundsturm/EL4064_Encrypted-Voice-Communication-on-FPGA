@@ -1,0 +1,47 @@
+======================================================================
+  KALKULATOR PERFORMA MODEM DTMF (WER, SER, BER, FRAME LOSS)
+======================================================================
+Membaca file TX: C:\Users\OSOTNAS\Documents\Kean\Kuliah\S1\SEMESTER_8\EL4064\EL4064_Encrypted-Voice-Communication-on-FPGA\util\TX.txt
+Membaca file RX: C:\Users\OSOTNAS\Documents\Kean\Kuliah\S1\SEMESTER_8\EL4064\EL4064_Encrypted-Voice-Communication-on-FPGA\util\RX.txt
+
+No.  | TX Key     | RX Key     | Key Match  | Sym Errors | Bit Errors | Frame Loss
+----------------------------------------------------------------------------------
+1    | 42766675   | 42766675   | OK         | 0          | 0          | -         
+2    | 182125F4   | 182125F4   | OK         | 0          | 0          | -         
+3    | 660F9582   | 660F9582   | OK         | 0          | 0          | -         
+4    | FF5AF753   | FF5AF753   | OK         | 0          | 0          | -         
+5    | 9B70782B   | 9B70782B   | OK         | 0          | 0          | -         
+6    | 084C3502   | 084C3502   | OK         | 0          | 0          | -         
+7    | 2A9716D5   | 084C3502   | MISMATCH   | 8          | 17         | LOSS      
+8    | 8150EDA9   | 8150EDA9   | OK         | 0          | 0          | -         
+9    | F93173E2   | 8150EDA9   | MISMATCH   | 8          | 16         | LOSS      
+10   | A091346C   | 8150EDA9   | MISMATCH   | 8          | 14         | LOSS      
+11   | 0F1307EC   | 8150EDA9   | MISMATCH   | 8          | 15         | LOSS      
+12   | 25724E70   | 25724E70   | OK         | 0          | 0          | -         
+13   | 05910723   | 05910723   | OK         | 0          | 0          | -         
+14   | 57FADD7F   | 57FADD7F   | OK         | 0          | 0          | -         
+15   | BE4C9661   | BE4C9661   | OK         | 0          | 0          | -         
+16   | FAAA75B4   | FAAA75B4   | OK         | 0          | 0          | -         
+17   | 30119C44   | 30119C44   | OK         | 0          | 0          | -         
+18   | 46C24E45   | 46C24E45   | OK         | 0          | 0          | -         
+19   | BF12E38C   | 46C24E45   | MISMATCH   | 7          | 18         | LOSS      
+20   | 9887B241   | 9887B241   | OK         | 0          | 0          | -         
+----------------------------------------------------------------------------------
+
+================== RINGKASAN METRIK PERFORMA ==================
+Total Kunci/Word yang Diuji : 20
+Kunci Salah (Word Errors)   : 5 paket
+Word Error Rate (WER)       : 25.00 %
+-----------------------------------------------
+Total Simbol/Digit Diuji    : 160 digit
+Simbol Salah (Sym Errors)   : 39 digit
+Symbol Error Rate (SER)     : 24.38 %
+-----------------------------------------------
+Total Bit Data Diuji        : 640 bit
+Bit Salah (Bit Errors)      : 80 bit
+Bit Error Rate (BER)        : 12.50 %
+-----------------------------------------------
+Total Frame Loss (Hold-over): 5 paket
+Frame Loss Rate             : 26.32 %
+===============================================================
+

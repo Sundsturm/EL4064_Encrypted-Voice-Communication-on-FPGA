@@ -209,7 +209,7 @@ begin
 			else
 				if out_valid = '1' or rx_timeout_rst = '1' then
 					rx_cooldown_active <= '1';
-					rx_cooldown_cnt <= 1600; -- 40 ms cooldown (Currently)
+					rx_cooldown_cnt <= 1600; -- 50 ms cooldown
 				elsif rx_cooldown_active = '1' then
 					if Ldone = '1' then
 						if rx_cooldown_cnt = 0 then
@@ -415,7 +415,7 @@ begin
 		power_FRAC_BITS => 6,
 		batch_INT_BITS  => 14,
 		batch_FRAC_BITS => 2,
-		GUARD_FLOOR     => 32.0
+		GUARD_FLOOR     => 16.0  -- RELAKSASI 17 Jul: diturunkan ke 16
 	)
 	port map (
 		clk		     => AUD_XCK,

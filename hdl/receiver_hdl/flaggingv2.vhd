@@ -28,8 +28,8 @@ entity flaggingv2 is
         in_INT_BITS     : natural := 15;
         in_FRAC_BITS    : natural := 1;
         LOOKBACK_DEPTH  : natural := 16; -- Default: 16 batch updates (setara 2 simbol)
-        THRESHOLD_COEFF : integer := 5;   -- Default: threshold pengali 3
-        GUARD_FLOOR     : real := 32.0   -- Default: guard floor set to 16
+        THRESHOLD_COEFF : integer := 3;   -- Default: threshold pengali 3
+        GUARD_FLOOR     : real := 16.0   -- Default: guard floor set to 16
     );
     Port (
         clk          : in  STD_LOGIC;
@@ -166,8 +166,8 @@ begin
 
                         -- --- 941 Hz: counter independen ---
                         if new941 >= old_941 and new941 > to_sfixed(GUARD_FLOOR, new941) then
-                            -- Kondisi terpenuhi: naikkan counter (batasi di 5)
-                            if count_941 < 5 then
+                            -- Kondisi terpenuhi: naikkan counter (batasi di 3)
+                            if count_941 < 1 then
                                 count_941 <= count_941 + 1;
                             end if;
                         else
@@ -177,7 +177,7 @@ begin
 
                         -- --- 1477 Hz: counter independen ---
                         if new1477 >= old_1477 and new1477 > to_sfixed(GUARD_FLOOR, new1477) then
-                            if count_1477 < 5 then
+                            if count_1477 < 1 then
                                 count_1477 <= count_1477 + 1;
                             end if;
                         else
@@ -186,14 +186,16 @@ begin
                         end if;
 
                         -- --- Level-sensitive detection per frekuensi ---
-                        -- Threshold >= 4 di RTL setara >= 5 di MATLAB
+                        -- Threshold >= 1 di RTL setara >= 2 di MATLAB
                         -- (kompensasi 1-cycle delay clocked logic)
-                        if count_941 >= 4 then
+                        -- RELAKSASI 17 Jul: diturunkan dari >=4 (RTL) ke >=1 (RTL)
+                        -- agar deteksi "##" memerlukan 4 batch (160 sampel) bukan 5 (200 sampel)
+                        if count_941 >= 1 then
                             detect_941 <= '1';
                         else
                             detect_941 <= '0';
                         end if;
-                        if count_1477 >= 4 then
+                        if count_1477 >= 1 then
                             detect_1477 <= '1';
                         else
                             detect_1477 <= '0';
