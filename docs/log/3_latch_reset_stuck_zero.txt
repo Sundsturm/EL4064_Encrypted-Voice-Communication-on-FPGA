@@ -1,0 +1,36 @@
+======================================================================
+  KALKULATOR PERFORMA MODEM DTMF (WER, SER, BER, FRAME LOSS)
+======================================================================
+Membaca file TX: D:\Users\Rafi Ananta Alden\Documents\Kuliah\Semester 8\EL4064\Enkripsi-Suara-FPGA\Demo\Top-Level\hdl\results\TX.txt
+Membaca file RX: D:\Users\Rafi Ananta Alden\Documents\Kuliah\Semester 8\EL4064\Enkripsi-Suara-FPGA\Demo\Top-Level\hdl\results\RX.txt
+
+No.  | TX Key     | RX Key     | Key Match  | Sym Errors | Bit Errors | Frame Loss
+----------------------------------------------------------------------------------
+1    | 2A593EDA   | 00000000   | MISMATCH   | 8          | 16         | -         
+2    | D262428F   | 00000000   | MISMATCH   | 8          | 19         | -         
+3    | 98F7DF29   | 00000000   | MISMATCH   | 8          | 16         | -         
+4    | A3DCE107   | 00000000   | MISMATCH   | 8          | 16         | -         
+5    | E444511E   | 00000000   | MISMATCH   | 8          | 18         | -         
+6    | F07C613C   | 00000000   | MISMATCH   | 8          | 15         | -         
+7    | 2D6D31C9   | 00000000   | MISMATCH   | 8          | 17         | -         
+8    | DB309B5A   | 00000000   | MISMATCH   | 8          | 16         | -         
+9    | 3DE6BA71   | 00000000   | MISMATCH   | 8          | 18         | -         
+10   | FA990260   | 00000000   | MISMATCH   | 8          | 19         | -         
+----------------------------------------------------------------------------------
+
+================== RINGKASAN METRIK PERFORMA ==================
+Total Kunci/Word yang Diuji : 10
+Kunci Salah (Word Errors)   : 10 paket
+Word Error Rate (WER)       : 100.00 %
+-----------------------------------------------
+Total Simbol/Digit Diuji    : 80 digit
+Simbol Salah (Sym Errors)   : 80 digit
+Symbol Error Rate (SER)     : 100.00 %
+-----------------------------------------------
+Total Bit Data Diuji        : 320 bit
+Bit Salah (Bit Errors)      : 170 bit
+Bit Error Rate (BER)        : 53.12 %
+-----------------------------------------------
+Total Frame Loss (Hold-over): 0 paket
+Frame Loss Rate             : 0.00 %
+===============================================================

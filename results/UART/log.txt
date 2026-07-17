@@ -1,0 +1,47 @@
+======================================================================
+  KALKULATOR PERFORMA MODEM DTMF (WER, SER, BER, FRAME LOSS)
+======================================================================
+Membaca file TX: D:\Users\Rafi Ananta Alden\Documents\Kuliah\Semester 8\EL4064\Enkripsi-Suara-FPGA\Demo\Top-Level\hdl\results\TX.txt
+Membaca file RX: D:\Users\Rafi Ananta Alden\Documents\Kuliah\Semester 8\EL4064\Enkripsi-Suara-FPGA\Demo\Top-Level\hdl\results\RX.txt
+
+No.  | TX Key     | RX Key     | Key Match  | Sym Errors | Bit Errors | Frame Loss
+----------------------------------------------------------------------------------
+1    | BAD0AD4A   | BBD0AD4A   | MISMATCH   | 1          | 1          | -         
+2    | 363DAC7B   | 363DAC7B   | OK         | 0          | 0          | -         
+3    | 18E99D3F   | F18E9D3F   | MISMATCH   | 4          | 10         | -         
+4    | 14D6887A   | 14D6887A   | OK         | 0          | 0          | -         
+5    | A15D03B3   | A15D03B3   | OK         | 0          | 0          | -         
+6    | 6048F857   | 6F488577   | MISMATCH   | 4          | 11         | -         
+7    | BE09008F   | BE09008F   | OK         | 0          | 0          | -         
+8    | 6B92FFCF   | 6B92FFCF   | OK         | 0          | 0          | -         
+9    | E94CB5B8   | E94CB5B8   | OK         | 0          | 0          | -         
+10   | B4320FC0   | DB432090   | MISMATCH   | 7          | 17         | -         
+11   | B2BB054D   | 25B054ED   | MISMATCH   | 6          | 13         | -         
+12   | C766468A   | FC66438A   | MISMATCH   | 3          | 7          | -         
+13   | A08E43F5   | 3A08E43F   | MISMATCH   | 8          | 16         | -         
+14   | 384593AC   | 384593AC   | OK         | 0          | 0          | -         
+15   | C19E2046   | 9C771244   | MISMATCH   | 7          | 14         | -         
+16   | AFBC7F76   | FDFBCF76   | MISMATCH   | 5          | 10         | -         
+17   | 3700C2D8   | F3700C28   | MISMATCH   | 6          | 15         | -         
+18   | CCBAF978   | CCBAF978   | OK         | 0          | 0          | -         
+19   | 48D8AD88   | 48D8AD88   | OK         | 0          | 0          | -         
+20   | B36839D3   | F3623FD3   | MISMATCH   | 3          | 5          | -         
+----------------------------------------------------------------------------------
+
+================== RINGKASAN METRIK PERFORMA ==================
+Total Kunci/Word yang Diuji : 20
+Kunci Salah (Word Errors)   : 11 paket
+Word Error Rate (WER)       : 55.00 %
+-----------------------------------------------
+Total Simbol/Digit Diuji    : 160 digit
+Simbol Salah (Sym Errors)   : 54 digit
+Symbol Error Rate (SER)     : 33.75 %
+-----------------------------------------------
+Total Bit Data Diuji        : 640 bit
+Bit Salah (Bit Errors)      : 119 bit
+Bit Error Rate (BER)        : 18.59 %
+-----------------------------------------------
+Total Frame Loss (Hold-over): 0 paket
+Frame Loss Rate             : 0.00 %
+===============================================================
+

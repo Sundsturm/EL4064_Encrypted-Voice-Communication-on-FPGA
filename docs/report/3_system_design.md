@@ -131,24 +131,23 @@ graph TD
     RX_SUB -->|reconstructed_key_32bit| VIS_MUX
 ```
 
-### 3.2.2. Konfigurasi Codec WM8731 & PLL
-Sistem beroperasi menggunakan clock master audio $18,432\text{ MHz}$ (`AUD_XCK`) yang disintesis dari clock osilator $50\text{ MHz}$ (`CLOCK_50`) menggunakan IP *Altera PLL* (audiopll). Frekuensi master clock ini dipilih karena habis dibagi untuk menghasilkan frekuensi sampling ($f_s$) tepat $32\text{ kHz}$.
-Konfigurasi chip Codec WM8731 dilakukan oleh pengendali I2C ([Audio_interface.vhd](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl/Audio_interface.vhd)) saat inisialisasi boot untuk mengatur volume, format data audio serial ($16\text{-bit}$ I2S), laju sampling, dan mode operasi master-slave.
+### 3.2.2. Manajemen Detak & Penskalaan Audio
+Sistem membutuhkan sinkronisasi detak yang presisi untuk menjamin akurasi frekuensi sampling audio. Detak utama audio diturunkan dari detak sistem pusat melalui pembagi frekuensi berbasis perangkat keras untuk menghasilkan laju sampling yang stabil. Pengendalian konfigurasi codec audio dilakukan melalui bus komunikasi serial pada saat inisialisasi awal sistem untuk menetapkan parameter operasional seperti level volume suara, format pengodean data serial audio, laju pengambilan sampel, dan relasi master-slave antar-perangkat.
 
-### 3.2.3. UART Receiver & Clock-Domain Crossing (CDC)
-Penerimaan kunci digital secara dinamis dari PC menggunakan modul penerima UART ([uart_rx.vhd](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl/util/uart_rx.vhd)) dengan baudrate 115200 bps. Karena UART beroperasi pada clock domain stabil $50\text{ MHz}$ (`CLOCK_50`) sedangkan kendali modem utama beroperasi pada domain `AUD_XCK`, maka diterapkan sirkuit *2-FF Synchronizer* untuk memindahkan sinyal validitas UART (`uart_rx_valid`) guna mencegah metastabilitas. Sinyal byte data yang masuk (`uart_rx_data`) ditangkap pada register penampung (`uart_data_latch`) saat data valid.
+### 3.2.3. Antarmuka Data Digital & Penyearahan Domain Detak
+Penerimaan data eksternal secara dinamis dilakukan melalui modul antarmuka komunikasi serial tak-sinkron dengan laju transfer data standar. Dikarenakan modul komunikasi serial tersebut dan unit pemrosesan modem utama bekerja pada domain detak yang berbeda, diterapkan mekanisme penyelarasan detak bertingkat (*clock-domain crossing*) untuk meniadakan risiko metastabilitas sinyal kontrol. Data byte yang diterima secara serial akan ditangkap dan disimpan sementara pada penyangga data internal begitu penanda validitas transmisi terdeteksi.
 
-### 3.2.4. Logika Pemicu Transmisi & FSM Tombol
-Sinyal pemicu transmisi (`start_transmission`) diproduksi secara paralel oleh dua mekanisme input:
-1.  **Pemicu Software (UART):** Sebuah FSM kecil mendeteksi kedatangan karakter *Line Feed* (`\n` / `0x0A`). Byte data sebelum karakter pembatas digeser ke dalam register kunci UART (`uart_key_reg`). Kedatangan karakter `0x0A` menyalakan pulsa pemicu `uart_trigger` selama satu siklus clock.
-2.  **Pemicu Hardware (KEY):** Penekanan tombol fisik `KEY(1)` dikelola oleh FSM pengendali tombol dengan status `WAIT_FOR_PRESS`, `WAIT_FOR_RELEASE`, dan `RELEASE_STATE` untuk menghasilkan pulsa sinyal `command` saat tombol dilepas (*falling-edge*).
+### 3.2.4. Mekanisme Pemicuan Pengiriman Data
+Transmisi paket nada diaktifkan secara paralel melalui dua jalur pemicu independen:
+1. **Pemicu Perangkat Lunak:** Unit logika mendeteksi kedatangan karakter pembatas baris pada aliran data komunikasi serial. Bit-bit data yang diterima sebelum pembatas baris akan dirakit menjadi sebuah kata kunci digital, dan kedatangan karakter pembatas akan memicu pulsa inisiasi pengiriman.
+2. **Pemicu Perangkat Keras:** Pendeteksian penekanan tombol fisik dikelola menggunakan logika pengendali debounce tombol untuk mendeteksi tepi transisi saat tombol dilepas, menghasilkan sinyal pemicu pengiriman yang bersih dari derau mekanis.
 
-Kedua sinyal pemicu digabungkan secara kombinasional menggunakan gerbang logika `OR` untuk memicu pemancaran DTMF.
+Kedua jalur pemicuan tersebut digabungkan menggunakan logika penjumlahan Boolean untuk menginisiasi proses pemancaran nada.
 
-### 3.2.5. Multiplexing Penampil Visual
-Kunci 32-bit yang diterima (`reconstructed_key_32bit`) divisualisasikan pada 6 display Seven-Segment. Karena keterbatasan fisik display, slide switch `SW(0)` digunakan sebagai penentu halaman tampilan (*bank-switching*):
-*   Jika `SW(0) = '0'` (LSB Mode): 24-bit data terbawah (6 digit hex) dikonversi ke kode Seven-Segment active-low dan ditampilkan pada `HEX5` s.d. `HEX0`.
-*   Jika `SW(0) = '1'` (MSB Mode): 8-bit data teratas (2 digit hex) ditampilkan pada `HEX5` dan `HEX4`. Display `HEX3` hingga `HEX0` dipaksa menampilkan karakter strip (`-`) dengan memicu nilai active-low `"0111111"`.
+### 3.2.5. Pemultipleksan Unit Visualisasi
+Kunci digital hasil rekonstruksi ditampilkan pada modul penampil visual multi-digit heksadesimal. Mengingat keterbatasan jumlah digit penampil fisik dibandingkan dengan panjang kunci data enkripsi, diterapkan mekanisme pemilihan halaman tampilan (*bank-switching*) menggunakan sakelar pemilih:
+* **Mode Bagian Rendah:** Menampilkan fraksi bit-bit signifikansi rendah (LSB) dari data kunci pada penampil visual.
+* **Mode Bagian Tinggi:** Menampilkan fraksi bit-bit signifikansi tinggi (MSB) dari data kunci pada sebagian penampil visual, sementara digit penampil sisa dipaksa menampilkan karakter penanda kosong (strip) guna memberikan kontras visual halaman informasi yang jelas.
 
 ---
 
@@ -188,45 +187,77 @@ graph TD
     AUD_MUX -->|Lout / Rout signed 16-bit| IF_CTRL
 ```
 
-### 3.3.1. FSM Pengendali Transmisi (Transmitter FSM)
-FSM Pengirim mengontrol transisi status pengiriman 12 simbol yang membentuk satu paket bingkai transmisi. FSM beroperasi sinkron pada clock `AUD_XCK` dan dikendalikan oleh denyut `Ldone` ($32\text{ kHz}$). 
-*   Status berpindah dari `IDLE` ke `TRANSMIT` saat `start_transmission = '1'`.
-*   Saat berada di status `TRANSMIT`, modul penyandi nada diaktifkan (`dtmf_tone_enable = '1'`).
-*   Pencacah sampel (`sample_counter`) menghitung denyut `Ldone` hingga mencapai 640 sampel ($20\text{ ms}$). Begitu tercapai, `sample_counter` kembali ke 0, dan pencacah segmen (`segment_counter`) ditambahkan 1.
-*   Transmisi berjalan kontinu tanpa jeda diam (*continuous handshake blast*). Ketika `segment_counter` mencapai 12 (simbol ke-11 selesai dipancarkan), FSM kembali ke status `IDLE` dan mematikan pemancar.
+#### 3.3.1. Pengendali Penjadwalan Waktu Transmisi
+Unit pengendali waktu transmisi mengatur siklus hidup pengiriman bingkai data yang terdiri dari sejumlah simbol serial berurutan. Unit ini bekerja secara sinkron berdasarkan laju sampel audio yang masuk.
+* Status operasional berpindah dari kondisi bersiap (*idle*) ke kondisi aktif pengiriman (*transmit*) saat pemicu aktif terdeteksi.
+* Selama proses pengiriman aktif, unit pensintesis nada diaktifkan secara kontinu.
+* Pengendali waktu menghitung sampel masukan hingga mencapai batas durasi per simbol (20 ms). Setelah batas tercapai, penghitung sampel dikembalikan ke nol dan penunjuk indeks simbol berurutan dinaikkan untuk menunjuk segmen berikutnya.
+* Pengiriman berjalan tanpa jeda untuk menjaga keharmonisan fasa sinyal. Setelah semua simbol dalam satu bingkai selesai dipancarkan, sistem secara otomatis kembali ke keadaan bersiap dan mematikan unit pensintesis nada.
 
-### 3.3.2. Segment Multiplexer & Decoder Simbol
-Setiap penambahan `segment_counter` dari nilai 0 hingga 11 akan memetakan simbol DTMF yang dikirim sesuai protokol pembingkaian:
-*   Jika `segment_counter` bernilai `0`, `1`, atau `3`, simbol dikunci pada nilai `0xF` (merepresentasikan karakter DTMF `#`).
-*   Jika `segment_counter` bernilai `2`, simbol dikunci pada nilai `0x3` (merepresentasikan karakter DTMF `3`).
-*   Jika `segment_counter` bernilai `4` s.d. `11`, nilai yang dikirim adalah payload kunci 32-bit yang dipecah per 4-bit (`current_4bit_segment`) mulai dari segmen MSB hingga LSB.
+### 3.3.2. Pemultipleksan Paket Bingkai Simbol
+Setiap pergeseran penunjuk indeks simbol dari awal hingga akhir bingkai dipetakan secara kombinasional mengikuti tata letak protokol transmisi:
+* Segmen simbol pertama, kedua, dan keempat dikunci untuk memancarkan frekuensi pembuka (preamble `#`).
+* Segmen simbol ketiga memancarkan nada transisi spektral penyelarasan fasa (preamble `3`).
+* Segmen simbol kelima hingga akhir secara dinamis memetakan potongan-potongan kecil dari kata kunci enkripsi 32-bit dari bit signifikansi tinggi (MSB) ke bit signifikansi rendah (LSB).
 
-### 3.3.3. Generator Nada Sinus DTMF
-Pembangkitan DTMF murni dikerjakan oleh entitas [generate_dtmf_signed.vhd](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl/sender_hdl/generate_dtmf_signed.vhd) yang menggabungkan dua osilator NCO [sine_gen_signed.vhd](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl/sender_hdl/sine_gen_signed.vhd). Simbol 4-bit diterjemahkan menjadi nilai kenaikan fase (*phase increment*) 32-bit berdasarkan frekuensi spesifik menggunakan persamaan:
+### 3.3.3. Pembangkitan Nada Spektral Berbasis Osilator Numerik
+Sintesis gelombang audio dual-nada murni dikerjakan oleh unit pembangkit nada yang menggabungkan dua osilator terkontrol numerik (NCO) untuk frekuensi rendah dan tinggi. Potongan kode simbol yang masuk diterjemahkan menjadi nilai kenaikan fasa (*phase increment*) berdasarkan persamaan fasa sebagai berikut:
 
 $$\Delta \theta = \frac{f \times 2^{32}}{f_s}$$
 
-Menggunakan frekuensi sampling $f_s = 32.000\text{ Hz}$, nilai konstanta kenaikan fase didefinisikan pada Tabel 3.3:
+Berdasarkan frekuensi sampling yang ditetapkan, nilai konstanta kenaikan fasa didefinisikan pada Tabel 3.3:
 
 #### Tabel 3.3. Nilai Konstanta Phase Increment NCO ($f_s = 32\text{ kHz}$)
 | Grup Frekuensi | Frekuensi ($f$) | Nilai Phase Increment ($\Delta \theta$) | Keterangan |
 | :---: | :---: | :---: | :--- |
-| **Low Group** | $697\text{ Hz}$ | $162.388$ | Digunakan untuk nada dasar simbol 1, 2, 3, A |
-| | $770\text{ Hz}$ | $179.393$ | Digunakan untuk nada dasar simbol 4, 5, 6, B |
-| | $852\text{ Hz}$ | $198.494$ | Digunakan untuk nada dasar simbol 7, 8, 9, C |
-| | $941\text{ Hz}$ | $219.224$ | Digunakan untuk nada dasar simbol *, 0, #, D |
-| **High Group** | $1209\text{ Hz}$ | $281.644$ | Nada grup tinggi kolom 1 |
-| | $1336\text{ Hz}$ | $311.220$ | Nada grup tinggi kolom 2 |
-| | $1477\text{ Hz}$ | $344.056$ | Nada grup tinggi kolom 3 |
-| | $1633\text{ Hz}$ | $380.394$ | Nada grup tinggi kolom 4 (A, B, C, D) |
+| **Grup Rendah** | $697\text{ Hz}$ | $162.388$ | Digunakan untuk nada dasar baris ke-1 |
+| | $770\text{ Hz}$ | $179.393$ | Digunakan untuk nada dasar baris ke-2 |
+| | $852\text{ Hz}$ | $198.494$ | Digunakan untuk nada dasar baris ke-3 |
+| | $941\text{ Hz}$ | $219.224$ | Digunakan untuk nada dasar baris ke-4 |
+| **Grup Tinggi** | $1209\text{ Hz}$ | $281.644$ | Nada grup tinggi kolom ke-1 |
+| | $1336\text{ Hz}$ | $311.220$ | Nada grup tinggi kolom ke-2 |
+| | $1477\text{ Hz}$ | $344.056$ | Nada grup tinggi kolom ke-3 |
+| | $1633\text{ Hz}$ | $380.394$ | Nada grup tinggi kolom ke-4 |
 
-NCO menggunakan sirkuit akumulator fase 32-bit yang mengindeks tabel pencarian sinus 1-kuadran. Logika internal memetakan akumulator fase untuk mencerminkan kuadran (menentukan tanda pembalikan positif/negatif) dan membalik urutan indeks tabel untuk kuadran genap guna merekonstruksi gelombang sinus penuh.
+Unit pembangkitan menggunakan akumulator fasa lebar bit tinggi yang mengindeks tabel pencarian sinus satu kuadran. Logika internal memetakan akumulator fasa untuk mendeteksi kuadran aktif guna melakukan pembalikan polaritas amplitudo (positif/negatif) serta membalik arah penelusuran tabel secara simetris untuk kuadran genap demi membentuk gelombang sinus penuh yang kontinu.
 
 ---
 
 ## 3.4. Rancangan Sisi Penerima (RX)
 
 Subsistem penerima mendeteksi paket preamble korelasi kuadratur, mengunci batas awal sampel secara berkala, melakukan komputasi spektral daya DTMF melalui bank filter Goertzel, dan mendekodekan data kunci hasil pemulihan.
+
+```mermaid
+graph TD
+    %% Subsistem Lain
+    IF_CTRL["Subsistem Antarmuka & Kendali"]
+
+    %% Dekomposisi Internal Sisi Penerima (RX)
+    subgraph RX_SUB [Subsistem Penerima - RX]
+        style RX_SUB fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#000
+        
+        IQ_CORR["Korelator Preamble I/Q"]
+        GT_BANK["Bank Filter Goertzel DSP"]
+        DEC_UNIT["Dekoder Keputusan"]
+        SHIFT_REG["Register Geser (shift_add)"]
+    end
+
+    %% Hubungan dari Antarmuka & Kendali ke Unit Internal RX
+    IF_CTRL -->|Lin signed 16-bit| IQ_CORR
+    IF_CTRL -->|Lin signed 16-bit| GT_BANK
+    IF_CTRL -->|Ldone sample pulse| IQ_CORR
+    IF_CTRL -->|Ldone sample pulse| GT_BANK
+
+    %% Hubungan Antar Unit Internal RX
+    IQ_CORR -->|enable| GT_BANK
+    IQ_CORR -->|sync_reset| GT_BANK
+    IQ_CORR -->|enable| SHIFT_REG
+    GT_BANK -->|Spectral Power 8 kanal| DEC_UNIT
+    DEC_UNIT -->|dtmf_code_4bit| SHIFT_REG
+
+    %% Hubungan dari Unit Internal RX ke Antarmuka & Kendali
+    SHIFT_REG -->|reconstructed_key_32bit| IF_CTRL
+```
 
 ### 3.4.1. Detektor Preamble Korelasi I/Q
 Deteksi pola preamble `#, #, 3, #` ditangani oleh [toplevel_iq.vhd](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl/receiver_hdl/toplevel_iq.vhd) yang terdiri dari:

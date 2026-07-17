@@ -57,22 +57,6 @@ total_power = total_calc(acc_sinsignal, acc_cossignal);
 batch_sums = sliding(total_power, batch_size);
 ```
 
-### 4.2.2. FSM Detektor Preamble (Flagging & Marking)
-Deteksi pola preamble diimplementasikan dalam skema FSM yang terdiri atas dua tahap utama, yakni proses *Flagging* dan *Marking*. Tahap *Flagging* dirancang untuk mendeteksi pola `"##"` dengan menggunakan modul [flagging.m](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/MATLAB/Frame-Synchronization/flagging.m) yang memantau daya nada $941\text{ Hz}$ dan $1477\text{ Hz}$. Status bendera dinyatakan valid jika daya saat ini meningkat minimal 3 kali lipat dibandingkan dengan daya pada 32 batch sebelumnya (durasi 40 ms) secara konsisten selama 5 iterasi berurutan. Setelah status flag terkunci, tahap *Marking* mencari pola `"3"` melalui modul [marking.m](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/MATLAB/Frame-Synchronization/marking.m) dengan mencari kenaikan daya nada $697\text{ Hz}$. Deteksi dikonfirmasi saat daya nada $697\text{ Hz}$ mengalami kemiringan naik, serta daya nada $697\text{ Hz}$ dan $1477\text{ Hz}$ berada di atas tingkat pengawal $941\text{ Hz}$. Begitu seluruh kondisi ini terdeteksi, sinyal `goertzel_enable` di-assert bernilai `'1'` untuk mengunci sinkronisasi awal paket data.
-
-```matlab
-% Cuplikan deteksi tahap Flagging ("#") dan Marking ("3")
-% Tahap Flagging
-if curr_941 >= 3 * prev_941 && curr_1477 >= 3 * prev_1477
-    % Validasi flag '#' jika konsisten 5 iterasi
-end
-
-% Tahap Marking
-if curr_697 > prev_697 && curr_697 > curr_941 && curr_1477 > curr_941
-    goertzel_enable = 1; % Kunci sinkronisasi
-end
-```
-
 ### 4.2.3. Filter Goertzel & Dekoder Keputusan
 Algoritma Goertzel untuk demodulasi nada DTMF dimodelkan secara komprehensif pada berkas [goertzel_detector.m](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/MATLAB/DTMF-Receiver-RX/goertzel_detector.m). Setiap sampel masukan diproses secara rekursif melalui persamaan diferensial orde-2: $s[n] = x[n] + 2\cos\left(\frac{2\pi f_i}{F_s}\right)s[n-1] - s[n-2]$. Setelah blok 640 sampel selesai diproses, daya spektral akhir dihitung menggunakan persamaan non-rekursif dan dinormalisasi dengan faktor $N^2$ untuk memberikan representasi daya yang proporsional terhadap amplitudo sinyal asli, menggunakan persamaan $P_{\text{Goertzel}} = \frac{s^2[N-1] + s^2[N-2] - 2\cos\left(\frac{2\pi f_i}{F_s}\right)s[N-1]s[N-2]}{N^2}$. 
 
@@ -90,7 +74,7 @@ power_val = raw_power / (N * N);
 ```
 
 ### 4.2.4. Simulasi Sinkronisasi dan Demodulasi (RX)
-Pengujian simulasi pada subsistem penerima di bawah direktori [MATLAB/Frame-Synchronization](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/MATLAB/Frame-Synchronization) dan [MATLAB/DTMF-Receiver-RX](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/MATLAB/DTMF-Receiver-RX) memvalidasi keandalan deteksi awal bingkai dan demodulasi nada. Sinyal audio preamble `[#, #, 3, #]` yang bercampur dengan Gaussian noise diproses oleh [frame_sync.m](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/MATLAB/Frame-Synchronization/frame_sync.m) bersama dengan [flagging.m](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/MATLAB/Frame-Synchronization/flagging.m) dan [marking.m](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/MATLAB/Frame-Synchronization/marking.m) untuk menentukan waktu sinkronisasi fasa awal $T=0$. Setelah pemicu sinkronisasi didapatkan, filter bank Goertzel pada [goertzel_detector.m](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/MATLAB/DTMF-Receiver-RX/goertzel_detector.m) mengalkulasi daya frekuensi dominan untuk merekonstruksi kode DTMF 4-bit biner dan merakitnya ke dalam register kunci 32-bit di titik tengah simbol sampel 640 guna menghindari ISI.
+Pengujian simulasi pada subsistem penerima di bawah direktori [MATLAB/Frame-Synchronization](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/MATLAB/Frame-Synchronization) dan [MATLAB/DTMF-Receiver-RX](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/MATLAB/DTMF-Receiver-RX) memvalidasi keandalan deteksi awal bingkai dan demodulasi nada. Sinyal audio preamble `[#, #, 3, #]` yang bercampur dengan Gaussian noise diproses oleh [frame_sync.m](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/MATLAB/Frame-Synchronization/frame_sync.m) bersama dengan [flagging.m](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/MATLAB/Frame-Synchronization/flagging.m) dan [marking.m](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/MATLAB/Frame-Synchronization/marking.m) untuk menentukan waktu sinkronisasi fasa awal $T=0$. Setelah pemicu sinkronisasi didapatkan, filter bank Goertzel pada [goertzel_detector.m](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/MATLAB/DTMF-Receiver-RX/goertzel_detector.m) mengalkulasi daya frekuensi dominan untuk merekonstruksi kode DTMF 4-bit biner dan merakitnya ke dalam register kunci 32-bit.
 
 ---
 

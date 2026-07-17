@@ -1,0 +1,42 @@
+======================================================================
+  KALKULATOR PERFORMA MODEM DTMF (WER, SER, BER, FRAME LOSS)
+======================================================================
+Membaca file TX: D:\Users\Rafi Ananta Alden\Documents\Kuliah\Semester 8\EL4064\Enkripsi-Suara-FPGA\Demo\Top-Level\hdl\results\TX.txt
+Membaca file RX: D:\Users\Rafi Ananta Alden\Documents\Kuliah\Semester 8\EL4064\Enkripsi-Suara-FPGA\Demo\Top-Level\hdl\results\RX.txt
+
+No.  | TX Key     | RX Key     | Key Match  | Sym Errors | Bit Errors | Frame Loss
+----------------------------------------------------------------------------------
+1    | 10101010   | 10101010   | OK         | 0          | 0          | -         
+2    | 20202020   | F2022020   | MISMATCH   | 4          | 6          | -         
+3    | 30303030   | F203FF02   | MISMATCH   | 8          | 16         | -         
+4    | 40404040   | 00055450   | MISMATCH   | 6          | 7          | -         
+5    | 50505050   | F5055050   | MISMATCH   | 4          | 8          | -         
+6    | 60606060   | 60606060   | OK         | 0          | 0          | -         
+7    | 70707070   | 70E07070   | MISMATCH   | 1          | 2          | -         
+8    | 80808080   | 33980808   | MISMATCH   | 8          | 11         | -         
+9    | 90909090   | FF9098F8   | MISMATCH   | 5          | 10         | -         
+10   | A0A0A0A0   | DDDAAA20   | MISMATCH   | 6          | 14         | -         
+11   | B0B0B0B0   | B0B0B0B0   | OK         | 0          | 0          | -         
+12   | C0C0C0C0   | 8DDCDC80   | MISMATCH   | 7          | 11         | -         
+13   | D0D0D0D0   | 00000000   | MISMATCH   | 4          | 12         | -         
+14   | E0E0E0E0   | FE0EE0E0   | MISMATCH   | 4          | 10         | -         
+15   | F0F0F0F0   | F0F00000   | MISMATCH   | 2          | 8          | -         
+----------------------------------------------------------------------------------
+
+================== RINGKASAN METRIK PERFORMA ==================
+Total Kunci/Word yang Diuji : 15
+Kunci Salah (Word Errors)   : 12 paket
+Word Error Rate (WER)       : 80.00 %
+-----------------------------------------------
+Total Simbol/Digit Diuji    : 120 digit
+Simbol Salah (Sym Errors)   : 59 digit
+Symbol Error Rate (SER)     : 49.17 %
+-----------------------------------------------
+Total Bit Data Diuji        : 480 bit
+Bit Salah (Bit Errors)      : 115 bit
+Bit Error Rate (BER)        : 23.96 %
+-----------------------------------------------
+Total Frame Loss (Hold-over): 0 paket
+Frame Loss Rate             : 0.00 %
+===============================================================
+

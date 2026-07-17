@@ -42,15 +42,15 @@ function [reconstructed_key, decode_table, goertzel_enable] = dtmf_transmission(
 
 % =========================================================================
 % Step 0: Setup path ke sub-modul (relatif terhadap lokasi file ini)
-%   Direktori ini   : MATLAB/DTMF/DTMF_Transmission/
-%   Generator       : MATLAB/DTMF/DTMF_Generator/
-%   Receiver        : MATLAB/DTMF/DTMF_Receiver/
-%   Frame Sync      : MATLAB/Frame Synchronization/exp 1.7 fixed point v6/
+%   Direktori ini   : MATLAB/
+%   Generator       : MATLAB/DTMF-Sender-TX/
+%   Receiver        : MATLAB/DTMF-Receiver-RX/
+%   Frame Sync      : MATLAB/Frame-Synchronization/
 % =========================================================================
 this_dir = fileparts(mfilename('fullpath'));
-addpath(fullfile(this_dir, '..', 'DTMF_Generator'));
-addpath(fullfile(this_dir, '..', 'DTMF_Receiver'));
-addpath(fullfile(this_dir, '..', '..', 'Frame Synchronization', 'exp 1.7 fixed point v6'));
+addpath(fullfile(this_dir, 'DTMF-Sender-TX'));
+addpath(fullfile(this_dir, 'DTMF-Receiver-RX'));
+addpath(fullfile(this_dir, 'Frame-Synchronization'));
 
 % =========================================================================
 % Step 1: Parameter Sistem & Validasi Input

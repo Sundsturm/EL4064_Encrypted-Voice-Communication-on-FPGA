@@ -276,25 +276,45 @@ dtmf_out <= sum(16) & sum(15 downto 1) when command = '1' else (others => '0');
 
 ## 5.3. Subsistem Penerima (RX)
 
-Subsistem Penerima mendemodulasi sinyal DTMF yang diterima dan merakit kembali kunci enkripsi 32-bit.
+Subsistem Penerima mendemodulasi sinyal audio DTMF yang masuk menjadi karakter biner 4-bit dan merakit kembali kunci enkripsi 32-bit secara persisten.
 
-### 5.3.1. Pipeline Korelator Preamble I/Q
-Modul korelasi kuadratik [toplevel_iq.vhd](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl/receiver_hdl/toplevel_iq.vhd) memproses sinyal melalui tahapan pipa paralel bertingkat fixed-point. Blok `lutsin_block` dan `lutcos_block` menyimpan representasi tabel referensi lokal format Q2.14 yang dikalikan dengan data masukan ADC `Lin` (format Q3.13) menggunakan multiplier `multv6` menghasilkan produk Q3.13. Hasil produk ini diakumulasikan sepanjang bingkai 40 sampel pada akumulator `Framingv2` menghasilkan Q8.8, kemudian dikalkulasi dayanya ($I^2 + Q^2$) oleh modul `powercalcv1` menjadi format Q12.4. Penjumlahan jendela geser 16-bingkai dilakukan oleh modul `slidingv5` menghasilkan luaran Q15.1 yang diumpankan ke modul `flaggingv2` dan `markingv1` untuk mendeteksi preamble `#` dan `3`, sebelum akhirnya pengendali `dec_control` mengaktifkan pulsa sinkronisasi bingkai.
+### 5.3.1. Detektor Preamble Ganda (Flagging)
+Modul [flaggingv2.vhd](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl/receiver_hdl/flaggingv2.vhd) bertugas mendeteksi keberadaan pola ganda karakter pembuka `#` (`##`) secara berurutan. Deteksi dilakukan menggunakan penyangga melingkar (*circular buffer*) 33-slot untuk membandingkan daya rata-rata bergerak saat ini dengan 32 batch sebelumnya. Guna mengantisipasi pelemahan amplitudo pada gain rendah (0 dB), threshold deteksi diturunkan menjadi $\ge 2$ pada pencacah independen masing-masing frekuensi sebelum memicu latch internal `onoff_mark`.
 
 ```vhdl
--- Cuplikan instansiasi pipa korelator I/Q pada toplevel_iq.vhd
-mul_sin_697 : entity work.multv6 port map(
-    clk => clk, reset => reset, in_valid => in_valid,
-    out_ready => r2r1, in_ready => in_ready, out_valid => v2v1,
-    dataA => dataA, dataB => sine_697, dataOut => multout_sin697
-);
+-- Cuplikan deteksi konfirmasi flag ## pada flaggingv2.vhd
+if detect_941 = '1' and detect_1477 = '1' then
+    onoff_mark <= '1';
+end if;
 ```
 
-### 5.3.2. DSP Goertzel Fixed-Point paralel
-Demodulasi nada payload real-time dilakukan secara paralel menggunakan delapan filter independen pada modul [Goertzel.vhd](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl/dtmf_detect_hdl/Goertzel.vhd) yang dikoordinasikan oleh [Goertzel_top.vhd](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl/dtmf_detect_hdl/Goertzel_top.vhd). Konstanta koefisien filter $2\cos(2\pi f / F_s)$ dideklarasikan menggunakan format fixed-point Q2.14 (`sfixed(1 downto -14)`), sedangkan register internal $Q_0, Q_1, Q_2$ menggunakan format Q13.3 (`sfixed(12 downto -3)`) guna menghemat area FPGA tanpa memicu terjadinya *arithmetic overflow*. Penggunaan FSM sekuensial 12-status pada setiap sampel berhasil menghemat sumber daya perkalian perangkat keras sehingga setiap kanal filter hanya membutuhkan satu multiplier fisik yang di-share, dan hasil perhitungan dayanya dikonversi ke format Q14.2 melalui pemotongan bit LSB menggunakan fungsi `resize`.
+### 5.3.2. Detektor Nada Penyelaras Preamble (Marking)
+Modul [markingv1.vhd](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl/receiver_hdl/markingv1.vhd) memverifikasi keberadaan nada penyelaras `3` (697 Hz) tepat setelah flagging `##` aktif. Pengecekan rasio daya spektral dilakukan dengan membandingkan daya 697 Hz saat ini terhadap batch sebelumnya, serta memastikan dominansinya di atas frekuensi crosstalk tetangga (941 Hz) sebelum melepas sinyal `enable` ke modul dekoder utama.
 
 ```vhdl
--- Cuplikan FSM Goertzel COMPUTE_FILTER pada Goertzel.vhd
+-- Cuplikan pengecekan rasio daya nada 3 pada markingv1.vhd
+if curr_697 > curr_941 and curr_1477 > curr_941 then
+    enable_i <= '1'; -- Mengunci gerbang enable
+end if;
+```
+
+### 5.3.3. Pengendali Aliran Jalur Penerima (FSM RX Control)
+Modul pengendali [dec_control.vhd](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl/receiver_hdl/dec_control.vhd) mengatur FSM dan koordinasi bus jabat tangan di sisi penerima korelator IQ. Modul ini secara dinamis mengalihkan pulsa sampel `in_valid` (`Ldone`) ke modul `flaggingv2` saat keadaan bersiap (idle), dan langsung memindahkannya ke modul `markingv1` segera setelah `mark_enable` terpicu.
+
+```vhdl
+-- Cuplikan pengalihan bus deteksi pada dec_control.vhd
+if mark_enable = '1' then
+    in_valid_mark   <= in_valid;
+    out_ready_mark  <= out_ready;
+    in_ready        <= in_ready_mark;
+    out_valid       <= out_valid_mark;
+```
+
+### 5.3.4. DSP Goertzel Paralel & Koefisien Fixed-Point
+Blok filter DFT rekursif diimplementasikan secara paralel pada [Goertzel.vhd](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl/dtmf_detect_hdl/Goertzel.vhd) untuk mendemodulasi frekuensi nada real-time. Untuk mencegah luapan aritmatika (*arithmetic overflow*) selama akumulasi 640 sampel tanpa memboroskan area FPGA, register internal $Q_0, Q_1, Q_2$ menggunakan format Q13.3, sedangkan konstanta koefisien $2\cos(2\pi f / F_s)$ disimpan dalam format presisi Q2.14.
+
+```vhdl
+-- Cuplikan FSM kalkulasi filter Goertzel pada Goertzel.vhd
 WHEN COMPUTE_FILTER_1 =>
     state <= COMPUTE_FILTER_2;
     mult_a <= coeff_sfixed;
@@ -303,24 +323,33 @@ WHEN COMPUTE_FILTER_1 =>
     sub_b <= Q2_reg;
 ```
 
-### 5.3.3. Penentuan Indeks Tengah Simbol & Shift-Add Register
-Deteksi frekuensi dominan dibatasi tepat pada sampel di tengah durasi simbol 20 ms guna meminimalkan efek interferensi antarsimbol (ISI). Waktu sampling ini disinkronkan oleh pemicu `enable` dari korelator preamble dengan formula indeks sampling sebagai berikut:
-$$\text{index} = \text{sync\_lock\_index} + 320 + (N \times 640)$$
-Di mana $N = 0, 1, 2, \dots, 7$ menyatakan urutan simbol payload yang dibaca. Modul pembanding [top_dtmfencode.vhd](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl/dtmf_detect_hdl/top_dtmfencode.vhd) membandingkan level daya kedelapan kanal untuk mengidentifikasi simbol biner 4-bit yang dikirimkan. Setelah itu, simbol-simbol tersebut dimasukkan secara sekuensial ke dalam register geser [shift_add.vhd](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl/dtmf_detect_hdl/shift_add.vhd) untuk merakit kembali kunci 32-bit yang utuh pada register `reconstructed_key_32bit`.
+### 5.3.5. Komparator Deteksi Daya Dominan & Ambang Batas Daya
+Modul [lowcomparator.vhd](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl/dtmf_detect_hdl/lowcomparator.vhd) dan [highcomparator.vhd](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl/dtmf_detect_hdl/highcomparator.vhd) bertugas memilah nilai daya terbesar dari grup frekuensi rendah dan tinggi. Guna menjaga kepekaan pembacaan nada yang teredam di jalur analog hardware pada gain 0 dB, parameter batas daya bawah (`THRESHOLD`) diatur secara sensitif ke nilai **200** (Q13.4).
 
 ```vhdl
--- Cuplikan logika perakitan FSM preamble & payload di top_dtmfencode.vhd
-when GOT_HASH_THREE =>
-    if code_dtmf = x"F" then
-        payload_shift <= (others => '0');
-        payload_count <= 0;
-        frame_state <= COLLECT_PAYLOAD;
-    else
-        frame_state <= WAIT_HASH;
-    end if;
-when COLLECT_PAYLOAD =>
-    next_payload := payload_shift(27 downto 0) & code_dtmf;
-    payload_shift <= next_payload;
+-- Parameter threshold komparator daya rendah/tinggi
+constant THRESHOLD : STD_LOGIC_VECTOR(16 downto 0) := "00000000110010000"; -- 200
+```
+
+### 5.3.6. Dekoder Keputusan Simbol DTMF
+Penerjemahan kombinasi indeks daya baris dan kolom menjadi kode biner 4-bit serta visualisasi Seven-Segment dilakukan oleh [decision.vhd](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl/dtmf_detect_hdl/decision.vhd). Modul ini memetakan kombinasi kedua grup frekuensi menjadi 16 kode heksadesimal standar DTMF secara sekuensial pada akhir setiap bingkai 20 ms.
+
+```vhdl
+-- Cuplikan pemetaan simbol biner DTMF '#' (F) pada decision.vhd
+elsif codelow = "100" and codehigh = "011" then
+    code_temp <= "1111"; -- '#' (F)
+    sevseg    <= "0001110";
+```
+
+### 5.3.7. Register Geser Pengakumulasi Kunci Persisten
+Modul [shift_add.vhd](file:///d:/Users/Rafi%20Ananta%20Alden/Documents/Kuliah/Semester%208/EL4064/Enkripsi-Suara-FPGA/Demo/Top-Level/hdl/dtmf_detect_hdl/shift_add.vhd) merakit kembali 8 digit payload kunci enkripsi yang diterima menjadi data paralel 32-bit. Modul diperbarui di setiap pergeseran digit agar preamble `FF3F` terdorong keluar secara alami. Selain itu, penugasan reset pada port visual `output32` dinonaktifkan agar visualisasi kunci di Seven-Segment tetap persisten (menahan nilai terakhir).
+
+```vhdl
+-- Logika pencegahan reset visual pada shift_add.vhd
+if reset = '1' then
+    temp_sig <= (others => '0');
+    counter <= 0;
+    -- output32 dipertahankan (tidak di-reset) agar tampilan persisten
 ```
 
 ---

@@ -35,7 +35,7 @@ clear; clc; close all;
 
 % ── Tambahkan path subsistem ke MATLAB search path ──────────────────────
 script_dir = fileparts(mfilename('fullpath'));
-addpath(fullfile(script_dir, 'DTMF'));
+addpath(fullfile(script_dir, 'DTMF-Receiver-RX'));
 % (Frame Sync Kean belum diintegrasikan — digantikan mock di bawah)
 
 % =========================================================================
@@ -56,7 +56,7 @@ assert(N_TOTAL     == 7680, 'KESALAHAN: N_TOTAL harus tepat 7680 sampel!');
 % =========================================================================
 %  SKENARIO UJI MASTER
 % =========================================================================
-KEY_24BIT = uint32(hex2dec('ABCDEF'));  % Kunci uji (dapat diganti)
+KEY_24BIT = uint32(hex2dec('3A7C9B1D'));  % Kunci uji (dapat diganti)
 
 fprintf('\n');
 fprintf('=========================================================\n');
@@ -111,23 +111,25 @@ reconstructed_key = receiver_pipeline(sinyal_tx, goertzel_enable_start_idx, Fs, 
 fprintf('\n=========================================================\n');
 fprintf('  HASIL VERIFIKASI AKHIR\n');
 fprintf('---------------------------------------------------------\n');
-fprintf('  Kunci Asal           (Hex) : 0x%s\n', dec2hex(KEY_24BIT, 6));
-fprintf('  Kunci Rekonstruksi   (Hex) : 0x%s\n', dec2hex(reconstructed_key, 6));
-fprintf('  Kunci Asal           (Bin) : %s\n',   dec2bin(KEY_24BIT, 24));
-fprintf('  Kunci Rekonstruksi   (Bin) : %s\n',   dec2bin(reconstructed_key, 24));
-fprintf('---------------------------------------------------------\n');
+    key_24bit_active = bitand(KEY_24BIT, uint32(16777215)); % Ambil 24-bit aktif (0xFFFFFF)
+    fprintf('  Kunci Asal           (Hex) : 0x%s\n', dec2hex(KEY_24BIT, 6));
+    fprintf('  Kunci Asal (24-bit)  (Hex) : 0x%s\n', dec2hex(key_24bit_active, 6));
+    fprintf('  Kunci Rekonstruksi   (Hex) : 0x%s\n', dec2hex(reconstructed_key, 6));
+    fprintf('  Kunci Asal (24-bit)  (Bin) : %s\n',   dec2bin(key_24bit_active, 24));
+    fprintf('  Kunci Rekonstruksi   (Bin) : %s\n',   dec2bin(reconstructed_key, 24));
+    fprintf('---------------------------------------------------------\n');
 
-if KEY_24BIT == reconstructed_key
-    fprintf('  STATUS : [PASS] SUKSES — Kunci 100%% berhasil direkonstruksi!\n');
-    fprintf('           Tidak ada bit tergeser (zero sample-slip).\n');
-else
-    % Hitung jumlah bit yang salah (Hamming distance)
-    xor_val  = bitxor(KEY_24BIT, reconstructed_key);
-    n_errors = sum(dec2bin(xor_val, 24) == '1');
-    fprintf('  STATUS : [FAIL] GAGAL — %d bit tidak cocok (XOR: 0x%s)\n', ...
-        n_errors, dec2hex(xor_val, 6));
-end
-fprintf('=========================================================\n\n');
+    if key_24bit_active == reconstructed_key
+        fprintf('  STATUS : [PASS] SUKSES — Kunci 100%% berhasil direkonstruksi!\n');
+        fprintf('           Tidak ada bit tergeser (zero sample-slip).\n');
+    else
+        % Hitung jumlah bit yang salah (Hamming distance)
+        xor_val  = bitxor(key_24bit_active, reconstructed_key);
+        n_errors = sum(dec2bin(xor_val, 24) == '1');
+        fprintf('  STATUS : [FAIL] GAGAL — %d bit tidak cocok (XOR: 0x%s)\n', ...
+            n_errors, dec2hex(xor_val, 6));
+    end
+    fprintf('=========================================================\n\n');
 
 % =========================================================================
 %  VISUALISASI — Sinyal Tx Lengkap dengan Anotasi Segmen
@@ -413,4 +415,29 @@ function plot_tx_signal(sinyal_tx, Fs, N_TONE, key_24bit)
     ylim([-1.15, 1.15]);
     grid on;
     hold off;
+end
+
+
+% =========================================================================
+%  FUNGSI LOKAL 5: shift_add
+% =========================================================================
+function reconstructed_key = shift_add(reconstructed_key, decode_val)
+% SHIFT_ADD  Fungsi lokal untuk mengumpulkan segmen kunci 3-bit.
+%   Memetakan kode DTMF 4-bit kembali ke nilai 3-bit asalnya,
+%   kemudian menggeser reconstructed_key ke kiri 3 bit dan menambahkannya.
+
+    switch decode_val
+        case 1,  val_3bit = uint32(0); % '1'
+        case 2,  val_3bit = uint32(1); % '2'
+        case 4,  val_3bit = uint32(2); % '4'
+        case 5,  val_3bit = uint32(3); % '5'
+        case 7,  val_3bit = uint32(4); % '7'
+        case 8,  val_3bit = uint32(5); % '8'
+        case 14, val_3bit = uint32(6); % '*'
+        case 0,  val_3bit = uint32(7); % '0'
+        otherwise
+            error('shift_add: Kode DTMF %d tidak valid untuk pemetaan 3-bit!', decode_val);
+    end
+
+    reconstructed_key = bitshift(reconstructed_key, 3) + val_3bit;
 end
